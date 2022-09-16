@@ -6,6 +6,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.nfc.Tag
+import android.util.Log
+import androidx.compose.runtime.internal.composableLambdaN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,6 +40,8 @@ abstract class ImageLoader(
      * if it can't load the image you will get a null as result and it also calls the print stack trace.
      */
     companion object {
+        private val TAG = javaClass.name
+
         fun create(
             filepath: String,
             reqWidth: Int,
@@ -51,10 +56,7 @@ abstract class ImageLoader(
                         inJustDecodeBounds = false
                         inSampleSize = calculateInSampleSize(this, reqWidth, reqHeight)
                         BitmapFactory.decodeFile(filepath, this)?.also {
-                            /*console(
-                                tag = "load image use case",
-                                msg = "loaded image from = $filepath, scaled size = ${it.width} x ${it.height}"
-                            )*/
+                            Log.d(TAG, "loaded image from = $filepath, scaled size = ${it.width} x ${it.height}")
                         }
                     }
                 }

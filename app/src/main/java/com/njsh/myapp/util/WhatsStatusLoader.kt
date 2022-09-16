@@ -29,7 +29,7 @@ abstract class WhatsStatusLoader {
                                         val whatsStatus = EntityWhatsStatus(file.absolutePath, false, whatsStatusType(file.name))
                                         whatsStatusList.add(whatsStatus)
                                     } catch (ex: IllegalArgumentException) {
-                                        ex.printStackTrace()
+                                        ex.printStackTrace() // Todo: remove it from here
                                     }
                                 }
                             }

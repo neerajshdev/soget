@@ -34,6 +34,8 @@ import com.njsh.myapp.entity.EntityWhatsStatus
 import com.njsh.myapp.ui.components.TopAppbar
 import com.njsh.myapp.util.ImageLoader
 import com.njsh.myapp.util.WhatsStatusLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.math.log
 
 private const val TAG = "WhatsStatusPage"
@@ -111,7 +113,7 @@ private fun AskForDocumentUri(onAccept: () -> Unit, onReject: () -> Unit) {
     val initialUri =
         Uri.parse("content://com.android.externalstorage.documents/document/primary%3AAndroid%2Fmedia%2Fcom.whatsapp%2FWhatsApp%2FMedia")
     val context = LocalContext.current
-    var resultLauncher = rememberLauncherForActivityResult(
+    val resultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree(),
         onResult = {
             if (it != null) {
@@ -206,12 +208,15 @@ class WhatsStatusPage {
     private fun ActualContent() {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 8.dp)
+
         ) {
             if (listOfStatus.value != null) {
-                Log.d(TAG, "ActualContent: listOfStatus size = ${listOfStatus?.value?.size}")
+                Log.d(TAG, "ActualContent: listOfStatus size = ${listOfStatus.value?.size}")
                 items(listOfStatus.value!!) {
-                    it.Compose()
+                    it.Compose(Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
                 }
             }
         }
@@ -245,10 +250,10 @@ class WhatsStatusPage {
 }
 
 
-class WhatsStatus(var whatsStatus: EntityWhatsStatus) {
+class WhatsStatus(private val whatsStatus: EntityWhatsStatus) {
     var onDownloadClick: (() -> Unit)? = null
     var onPlayBtnClick: (() -> Unit)? = null
-    private var image: Bitmap? = null
+    private var image: MutableState<Bitmap?> = mutableStateOf(null)
 
     @Composable
     fun Compose(modifier: Modifier = Modifier) {
@@ -276,14 +281,17 @@ class WhatsStatus(var whatsStatus: EntityWhatsStatus) {
                     )
                     .border(width = 8.dp, color = color)
             ) {
+                val size = maxWidth
                 Box(modifier = Modifier.fillMaxSize()) {
                     // background image
-                    if (image != null) {
+                    if (image.value != null) {
                         Image(
-                            bitmap = image!!.asImageBitmap(), null,
+                            bitmap = image.value!!.asImageBitmap(), contentDescription = "content preview image",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
+                    } else {
+                        LoadImage(reqSize = size.value.toInt())
                     }
 
                     // top left icon
@@ -318,48 +326,48 @@ class WhatsStatus(var whatsStatus: EntityWhatsStatus) {
                     }
                 }
             }
-
-            LoadImage(reqSize = maxWidth.value.toInt())
         }
     }
 
 
     @Composable
     private fun LoadImage(reqSize: Int) {
-        var context = LocalContext.current
+        val context = LocalContext.current
         LaunchedEffect(key1 = Unit) {
-            if (whatsStatus.isContentUri) {
-                if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
-                    ImageLoader.create(
-                        Uri.parse(whatsStatus.file),
-                        context.contentResolver,
-                        reqSize, reqSize
-                    ) { bitmap ->
-                        image = bitmap
-                    }.invoke()
-                } else {
-                    ImageLoader.createForVideo(
-                        Uri.parse(whatsStatus.file),
-                        context,
-                        100, reqSize, reqSize
-                    ) { bitmap ->
-                        image = bitmap
+            withContext(Dispatchers.Default) {
+                if (whatsStatus.isContentUri) {
+                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
+                        ImageLoader.create(
+                            Uri.parse(whatsStatus.file),
+                            context.contentResolver,
+                            reqSize, reqSize
+                        ) { bitmap ->
+                            image.value = bitmap
+                        }.invoke()
+                    } else {
+                        ImageLoader.createForVideo(
+                            Uri.parse(whatsStatus.file),
+                            context,
+                            100, reqSize, reqSize
+                        ) { bitmap ->
+                            image.value = bitmap
+                        }
                     }
-                }
-            } else {
-                if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
-                    ImageLoader.create(
-                        whatsStatus.file,
-                        reqSize, reqSize
-                    ) { bitmap ->
-                        image = bitmap
-                    }.invoke()
                 } else {
-                    ImageLoader.createForVideo(
-                        whatsStatus.file,
-                        100, reqSize, reqSize
-                    ) { bitmap ->
-                        image = bitmap
+                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
+                        ImageLoader.create(
+                            whatsStatus.file,
+                            reqSize, reqSize
+                        ) { bitmap ->
+                            image.value = bitmap
+                        }.invoke()
+                    } else {
+                        ImageLoader.createForVideo(
+                            whatsStatus.file,
+                            100, reqSize, reqSize
+                        ) { bitmap ->
+                            image.value = bitmap
+                        }
                     }
                 }
             }
