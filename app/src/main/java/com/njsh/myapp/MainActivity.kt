@@ -1,5 +1,7 @@
 package com.njsh.myapp
 
+import android.app.Application
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

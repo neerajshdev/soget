@@ -2,8 +2,13 @@ package com.njsh.myapp.util
 
 import androidx.documentfile.provider.DocumentFile
 import java.io.File
+import java.lang.IllegalArgumentException
+import java.util.*
 
 fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile)->Int) {
+    if (!root.exists()) {
+        throw IllegalArgumentException("provided document path does not exists")
+    }
     val children = root.listFiles()
     for (child in children) {
         if(child.isFile) {
@@ -30,6 +35,9 @@ fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile)->Int) {
 
 
 fun visitFileTree(root : File, visitor: (File) -> Int) {
+    if (!root.exists()) {
+        throw IllegalArgumentException("provided file path does not exists")
+    }
     val children = root.listFiles()
     if (children != null)
         for (child in children) {
