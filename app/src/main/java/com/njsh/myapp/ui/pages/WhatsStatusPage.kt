@@ -1,8 +1,8 @@
 package com.njsh.myapp.ui.pages
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -28,25 +28,27 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import com.njsh.myapp.entity.EntityWhatsStatus
 import com.njsh.myapp.ui.components.TopAppbar
+import com.njsh.myapp.util.AskForRWPerms
 import com.njsh.myapp.util.ImageLoader
 import com.njsh.myapp.util.WhatsStatusLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.log
-
+import com.njsh.myapp.util.hasRWPerm
 private const val TAG = "WhatsStatusPage"
 
 @Composable
-private fun hasDocumentUri(): Boolean {
+private fun hasDocumentUri(): Boolean
+{
     var returnValue = false
     var context = LocalContext.current
     var pUris = context.contentResolver.persistedUriPermissions
-    for (pUri in pUris) {
-        if (pUri.uri.toString().toLowerCase().endsWith("whatsapp/media")) {
+    for (pUri in pUris)
+    {
+        if (pUri.uri.toString().toLowerCase().endsWith("whatsapp/media"))
+        {
             returnValue = true
         }
     }
@@ -55,84 +57,33 @@ private fun hasDocumentUri(): Boolean {
 
 
 @Composable
-private fun hasRWPerm(): Boolean {
-    var returnValue: Boolean
-    var perms: Array<String> = arrayOf(
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE
-    )
-
-    var context = LocalContext.current
-    returnValue = ActivityCompat.checkSelfPermission(
-        context,
-        perms[0]
-    ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                context,
-                perms[1]
-            ) == PackageManager.PERMISSION_GRANTED
-    return returnValue
-}
-
-
-/**
- * Ask for read write permissions
- */
-@Composable
-private fun AskForRWPerms(onAccept: () -> Unit, onReject: () -> Unit) {
-    Log.d(TAG, "AskForRWPerms: ")
-
-    var perms: Array<String> = arrayOf(
-        android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        android.Manifest.permission.READ_EXTERNAL_STORAGE
-    )
-
-    var resultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { result ->
-            if (result[perms[0]] == true && result[perms[1]] == true) {
-                onAccept()
-            } else {
-                onReject()
-            }
-        })
-
-    LaunchedEffect(key1 = Unit)
-    {
-//        Log.d(TAG, "AskForRWPerms: running effect")
-        if (resultLauncher != null) {
-//            Log.d(TAG, "AskForRWPerms: result launcher is not null")
-        }
-        resultLauncher.launch(perms);
-    }
-}
-
-
-@Composable
-private fun AskForDocumentUri(onAccept: () -> Unit, onReject: () -> Unit) {
+private fun AskForDocumentUri(onAccept: () -> Unit, onReject: () -> Unit)
+{
     val initialUri =
         Uri.parse("content://com.android.externalstorage.documents/document/primary%3AAndroid%2Fmedia%2Fcom.whatsapp%2FWhatsApp%2FMedia")
     val context = LocalContext.current
-    val resultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree(),
-        onResult = {
-            if (it != null) {
-                if (it.toString().lowercase().endsWith("whatsapp/media")) {
-                    context.contentResolver.takePersistableUriPermission(
-                        it,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                    onAccept()
+    val resultLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocumentTree(),
+            onResult = {
+                if (it != null)
+                {
+                    if (it.toString().lowercase().endsWith("whatsapp/media"))
+                    {
+                        context.contentResolver.takePersistableUriPermission(
+                            it, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        )
+                        onAccept()
+                    }
+                } else
+                {
+                    onReject()
                 }
-            } else {
-                onReject()
-            }
-        })
+            })
 
-    LaunchedEffect(key1 = Unit)
-    {
+    LaunchedEffect(key1 = Unit) {
 //        Log.d(TAG, "AskForRWPerms: running effect")
-        if (resultLauncher != null) {
+        if (resultLauncher != null)
+        {
 //            Log.d(TAG, "AskForRWPerms: result launcher is not null")
             resultLauncher.launch(initialUri)
         }
@@ -146,66 +97,72 @@ fun isScopedStorageEnable(): Boolean = Build.VERSION.SDK_INT > 28
 /**
  * Represents the WhatsStatusPage by wrapping composable functions
  */
-class WhatsStatusPage {
+class WhatsStatusPage
+{
     val title: String = "WHATSAPP STATUSES"
     var listOfStatus: MutableState<List<WhatsStatus>?> = mutableStateOf(null)
 
     private val topAppbar = TopAppbar()
 
-    init {
+    init
+    {
         topAppbar.title = title
     }
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
-    fun Compose(modifier: Modifier = Modifier) {
+    fun Compose(modifier: Modifier = Modifier)
+    {
         val context = LocalContext.current
-        Scaffold(
-            topBar = { topAppbar.Compose() },
-            content = {
-                var hasRequiredPerm by remember { mutableStateOf(false) }
-                if (isScopedStorageEnable()) {
-                    if (hasDocumentUri()) {
-                        hasRequiredPerm = true;
-                    } else {
-                        // ask for uri
-                        AskForDocumentUri(
-                            onAccept = { hasRequiredPerm = true },
-                            onReject = { /* TODO: handle the reject */ }
-                        )
-                    }
-                } else {
-                    if (hasRWPerm()) {
-                        hasRequiredPerm = true;
-                    } else {
-                        // ask for read write permissions
-                        AskForRWPerms(
-                            onAccept = { hasRequiredPerm = true },
-                            onReject = { /* TODO: handle the reject */ }
-                        )
-                    }
+        Scaffold(topBar = { topAppbar.Compose() }, content = {
+            var hasRequiredPerm by remember { mutableStateOf(false) }
+            if (isScopedStorageEnable())
+            {
+                if (hasDocumentUri())
+                {
+                    hasRequiredPerm = true;
+                } else
+                {
+                    // ask for uri
+                    AskForDocumentUri(onAccept = { hasRequiredPerm = true },
+                        onReject = { /* TODO: handle the reject */ })
                 }
+            } else
+            {
+                if (hasRWPerm())
+                {
+                    hasRequiredPerm = true;
+                } else
+                {
+                    // ask for read write permissions
+                    AskForRWPerms(onAccept = { hasRequiredPerm = true },
+                        onReject = { /* TODO: handle the reject */ })
+                }
+            }
 
-                if (hasRequiredPerm) {
-                    // runs the block only the first time when this current composable
-                    // enters the composition tree
+            if (hasRequiredPerm)
+            {
+                // runs the block only the first time when this current composable
+                // enters the composition tree
 
-                    Log.d(TAG, "Compose: has rw perm")
-                    LaunchedEffect(key1 = Unit, block = {
+                Log.d(TAG, "Compose: has rw perm")
+                LaunchedEffect(key1 = Unit, block = {
 //                        Log.d(TAG, "Compose: running launch effect")
-                        if (listOfStatus.value == null) {
-                            loadWhatsStatus(context)
-                        }
-                    })
-                }
-                ActualContent()
-            },
-            modifier = modifier
+                    if (listOfStatus.value == null)
+                    {
+                        loadWhatsStatus(context)
+                    }
+                })
+            }
+            ActualContent()
+        }, modifier = modifier
         )
     }
 
 
     @Composable
-    private fun ActualContent() {
+    private fun ActualContent()
+    {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -213,7 +170,8 @@ class WhatsStatusPage {
                 .padding(vertical = 8.dp)
 
         ) {
-            if (listOfStatus.value != null) {
+            if (listOfStatus.value != null)
+            {
                 Log.d(TAG, "ActualContent: listOfStatus size = ${listOfStatus.value?.size}")
                 items(listOfStatus.value!!) {
                     it.Compose(Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
@@ -223,12 +181,15 @@ class WhatsStatusPage {
     }
 
 
-    private fun loadWhatsStatus(context: Context) {
-        val whatsStatusLoader = if (isScopedStorageEnable()) {
+    private fun loadWhatsStatus(context: Context)
+    {
+        val whatsStatusLoader = if (isScopedStorageEnable())
+        {
             WhatsStatusLoader.fromDocumentFile(
                 DocumentFile.fromTreeUri(context, whatsMediaUri(context))!!
             )
-        } else {
+        } else
+        {
             val path =
                 Environment.getExternalStorageDirectory().absolutePath + "/Whatsapp/Media/.Statuses"
             WhatsStatusLoader.fromFilepath(path)
@@ -238,10 +199,13 @@ class WhatsStatusPage {
         listOfStatus.value = whatsStatuses.map { WhatsStatus(it) }
     }
 
-    private fun whatsMediaUri(context: Context): Uri {
+    private fun whatsMediaUri(context: Context): Uri
+    {
         val uris = context.contentResolver.persistedUriPermissions
-        for (uri in uris) {
-            if (uri.uri.toString().lowercase().endsWith("whatsapp/media") && uri.isReadPermission) {
+        for (uri in uris)
+        {
+            if (uri.uri.toString().lowercase().endsWith("whatsapp/media") && uri.isReadPermission)
+            {
                 return uri.uri
             }
         }
@@ -250,13 +214,15 @@ class WhatsStatusPage {
 }
 
 
-class WhatsStatus(private val whatsStatus: EntityWhatsStatus) {
+class WhatsStatus(private val whatsStatus: EntityWhatsStatus)
+{
     var onDownloadClick: (() -> Unit)? = null
     var onPlayBtnClick: (() -> Unit)? = null
     private var image: MutableState<Bitmap?> = mutableStateOf(null)
 
     @Composable
-    fun Compose(modifier: Modifier = Modifier) {
+    fun Compose(modifier: Modifier = Modifier)
+    {
         var topLeftIcon =
             if (whatsStatus.type == EntityWhatsStatus.Type.VIDEO) com.njsh.myapp.R.drawable.ic_round_video
             else com.njsh.myapp.R.drawable.ic_round_image_24
@@ -268,15 +234,11 @@ class WhatsStatus(private val whatsStatus: EntityWhatsStatus) {
 
         BoxWithConstraints(modifier = modifier) {
             Card(
-                elevation = 4.dp,
-                modifier = Modifier
+                elevation = 4.dp, modifier = Modifier
                     .size(maxWidth)
                     .clip(
                         shape = RoundedCornerShape(
-                            topStart = 16.dp,
-                            bottomEnd = 16.dp,
-                            topEnd = 8.dp,
-                            bottomStart = 8.dp
+                            topStart = 16.dp, bottomEnd = 16.dp, topEnd = 8.dp, bottomStart = 8.dp
                         )
                     )
                     .border(width = 8.dp, color = color)
@@ -284,13 +246,16 @@ class WhatsStatus(private val whatsStatus: EntityWhatsStatus) {
                 val size = maxWidth
                 Box(modifier = Modifier.fillMaxSize()) {
                     // background image
-                    if (image.value != null) {
+                    if (image.value != null)
+                    {
                         Image(
-                            bitmap = image.value!!.asImageBitmap(), contentDescription = "content preview image",
+                            bitmap = image.value!!.asImageBitmap(),
+                            contentDescription = "content preview image",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
-                    } else {
+                    } else
+                    {
                         LoadImage(reqSize = size.value.toInt())
                     }
 
@@ -331,40 +296,41 @@ class WhatsStatus(private val whatsStatus: EntityWhatsStatus) {
 
 
     @Composable
-    private fun LoadImage(reqSize: Int) {
+    private fun LoadImage(reqSize: Int)
+    {
         val context = LocalContext.current
         LaunchedEffect(key1 = Unit) {
             withContext(Dispatchers.Default) {
-                if (whatsStatus.isContentUri) {
-                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
+                if (whatsStatus.isContentUri)
+                {
+                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE)
+                    {
                         ImageLoader.create(
-                            Uri.parse(whatsStatus.file),
-                            context.contentResolver,
-                            reqSize, reqSize
+                            Uri.parse(whatsStatus.file), context.contentResolver, reqSize, reqSize
                         ) { bitmap ->
                             image.value = bitmap
                         }.invoke()
-                    } else {
+                    } else
+                    {
                         ImageLoader.createForVideo(
-                            Uri.parse(whatsStatus.file),
-                            context,
-                            100, reqSize, reqSize
+                            Uri.parse(whatsStatus.file), context, 100, reqSize, reqSize
                         ) { bitmap ->
                             image.value = bitmap
                         }
                     }
-                } else {
-                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE) {
+                } else
+                {
+                    if (whatsStatus.type == EntityWhatsStatus.Type.IMAGE)
+                    {
                         ImageLoader.create(
-                            whatsStatus.file,
-                            reqSize, reqSize
+                            whatsStatus.file, reqSize, reqSize
                         ) { bitmap ->
                             image.value = bitmap
                         }.invoke()
-                    } else {
+                    } else
+                    {
                         ImageLoader.createForVideo(
-                            whatsStatus.file,
-                            100, reqSize, reqSize
+                            whatsStatus.file, 100, reqSize, reqSize
                         ) { bitmap ->
                             image.value = bitmap
                         }

@@ -9,12 +9,18 @@ class Navigator : Page()
     val stack: Stack<Page> = Stack<Page>()
 
     @Composable
-    override fun Compose(modifier: Modifier) {}
+    override fun Compose()
+    {
+    }
 }
 
 
 open class Page
 {
+    val modifier = Modifier
+
     @Composable
-    open fun Compose(modifier: Modifier = Modifier) {}
+    open fun Compose()
+    {
+    }
 }

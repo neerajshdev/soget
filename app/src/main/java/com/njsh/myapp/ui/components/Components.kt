@@ -15,6 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.njsh.myapp.ui.theme.MyappTheme
 
+// this file contains common compose components
+
 class TopAppbar(var title: String = "", var menuIcon: ImageVector = Icons.Default.Menu) {
     @Composable
     fun Compose(modifier: Modifier = Modifier)
@@ -52,3 +54,10 @@ fun TopAppBarPrev() {
         appBar.Compose()
     }
 }
+
+
+
+
+
+
+

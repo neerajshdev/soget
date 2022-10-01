@@ -15,6 +15,5 @@ class ExampleUnitTest {
         val link = "https://www.youtube.com/watch?v=jylLm4Fl5FU"
         val ytParser = YtParser(link)
         ytParser.fetch()
-        //assertEquals(4, 2 + 2)
     }
 }
