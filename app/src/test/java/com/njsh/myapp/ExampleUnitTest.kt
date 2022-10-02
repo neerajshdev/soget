@@ -1,6 +1,5 @@
 package com.njsh.myapp
 
-import com.njsh.myapp.downloader.youtube.YtParser
 import org.junit.Test
 
 
@@ -13,7 +12,7 @@ class ExampleUnitTest {
     @Test
     fun sample() {
         val link = "https://www.youtube.com/watch?v=jylLm4Fl5FU"
-        val ytParser = YtParser(link)
-        ytParser.fetch()
+//        val ytParser = YtParser(link)
+//        ytParser.fetch()
     }
 }

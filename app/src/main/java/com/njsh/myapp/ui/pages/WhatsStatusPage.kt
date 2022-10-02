@@ -102,12 +102,7 @@ class WhatsStatusPage
     val title: String = "WHATSAPP STATUSES"
     var listOfStatus: MutableState<List<WhatsStatus>?> = mutableStateOf(null)
 
-    private val topAppbar = TopAppbar()
-
-    init
-    {
-        topAppbar.title = title
-    }
+    private val topAppbar = TopAppbar(title)
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable

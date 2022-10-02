@@ -3,10 +3,8 @@ package com.njsh.myapp.ui.pages
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Environment
-import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,21 +28,24 @@ import com.njsh.downloader.UpdateListener
 import com.njsh.downloader.youtube.YtParser
 import com.njsh.downloader.youtube.YtVideo
 import com.njsh.downloader.youtube.YtVideoFormat
+import com.njsh.myapp.navigation.Page
+import com.njsh.myapp.ui.components.Drawer
 import com.njsh.myapp.ui.components.TopAppbar
 import com.njsh.myapp.util.AskForRWPerms
 import com.njsh.myapp.util.UniqueId
 import com.njsh.myapp.util.hasRWPerm
+import kotlinx.coroutines.launch
+import kotlin.math.log
 
-private val TAG = "Youtube Page"
+private const val TAG = "Youtube Page"
 
 
 // constants
 val dir = "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_DOWNLOADS}"
 
-class YoutubePage
+class YoutubePage : Page(tag = "Youtube Videos")
 {
     val inputUrlComp = InputUrlField()
-    val topAppbarComp = TopAppbar(title = "Youtube Videos")
 
     val ytVideoComp = YoutubeVideo()
 
@@ -52,7 +54,6 @@ class YoutubePage
         inputUrlComp.onUrlInput = { text ->
             //Todo validate url text
             // here..
-
             Thread {
                 try
                 {
@@ -69,22 +70,22 @@ class YoutubePage
                 }
             }.start()
         }
+
+        addContent { this.Compose() }
     }
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
     fun Compose()
     {
-        Scaffold(topBar = { topAppbarComp.Compose() }, content = {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                inputUrlComp.Compose(
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .fillMaxWidth()
-                )
-                ytVideoComp.Compose()
-            }
-        })
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            inputUrlComp.Compose(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+            )
+            ytVideoComp.Compose()
+        }
     }
 }
 
@@ -119,7 +120,16 @@ class YoutubeVideo()
             //TODO:    write code to download into a file
             val dir = Environment.getExternalStorageDirectory().absolutePath
             val filename = "myfile." + ytVideoFormat.mimeType.substringAfter("/")
-            dManager.addNewTask(ytVideoFormat.url, dir, filename, null, UniqueId.getUniqueId())
+            
+            val updateListener = object : UpdateListener()
+            {
+                override fun onUpdateSpeed(bytesPerSec: Int)
+                {
+                    Log.d(TAG, "onUpdateSpeed: speed = ${bytesPerSec / (1024 * 1024).toFloat()}")
+                }
+            }
+            
+            dManager.addNewTask(ytVideoFormat.url, dir, filename, updateListener, UniqueId.getUniqueId())
         }
     }
 

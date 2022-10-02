@@ -32,9 +32,7 @@ public class DownloadManager
             downloadTask.setUpdateListener(listener);
             downloadTask.setId(taskId);
             tasks.add(downloadTask);
-
-            new Thread(downloadTask::start).start();
-
+            downloadTask.start();
         } catch (MalformedURLException ex)
         {
             ex.printStackTrace();

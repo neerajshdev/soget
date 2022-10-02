@@ -13,16 +13,20 @@ import java.net.URLConnection;
 import java.security.PublicKey;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DownloadTask
 {
+    private static ExecutorService service = Executors.newCachedThreadPool();
     // this download task id
     private long id;
-    private URL url;
+    private final URL url;
     private int bufferSize = 10;
 
     // downloaded bytes
-    private long bytes;
+    private long downloaded;
 
     private long contentSize;
     private boolean isPauseSupported;
@@ -75,6 +79,11 @@ public class DownloadTask
 
     public void start()
     {
+        service.submit(this::runDownload);
+    }
+
+    private void  runDownload()
+    {
         if (state == State.Idle || state == State.Paused)
         {
             state = State.Downloading;
@@ -90,7 +99,7 @@ public class DownloadTask
 
             if (isPauseSupported)
             {
-                uc.setRequestProperty("Range", "bytes=" + bytes + "-" + contentSize);
+//                uc.setRequestProperty("Range", "bytes=" + downloaded + "-" + contentSize);
             }
 
             uc.connect();
@@ -162,7 +171,7 @@ public class DownloadTask
     {
         byte[] bytes = new byte[bufferSize * 1024];
         int len = iStream.read(bytes);
-        this.bytes += len;
+        downloaded += len;
 
         // start the speed meter again
         meter.start();
@@ -171,11 +180,11 @@ public class DownloadTask
         {
             ofStream.write(bytes, 0, len);
             len = iStream.read(bytes);
-            this.bytes += len;
+            downloaded += len;
 
             if (updateListener != null)
             {
-                updateListener.onUpdateProgress((long) this.bytes, contentSize);
+                updateListener.onUpdateProgress(downloaded, contentSize);
                 if (meter.update(len))
                 {
                     updateListener.onUpdateSpeed(meter.getSpeedValue());
@@ -186,10 +195,6 @@ public class DownloadTask
         if (len == 0 && state == State.Downloading)
         {
             state = State.Finished;
-            if (updateListener != null)
-            {
-                updateListener.onDownloadFished();
-            }
         }
     }
 
@@ -225,7 +230,7 @@ public class DownloadTask
 
     public long getBytes()
     {
-        return bytes;
+        return downloaded;
     }
 
     public State getState()
