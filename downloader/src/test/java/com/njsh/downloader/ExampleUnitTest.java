@@ -1,8 +1,11 @@
 package com.njsh.downloader;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,8 +15,10 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest
 {
     @Test
-    public void addition_isCorrect()
+    public void addition_isCorrect() throws IOException
     {
-        assertEquals(4, 2 + 2);
+        URL link = new URL("https://www.instagram.com/reel/CjHhVf7JELW/?utm_source=ig_web_copy_link");
+        Document document = Jsoup.parse(link, 5000);
+        System.out.println(document.html());
     }
 }

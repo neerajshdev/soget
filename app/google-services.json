@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "458128866736",
+    "project_id": "all-downloader-d5ea7",
+    "storage_bucket": "all-downloader-d5ea7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458128866736:android:f5d2d24c96ac5f388e2a75",
+        "android_client_info": {
+          "package_name": "com.njsh.instadl"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "458128866736-90hk0lb54s950jil1g8kl6a90mq687j6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC6UkNwDKW6YaNHo3zktj8xorNqNcVemM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "458128866736-90hk0lb54s950jil1g8kl6a90mq687j6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -31,7 +31,7 @@ public class YtParser
 
     public YtVideo fetch() throws IOException
     {
-        Document document = Jsoup.parse(url, 5000);
+        Document document = Jsoup.parse(url, 15000);
         Elements scriptElements = document.getElementsByTag("script");
 
         String content = null;
