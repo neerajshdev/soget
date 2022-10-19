@@ -1,7 +1,7 @@
 package com.njsh.instadl.util
 
 import android.content.Context
-import com.njsh.instadl.Application
+import com.njsh.instadl.App
 
 
 /**
@@ -22,7 +22,7 @@ class UniqueId
 
         fun saveState()
         {
-            Application.getAppContext().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
+            App.instace().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
                 .edit().putLong("state-value", uniqueId.stateValue)
                 .apply()
         }
@@ -31,7 +31,7 @@ class UniqueId
 
     init
     {
-        val ctx = Application.getAppContext()
+        val ctx = App.instace()
         stateValue = ctx.getSharedPreferences("counter-state", Context.MODE_PRIVATE).getLong("state-value", 0)
     }
 

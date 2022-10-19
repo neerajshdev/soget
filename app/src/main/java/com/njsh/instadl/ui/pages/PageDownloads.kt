@@ -18,7 +18,7 @@ import com.njsh.downloader.DownloadTask
 import com.njsh.downloader.UpdateListener
 import com.njsh.instadl.R
 import com.njsh.instadl.navigation.Page
-import com.njsh.instadl.ui.theme.MyappTheme
+import com.njsh.instadl.ui.theme.AppTheme
 
 
 class DownloadControl(
@@ -98,7 +98,7 @@ fun PrevProgress()
         )
     }
 
-    MyappTheme {
+    AppTheme {
         progress.Compose(
             modifier = Modifier
                 .background(color = MaterialTheme.colors.background)

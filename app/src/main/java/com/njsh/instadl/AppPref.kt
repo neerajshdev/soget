@@ -6,9 +6,9 @@ import android.content.SharedPreferences
 object AppPref
 {
     private const val name = "App Shared Pref"
-    val pref by lazy { Application.getAppContext().getSharedPreferences(name, Context.MODE_PRIVATE) }
+    val pref by lazy { App.instace().getSharedPreferences(name, Context.MODE_PRIVATE) }
 
-    const val FIREBASE_FETCHED = "FIREBASE_FETCHED"
+    const val FIREBASE_FETCHED = "IS_FIREBASE_FETCHED"
 
     fun edit(prefEditor: SharedPreferences.Editor.()->Unit)
     {

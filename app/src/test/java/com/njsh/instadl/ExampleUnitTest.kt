@@ -1,10 +1,6 @@
 package com.njsh.instadl
 
-import com.google.gson.Gson
-import com.njsh.instadl.instagram.FetchInstaReel
-import com.njsh.instadl.instagram.InstaReelData
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.njsh.instadl.usecase.FetchInstaReel
 import org.junit.Test
 
 
