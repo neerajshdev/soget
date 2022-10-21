@@ -22,7 +22,7 @@ class UniqueId
 
         fun saveState()
         {
-            App.instace().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
+            App.instance().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
                 .edit().putLong("state-value", uniqueId.stateValue)
                 .apply()
         }
@@ -31,7 +31,7 @@ class UniqueId
 
     init
     {
-        val ctx = App.instace()
+        val ctx = App.instance()
         stateValue = ctx.getSharedPreferences("counter-state", Context.MODE_PRIVATE).getLong("state-value", 0)
     }
 

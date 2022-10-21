@@ -1,15 +1,23 @@
-package com.njsh.instadl.appevent
+package com.njsh.instadl.util
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import com.njsh.instadl.App
+import com.njsh.instadl.appevent.ConnectionAvailable
+import com.njsh.instadl.appevent.ConnectionLost
+import com.njsh.instadl.appevent.EventManager
 
-class NetworkMonitoringUtil : ConnectivityManager.NetworkCallback()
+object NetworkMonitoringUtil : ConnectivityManager.NetworkCallback()
 {
     private val TAG = NetworkMonitoringUtil::class.simpleName
+
+    val isOnline  = mutableStateOf(false)
 
     private val networkReq by lazy {
         NetworkRequest.Builder()
@@ -18,7 +26,7 @@ class NetworkMonitoringUtil : ConnectivityManager.NetworkCallback()
     }
 
     private val conManager by lazy {
-        App.instace().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        App.instance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 
     fun registerNetworkCallbackEvents()
@@ -28,11 +36,11 @@ class NetworkMonitoringUtil : ConnectivityManager.NetworkCallback()
 
     override fun onAvailable(network: Network)
     {
-        EventManager.getInstance().fire(ConnectionAvailable())
+        isOnline.value = true
     }
 
     override fun onLost(network: Network)
     {
-        EventManager.getInstance().fire(ConnectionLost())
+        isOnline.value = false
     }
 }

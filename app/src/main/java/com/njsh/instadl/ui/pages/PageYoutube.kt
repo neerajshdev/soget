@@ -11,11 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -43,7 +38,7 @@ private const val TAG = "Youtube Page"
 // constants
 val dir = "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_DOWNLOADS}"
 
-class PageYoutube : Page(tag = "Youtube Videos")
+class PageYoutube : Page(pageTag = "Youtube Videos")
 {
     val inputUrlComp = InputUrlField()
     val ytVideoComp = YoutubeVideo()

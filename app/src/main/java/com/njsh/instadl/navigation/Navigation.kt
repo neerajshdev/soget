@@ -65,7 +65,7 @@ class PageNavigator(page: Page)
 }
 
 open class Page(
-    val tag: String = ""
+    val pageTag: String = ""
 )
 {
     private var content: @Composable () -> Unit = {}

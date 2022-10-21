@@ -211,7 +211,7 @@ class InputPasteAndGet
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedButton(
-                    onClick = eventOnPasteClick,
+                    onClick = {eventOnPasteClick()},
                     border = BorderStroke(width = 2.dp, color = MaterialTheme.colors.primary),
                     modifier = Modifier
                         .weight(1f)
@@ -230,7 +230,7 @@ class InputPasteAndGet
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
-                    onClick = eventOnGetClick,
+                    onClick ={ eventOnGetClick() },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()

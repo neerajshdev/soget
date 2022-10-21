@@ -1,4 +1,4 @@
-package com.njsh.instadl.usecase
+package com.njsh.instadl.api
 
 import android.util.Log
 import com.google.gson.Gson
@@ -8,28 +8,23 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URI
 
-// val link = "https://www.instagram.com/reel/CjPctf_pMew/?__a=1&__d=dis"
-
-class FetchInstaReel(private val url: String)
+class FetchInstaReelImpl(private val url: String, val dsUserId: String, val sessionId: String) : FetchInstaReel
 {
-    lateinit var sessionId: String
-    lateinit var ds_user_id: String
-    var handleExcep: (Exception) -> Unit = {}
-
-    operator fun invoke(): EntityInstaReel?
+    override fun fetchReelData(callback: (CallResult<EntityInstaReel>) -> Unit)
     {
         try
         {
-            val link = verifyUrl(url)
-            if (link != null)
+            val checkedUrl = verifyUrl(url)
+            if (checkedUrl != null)
             {
-                return fetch(link)
+                val data = fetch(checkedUrl)!!
+                val result = CallResult.Success(data)
+                callback(result)
             }
         } catch (ex: Exception)
         {
-            handleExcep(ex)
+            callback(CallResult.Failed(ex.message ?: "Something went wrong!"))
         }
-        return null
     }
 
 
@@ -54,14 +49,14 @@ class FetchInstaReel(private val url: String)
             "User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.37"
         ).header(
-            "Cookie", "sessionid=$sessionId; ds_user_id=$ds_user_id"
+            "Cookie", "sessionid=$sessionId; ds_user_id=${this.dsUserId}"
         ).build()
 
         val call = client.newCall(request);
         val response = call.execute()
         val jsonContent = response.body?.string()
         val gson = Gson()
-        val data = gson.fromJson(jsonContent, InstaReelData::class.java)
+        val data = gson.fromJson(jsonContent, GsonReelData::class.java)
         val uri = URI(data.items[0].video_versions[0].url)
         val ext = uri.path.substring(uri.path.lastIndexOf(".") + 1)
 
@@ -72,7 +67,7 @@ class FetchInstaReel(private val url: String)
             imageUrl = data.items[0].image_versions2.candidates[0].url,
             width = data.items[0].image_versions2.candidates[0].width,
             height = data.items[0].image_versions2.candidates[0].height,
-            ext = ext,
+            type = "Video/$ext",
             duration = data.items[0].video_duration,
             url = data.items[0].video_versions[0].url
         )

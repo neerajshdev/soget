@@ -1,17 +1,24 @@
 package com.njsh.instadl
 
-import android.app.DownloadManager
 import android.content.Context
-import android.net.Uri
-import android.os.Environment
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.njsh.instadl.api.CallResult
+import com.njsh.instadl.api.FetchFacebookVideoImpl
+import com.njsh.instadl.api.FetchInstaReelImpl
+import com.njsh.instadl.entity.EntityFBVideo
 import com.njsh.instadl.entity.EntityInstaReel
-import com.njsh.instadl.usecase.FetchInstaReel
+import com.njsh.instadl.util.isOnline
 
 object ViewModel
 {
+    var isUserOnline = mutableStateOf( isOnline(App.instance()))
     val instagram = InstagramViewModel()
+    val facebook = FacebookViewModel()
 }
 
 
@@ -19,53 +26,46 @@ class InstagramViewModel
 {
     val reelState: MutableState<EntityInstaReel?> = mutableStateOf(null)
 
-    fun getContent(url: String, callbacks: (Result) -> Unit)
+    fun getContent(
+        url: String, dsUserId: String, sessionId: String, callbacks: (CallResult<Nothing>) -> Unit
+    )
     {
-        val fetchInstaReel = FetchInstaReel(url)
-
-        fetchInstaReel.handleExcep = { exception ->
-            callbacks.invoke(Result.Failed(exception.message ?: "Something went wrong"))
-        }
-
+        val fetchImpl = FetchInstaReelImpl(url, dsUserId, sessionId)
         Executor.execute {
-            fetchInstaReel.invoke()
+            fetchImpl.fetchReelData { result ->
+                if (result is CallResult.Success)
+                {
+                    reelState.value = result.data
+                } else if (result is CallResult.Failed)
+                {
+                    callbacks.invoke(CallResult.Failed(result.msg))
+                }
+            }
         }
     }
+}
 
 
-    /**
-     * Download instagram reel with download manager
-     * @return returns the download reference
-     */
-    fun download()
+class FacebookViewModel
+{
+    val videoState: MutableState<EntityFBVideo?> = mutableStateOf(null)
+
+    fun getContent(url: String, callback: (CallResult<*>) -> Unit)
     {
-        val reel = reelState.value!!
-        val downloadManager =
-            App.instace().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-
-        val req = DownloadManager.Request(Uri.parse(reel.url))
-
-        req.apply {
-            setTitle(reel.title)
-            setDescription("Instagram reel")
-            setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, reel.title)
-            setAllowedOverMetered(true)
-            setAllowedOverRoaming(true)
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setMimeType("video/${reel.ext}")
+        // submit a task
+        Executor.execute {
+            val fetch = FetchFacebookVideoImpl(url)
+            fetch.fetchVideo { result ->
+                if (result is CallResult.Success)
+                {
+                    videoState.value = result.data
+                    callback(result)
+                } else if (result is CallResult.Failed)
+                {
+                    callback(result)
+                }
+            }
         }
-        downloadManager.enqueue(req)
     }
 }
 
-
-class FacebookVideo
-{
-//    val video: MutableState<>
-}
-
-sealed class Result()
-{
-    object Success : Result()
-    data class Failed(val msg: String) : Result()
-}

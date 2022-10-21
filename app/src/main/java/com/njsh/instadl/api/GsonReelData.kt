@@ -1,7 +1,7 @@
-package com.njsh.instadl.usecase
+package com.njsh.instadl.api
 
 
-class InstaReelData(
+class GsonReelData(
     val items: ArrayList<Item>,
 
     ) {

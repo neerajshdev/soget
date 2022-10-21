@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -12,31 +11,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.instadl.App
-import com.njsh.instadl.FirebaseKeys
 import com.njsh.instadl.R
 import com.njsh.instadl.ViewModel
 import com.njsh.instadl.ads.checkAndShowAd
 import com.njsh.instadl.api.CallResult
-import com.njsh.instadl.entity.EntityInstaReel
+import com.njsh.instadl.entity.EntityFBVideo
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.CircularProgressBar
 import com.njsh.instadl.ui.components.InputPasteAndGet
 import com.njsh.instadl.ui.components.RightCurvedHeading
-import com.njsh.instadl.ui.theme.AppTheme
 import com.njsh.instadl.util.checkStoragePermission
 import com.njsh.instadl.util.storagePermission
 
-class PageInstagram : Page("Instagram")
+
+class PageFacebookVideo : Page("Facebook video Downloader")
 {
-    private val instagram = ViewModel.instagram
+    private val facebook = ViewModel.facebook
     private val inputUrl = InputPasteAndGet()
-    private val isLoading = mutableStateOf(false)
+    private var isLoading = mutableStateOf(false)
 
     init
     {
@@ -50,30 +45,27 @@ class PageInstagram : Page("Instagram")
                 val activity = LocalContext.current as Activity
                 Column {
                     RightCurvedHeading(
-                        label = "ALL VIDEO DOWNLOADER", modifier = Modifier.padding(vertical = 4.dp)
+                        label = pageTag, modifier = Modifier.padding(vertical = 4.dp)
                     )
 
                     val onDownloadClick: () -> Unit = {
-                        checkAndShowAd(activity) {
-                            if (checkStoragePermission())
-                            {
-                                instagram.reelState.value?.download()
-                            } else
-                            {
-                                storagePermission(activity)
-                            }
+                        if (checkStoragePermission())
+                        {
+                            facebook.videoState.value?.download()
+                        } else
+                        {
+                            storagePermission(activity)
                         }
                     }
 
                     Column(modifier = parentModifier) {
                         inputUrl.Compose(inputUrlModifier)
-                        if (instagram.reelState.value != null)
+                        if (facebook.videoState.value != null)
                         {
-                            val reel = instagram.reelState.value!!
-                            Reel(reel = reel, modifier = Modifier.weight(1f))
+                            val reel = facebook.videoState.value!!
+                            Thumbnail(reel = reel, modifier = Modifier.weight(1f))
                             Button(
-                                onClick = onDownloadClick,
-                                modifier = Modifier
+                                onClick = onDownloadClick, modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
                             ) {
@@ -82,36 +74,31 @@ class PageInstagram : Page("Instagram")
                                         painter = painterResource(id = R.drawable.ic_round_downloaad),
                                         contentDescription = null
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(text = "DOWNLOAD", Modifier.padding(vertical = 4.dp))
                                 }
                             }
-                        } else
-                        {
+                        } else {
+                            // show content load on press get button
                             CircularProgressBar(isLoading)
                         }
                     }
                 }
 
-                SideEffect() {
+                SideEffect {
                     inputUrl.eventOnGetClick = {
                         checkAndShowAd(activity) {
                             isLoading.value = true
-                            val dsUserId = Firebase.remoteConfig.getString(FirebaseKeys.DS_USER_ID)
-                            val sessionId = Firebase.remoteConfig.getString(FirebaseKeys.SESSION_ID)
-
-                            instagram.getContent(
-                                inputUrl.text.value, dsUserId, sessionId
-                            ) { result ->
-                                if (result is CallResult.Failed)
-                                {
-                                    App.toast(result.msg)
-                                } else if (result is CallResult.Success)
+                            facebook.getContent(inputUrl.text.value) { result ->
+                                if (result is CallResult.Success)
                                 {
                                     isLoading.value = false
+                                } else if (result is CallResult.Failed)
+                                {
+                                    App.toast(result.msg)
                                 }
                             }
                         }
+
                     }
 
                     inputUrl.eventOnPasteClick = {
@@ -126,26 +113,13 @@ class PageInstagram : Page("Instagram")
 
 
     @Composable
-    private fun Reel(reel: EntityInstaReel, modifier: Modifier = Modifier)
+    private fun Thumbnail(reel: EntityFBVideo, modifier: Modifier = Modifier)
     {
         AsyncImage(
-            model = reel.imageUrl,
+            model = reel.thumbnail,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier.fillMaxWidth()
         )
-    }
-}
-
-
-@Preview
-@Composable
-fun PrevInstagramPage()
-{
-    val page = PageInstagram()
-    AppTheme {
-        Surface(color = MaterialTheme.colors.background) {
-            page.drawContent()
-        }
     }
 }

@@ -1,24 +1,23 @@
 package com.njsh.instadl
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import com.google.android.gms.ads.MobileAds
+import com.google.firebase.FirebaseApp
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.njsh.instadl.appevent.ConnectionAvailable
 import com.njsh.instadl.appevent.Event
 import com.njsh.instadl.appevent.EventHandler
 import com.njsh.instadl.appevent.EventManager
+import com.njsh.instadl.util.NetworkMonitoringUtil
+import com.njsh.instadl.util.isOnline
 
 
 class App : android.app.Application()
@@ -30,7 +29,7 @@ class App : android.app.Application()
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var instance: App
-        fun instace(): App
+        fun instance(): App
         {
             return instance;
         }
@@ -44,7 +43,10 @@ class App : android.app.Application()
 
         fun toast(text: String, len: Int = Toast.LENGTH_SHORT)
         {
-            Toast.makeText(instance, text, len).show()
+            val handler = Handler(Looper.getMainLooper())
+            handler.post() {
+                Toast.makeText(instance, text, len).show()
+            }
         }
     }
 
@@ -53,32 +55,16 @@ class App : android.app.Application()
         super.onCreate()
         instance = this
 
+        setupFirebase()
+        MobileAds.initialize(this)
+    }
+
+
+    private fun setupFirebase()
+    {
+        FirebaseApp.initializeApp(this)
         val remoteConfigSet =
             FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(10).build()
-
-        val conEventHandler = object : EventHandler
-        {
-            override fun handleEvent(event: Event)
-            {
-                if (event is ConnectionAvailable)
-                {
-                    Firebase.remoteConfig.setConfigSettingsAsync(remoteConfigSet)
-                    Firebase.remoteConfig.fetchAndActivate().addOnCompleteListener() { task ->
-                        if (task.isComplete)
-                        {
-                            AppPref.edit {
-                                putBoolean(AppPref.FIREBASE_FETCHED, true)
-                            }
-                        }
-                    }
-                }
-                // remove this handler
-                EventManager.getInstance().removeHandler(this)
-            }
-        }
-
-
-        // run only once
-        EventManager.getInstance().addHandler(conEventHandler)
+        Firebase.remoteConfig.setConfigSettingsAsync(remoteConfigSet)
     }
 }
