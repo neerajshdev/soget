@@ -51,9 +51,6 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page() {
 
     @Composable
     private fun NativeAdView(ad: NativeAd) {
-        AndroidView(factory = {
-
-        }
     }
 
     @Composable
