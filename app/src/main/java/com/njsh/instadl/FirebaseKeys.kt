@@ -9,4 +9,6 @@ object FirebaseKeys
     const val INTERSTITIAL_AD_UNIT_ID = "interstitial_ad_unit"
     const val NATIVE_AD_UNIT_ID = "native_ad_unit"
     const val CLICK_COUNT = "CLICK_COUNT"
+    const val VPN_CONFIG = "VPN_CONFIG"
+    const val IS_USING_VPN = "IS_USING_VPN"
 }

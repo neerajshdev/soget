@@ -1,7 +1,10 @@
 package com.njsh.instadl.ui.pages
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -13,25 +16,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.njsh.instadl.App
-import com.njsh.instadl.FirebaseKeys
+import com.njsh.instadl.*
 import com.njsh.instadl.R
-import com.njsh.instadl.ViewModel
 import com.njsh.instadl.ads.checkAndShowAd
 import com.njsh.instadl.api.CallResult
 import com.njsh.instadl.entity.EntityInstaReel
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.CircularProgressBar
 import com.njsh.instadl.ui.components.InputPasteAndGet
+import com.njsh.instadl.ui.components.NativeAdView
 import com.njsh.instadl.ui.components.RightCurvedHeading
 import com.njsh.instadl.ui.theme.AppTheme
 import com.njsh.instadl.util.checkStoragePermission
 import com.njsh.instadl.util.storagePermission
 
-class PageInstagram : Page("Instagram") {
+class PageInstagram(private val navController: NavController) : Page("Instagram") {
     private val instagram = ViewModel.instagram
     private val inputUrl = InputPasteAndGet()
     private val isLoading = mutableStateOf(false)
@@ -45,9 +49,9 @@ class PageInstagram : Page("Instagram") {
         addContent {
             Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
                 val activity = LocalContext.current as Activity
-                Column {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
                     RightCurvedHeading(
-                        label = "ALL VIDEO DOWNLOADER", modifier = Modifier.padding(vertical = 4.dp)
+                        label = pageTag, modifier = Modifier.padding(vertical = 4.dp)
                     )
 
                     val onDownloadClick: () -> Unit = {
@@ -62,9 +66,12 @@ class PageInstagram : Page("Instagram") {
 
                     Column(modifier = parentModifier) {
                         inputUrl.Compose(inputUrlModifier)
+                        NativeAdView()
                         if (instagram.reelState.value != null) {
                             val reel = instagram.reelState.value!!
-                            Reel(reel = reel, modifier = Modifier.weight(1f))
+                            Reel(
+                                reel = reel, modifier = Modifier.padding(top = 8.dp)
+                            )
                             Button(
                                 onClick = onDownloadClick,
                                 modifier = Modifier
@@ -99,8 +106,8 @@ class PageInstagram : Page("Instagram") {
                                 if (result is CallResult.Failed) {
                                     App.toast(result.msg)
                                 } else if (result is CallResult.Success) {
-                                    isLoading.value = false
                                 }
+                                isLoading.value = false
                             }
                         }
                     }
@@ -110,6 +117,13 @@ class PageInstagram : Page("Instagram") {
                             inputUrl.text.value = App.clipBoardData()
                         }
                     }
+                }
+            }
+
+            val activity = LocalContext.current as MainActivity
+            BackHandler {
+                checkAndShowAd(activity) {
+                    navController.popBackStack()
                 }
             }
         }
@@ -122,19 +136,22 @@ class PageInstagram : Page("Instagram") {
             model = reel.imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(max = 360.dp)
         )
     }
 }
 
 
+/*
 @Preview
 @Composable
-fun PrevInstagramPage() {
-    val page = PageInstagram()
+fun PrevInstagramPage(
+    val page = PageInstagram(rememberNavController()))
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {
             page.drawContent()
         }
     }
-}
+}*/

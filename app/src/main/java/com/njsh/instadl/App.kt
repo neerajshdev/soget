@@ -3,6 +3,7 @@ package com.njsh.instadl
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
@@ -12,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.google.firebase.remoteconfig.ktx.remoteConfig
@@ -71,5 +73,19 @@ class App : android.app.Application() {
         val remoteConfigSet =
             FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(10).build()
         Firebase.remoteConfig.setConfigSettingsAsync(remoteConfigSet)
+    }
+
+    fun logEventVpnConnected() {
+        val analytics = FirebaseAnalytics.getInstance(this)
+        val bundle = Bundle()
+        bundle.putString("vpnConnected", "YES")
+        analytics.logEvent("vpn", bundle)
+    }
+
+    fun logEventVpnFailedToConnect() {
+        val analytics = FirebaseAnalytics.getInstance(this)
+        val bundle = Bundle()
+        bundle.putString("vpnConnected", "NO")
+        analytics.logEvent("vpn", bundle)
     }
 }

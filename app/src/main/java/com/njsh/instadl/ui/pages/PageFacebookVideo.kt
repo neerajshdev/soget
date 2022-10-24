@@ -1,7 +1,10 @@
 package com.njsh.instadl.ui.pages
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
@@ -12,22 +15,26 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.njsh.instadl.App
+import com.njsh.instadl.MainActivity
 import com.njsh.instadl.R
 import com.njsh.instadl.ViewModel
+import com.njsh.instadl.ads.NativeAdLoader
 import com.njsh.instadl.ads.checkAndShowAd
 import com.njsh.instadl.api.CallResult
 import com.njsh.instadl.entity.EntityFBVideo
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.CircularProgressBar
 import com.njsh.instadl.ui.components.InputPasteAndGet
+import com.njsh.instadl.ui.components.NativeAdView
 import com.njsh.instadl.ui.components.RightCurvedHeading
 import com.njsh.instadl.util.checkStoragePermission
 import com.njsh.instadl.util.storagePermission
 
 
-class PageFacebookVideo : Page("Facebook video Downloader") {
+class PageFacebookVideo(private val navController: NavController) : Page("Facebook video Downloader") {
     private val facebook = ViewModel.facebook
     private val inputUrl = InputPasteAndGet()
     private var isLoading = mutableStateOf(false)
@@ -41,7 +48,7 @@ class PageFacebookVideo : Page("Facebook video Downloader") {
         addContent {
             Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
                 val activity = LocalContext.current as Activity
-                Column {
+                Column(modifier = parentModifier.verticalScroll(rememberScrollState())) {
                     RightCurvedHeading(
                         label = pageTag, modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -54,8 +61,10 @@ class PageFacebookVideo : Page("Facebook video Downloader") {
                         }
                     }
 
-                    Column(modifier = parentModifier) {
+                    Column {
                         inputUrl.Compose(inputUrlModifier)
+                        NativeAdView()
+                        Spacer(modifier = Modifier.height(8.dp))
                         if (facebook.videoState.value != null) {
                             val reel = facebook.videoState.value!!
                             Thumbnail(reel = reel, modifier = Modifier.weight(1f))
@@ -85,10 +94,10 @@ class PageFacebookVideo : Page("Facebook video Downloader") {
                             isLoading.value = true
                             facebook.getContent(inputUrl.text.value) { result ->
                                 if (result is CallResult.Success) {
-                                    isLoading.value = false
                                 } else if (result is CallResult.Failed) {
                                     App.toast(result.msg)
                                 }
+                                isLoading.value = false
                             }
                         }
 
@@ -101,6 +110,13 @@ class PageFacebookVideo : Page("Facebook video Downloader") {
                     }
                 }
             }
+
+            val activity = LocalContext.current as MainActivity
+            BackHandler {
+                checkAndShowAd(activity) {
+                    navController.popBackStack()
+                }
+            }
         }
     }
 
@@ -111,7 +127,9 @@ class PageFacebookVideo : Page("Facebook video Downloader") {
             model = reel.thumbnail,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(max = 360.dp)
         )
     }
 }

@@ -10,6 +10,7 @@ import com.njsh.instadl.FirebaseKeys
 import kotlinx.coroutines.*
 
 object NativeAdLoader {
+    const val TAG = "NativeAdLoader"
     val adUnitId by lazy { Firebase.remoteConfig.getString(FirebaseKeys.NATIVE_AD_UNIT_ID) }
     val loadedAds = mutableListOf<NativeAd>()
 
@@ -20,32 +21,32 @@ object NativeAdLoader {
         val options = NativeAdOptions.Builder().setVideoOptions(videoOptions).build()
         val adLoader: AdLoader =
             AdLoader.Builder(App.instance(), adUnitId).forNativeAd { nativeAd: NativeAd ->
-                deferred.complete(nativeAd)/*  val style: NativeTemplateStyle =
-                          Builder().withMainBackgroundColor(ColorDrawable(-0x1)).build()
-                      nativeAdView.setStyles(style)
-                      nativeAdView.setNativeAd(nativeAd)
-                      nativeAdView.setVisibility(View.VISIBLE)
-                      nativeAdView.setAlpha(0f)
-                      nativeAdView.animate().alpha(1f)
-                      if (_onAttach != null) _onAttach.run()*/
+                println("$TAG completing deferred with ad: $nativeAd")
+                deferred.complete(nativeAd)
             }.withNativeAdOptions(options).withAdListener(object : AdListener() {
                 override fun onAdLoaded() {
+                    println("$TAG native ad loaded")
                 }
 
                 override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     deferred.complete(null)
+                    println("$TAG could not load ad: $loadAdError")
                 }
             }).build()
 
         val adRequest = AdRequest.Builder().build()
         adLoader.loadAd(adRequest)
 
-        deferred.await()?.let { loadedAds.add(it) }
+        deferred.await()?.let {
+            loadedAds.add(it)
+            println("$TAG loaded ads: ${loadedAds.size}")
+        }
+
     }
 
     private suspend fun take(): NativeAd? {
         if (loadedAds.isNotEmpty()) {
-            loadedAds.removeFirst()
+            return loadedAds.removeFirst()
         } else {
             load()
             if (loadedAds.isNotEmpty()) return loadedAds.removeFirst()
@@ -54,9 +55,11 @@ object NativeAdLoader {
     }
 
     suspend fun takeAndLoad(): NativeAd? = coroutineScope {
+        println("$TAG loaded ads: ${loadedAds.size}")
+        val nativeAd = take()
         CoroutineScope(coroutineContext).launch(Dispatchers.IO) {
             load()
         }
-        take()
+        nativeAd
     }
 }

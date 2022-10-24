@@ -11,21 +11,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.ktx.Firebase
-import com.njsh.instadl.App
-import com.njsh.instadl.AppPref
+import com.njsh.instadl.*
 import com.njsh.instadl.R
-import com.njsh.instadl.ViewModel
 import com.njsh.instadl.ui.theme.AppTheme
 import com.njsh.instadl.util.fetchAndActivate
 import kotlinx.coroutines.delay
@@ -64,21 +60,22 @@ object ActivityContent {
                         }
 
                         composable(route = Route.MainScreen.name) {
-                            PageMainScreen { routeName ->
-                                navController.navigate(routeName)
-                            }.drawContent()
+                            PageMainScreen(navController).drawContent()
                         }
 
                         composable(route = Route.WelcomeScreen.name) {
-                            PageWelcome { routeName ->
-                                navController.navigate(
-                                    routeName
-                                )
-                            }.drawContent()
+                            PageWelcome(navController).drawContent()
                         }
 
-                        composable(route = Route.InstagramReelScreen.name) { PageInstagram().drawContent() }
-                        composable(route = Route.FacebookVideoScreen.name) { PageFacebookVideo().drawContent() }
+                        composable(route = Route.InstagramReelScreen.name) { PageInstagram(navController).drawContent() }
+                        composable(route = Route.FacebookVideoScreen.name) { PageFacebookVideo(navController).drawContent() }
+                        composable(route = Route.ExitDialog.name) {
+                            val activity = LocalContext.current as MainActivity
+                            ExitDialog(onYes ={ activity.finishAndRemoveTask()
+                            }, onNo = {
+                                navController.popBackStack()
+                            })
+                        }
                     }
 
                     LaunchedEffect(key1 = Unit) {
@@ -128,6 +125,8 @@ object ActivityContent {
                 }
             }
         }
+
+
     }
 
     @Composable

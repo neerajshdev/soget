@@ -1,6 +1,7 @@
 package com.njsh.instadl.ui.pages
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -11,19 +12,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.njsh.instadl.MainActivity
 import com.njsh.instadl.R
 import com.njsh.instadl.ads.checkAndShowAd
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.LeftCurvedButton
+import com.njsh.instadl.ui.components.NativeAdView
 import com.njsh.instadl.ui.components.RightCurvedHeading
 import com.njsh.instadl.ui.theme.AppTheme
 
-class PageMainScreen(val onNavigateTo: (String) -> Unit) : Page("Video downloader")
+class PageMainScreen(val navController: NavController) : Page("Video downloader")
 {
     init
     {
         addContent {
             Content()
+            val activity = LocalContext.current as MainActivity
+            BackHandler {
+                checkAndShowAd(activity) {
+                    navController.popBackStack()
+                }
+            }
         }
     }
 
@@ -38,9 +48,11 @@ class PageMainScreen(val onNavigateTo: (String) -> Unit) : Page("Video downloade
                 ) {
                     RightCurvedHeading(label = "ALL VIDEO DOWNLOADER")
                 }
-                Box(modifier = Modifier.weight(1f))
-                OptionsLayout(modifier = Modifier.fillMaxSize())
-                Box(modifier = Modifier.weight(1f))
+                NativeAdView(modifier = Modifier.padding(16.dp))
+                OptionsLayout(modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f))
+                NativeAdView(modifier = Modifier.padding(16.dp))
             }
         }
 
@@ -59,7 +71,7 @@ class PageMainScreen(val onNavigateTo: (String) -> Unit) : Page("Video downloade
                         .fillMaxWidth(0.8f),
                     onClick = {
                         checkAndShowAd(context) {
-                            onNavigateTo(Route.InstagramReelScreen.name)
+                            navController.navigate(Route.InstagramReelScreen.name)
                         }
                     })
 
@@ -70,7 +82,7 @@ class PageMainScreen(val onNavigateTo: (String) -> Unit) : Page("Video downloade
                         .fillMaxWidth(0.8f),
                     onClick = {
                         checkAndShowAd(context) {
-                            onNavigateTo(Route.FacebookVideoScreen.name)
+                            navController.navigate(Route.FacebookVideoScreen.name)
                         }
                     })
 
@@ -86,7 +98,7 @@ class PageMainScreen(val onNavigateTo: (String) -> Unit) : Page("Video downloade
 }
 
 
-@Preview
+/*@Preview
 @Composable
 fun PrevPageMainScreen()
 {
@@ -96,7 +108,7 @@ fun PrevPageMainScreen()
             page.drawContent()
         }
     }
-}
+}*/
 
 
 

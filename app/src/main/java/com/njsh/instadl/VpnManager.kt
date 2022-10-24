@@ -1,16 +1,14 @@
 package com.njsh.instadl
 
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CompletableDeferred
-import okhttp3.internal.notifyAll
 import unified.vpn.sdk.*
 import java.util.*
 
-object VpnManager  {
+object VpnManager {
     private val TAG = javaClass.simpleName
-    private lateinit var selectedCountry : String
+    private lateinit var selectedCountry: String
     private lateinit var base_host: String
     private lateinit var carrier_id: String
     private var ServerIPaddress = "00.000.000.00"
@@ -39,6 +37,18 @@ object VpnManager  {
         val notificationConfig = SdkNotificationConfig.newBuilder().disabled().build()
         UnifiedSdk.update(notificationConfig)
         UnifiedSdk.setLoggingLevel(Log.VERBOSE)
+
+        UnifiedSdk.addVpnStateListener(object : VpnStateListener {
+            override fun vpnStateChanged(state: VpnState) {
+                if (VpnState.CONNECTED == state) {
+                    App.instance().logEventVpnConnected()
+                }
+            }
+
+            override fun vpnError(p0: VpnException) {
+                println("vpn exception: $p0")
+            }
+        })
     }
 
     suspend fun connect(): Boolean {
@@ -100,7 +110,6 @@ object VpnManager  {
             .addDnsRule(TrafficRule.Builder.bypass().fromDomains(bypassDomains)).build(),
             object : CompletableCallback {
                 override fun complete() {
-                    println("connection complete")
                     deferred.complete(true)
                 }
 
@@ -114,8 +123,7 @@ object VpnManager  {
     }
 
     fun disconnectFromVnp() {
-        UnifiedSdk.getInstance().vpn.stop(
-            TrackingConstants.GprReasons.M_UI,
+        UnifiedSdk.getInstance().vpn.stop(TrackingConstants.GprReasons.M_UI,
             object : CompletableCallback {
                 override fun complete() {
                 }
@@ -150,5 +158,40 @@ object VpnManager  {
                 callback.failure(e)
             }
         })
+    }
+}
+
+
+data class VpnConfig(
+    @SerializedName("locations") var locations: String? = null,
+    @SerializedName("host") var host: String? = null,
+    @SerializedName("carrierId") var carrierId: String? = null
+) {
+    private val NONE = "none"
+
+    private val mapping by lazy {
+        val pair = locations?.replace(" +", "")?.lowercase()?.split(",")
+        val map = mutableMapOf<String, String>()
+        if (pair != null) {
+            for (value in pair) {
+                val entries = value.split(':')
+                map[entries[0]] = entries[1]
+            }
+        }
+        map
+    }
+
+    fun getTargetLocation(userLocation: String): String {
+        var value = mapping[userLocation]
+
+        if (value != null) {
+            return value
+        }
+
+        value = mapping["all"]
+        if (value != null) {
+            return value
+        }
+        return NONE
     }
 }
