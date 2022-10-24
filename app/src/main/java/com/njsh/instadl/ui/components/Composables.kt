@@ -19,12 +19,8 @@ import com.njsh.instadl.ui.theme.AppTheme
 
 @Composable
 fun LeftCurvedButton(
-    modifier: Modifier = Modifier,
-    painter: Painter,
-    label: String,
-    onClick: ()-> Unit
-)
-{
+    modifier: Modifier = Modifier, painter: Painter, label: String, onClick: () -> Unit
+) {
     val colors = MaterialTheme.colors
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = modifier
@@ -47,19 +43,16 @@ fun LeftCurvedButton(
 
 @Preview
 @Composable
-fun PrevLeftCurvedButton()
-{
+fun PrevLeftCurvedButton() {
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {
             Box(contentAlignment = Alignment.CenterEnd, modifier = Modifier.fillMaxWidth()) {
-                LeftCurvedButton(
-                    painter = painterResource(id = R.drawable.ic_instagram),
+                LeftCurvedButton(painter = painterResource(id = R.drawable.ic_instagram),
                     label = "INSTAGRAM",
                     modifier = Modifier
                         .padding(vertical = 16.dp)
                         .fillMaxWidth(0.8f),
-                    onClick = {}
-                )
+                    onClick = {})
             }
         }
     }
@@ -67,8 +60,7 @@ fun PrevLeftCurvedButton()
 
 
 @Composable
-fun RightCurvedHeading(modifier: Modifier = Modifier, label: String)
-{
+fun RightCurvedHeading(modifier: Modifier = Modifier, label: String) {
     Box(
         modifier = modifier
             .clip(shape = RoundedCornerShape(topEnd = 50.dp, bottomEnd = 50.dp))
@@ -82,8 +74,7 @@ fun RightCurvedHeading(modifier: Modifier = Modifier, label: String)
 
 @Preview
 @Composable
-fun PrevRightCurvedHeading()
-{
+fun PrevRightCurvedHeading() {
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {
             RightCurvedHeading(modifier = Modifier.padding(16.dp), "ALL VIDEO DOWNLOADER")
@@ -92,13 +83,13 @@ fun PrevRightCurvedHeading()
 }
 
 
-
 @Composable
-fun CircularProgressBar(isLoading: State<Boolean>)
-{
+fun CircularProgressBar(isLoading: State<Boolean>) {
     if (isLoading.value) {
-        CircularProgressIndicator(modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize())
+        CircularProgressIndicator(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize()
+        )
     }
 }

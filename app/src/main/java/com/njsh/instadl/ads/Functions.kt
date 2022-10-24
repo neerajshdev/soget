@@ -1,90 +1,50 @@
 package com.njsh.instadl.ads
 
 import android.app.Activity
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.njsh.instadl.api.CallResult
+import com.njsh.instadl.util.CallResult
 
-fun showAd(ad: AppOpenAd, activity: Activity, backAction: (FullScreenContentBackAction)->Unit) {
-    val callback = object : FullScreenContentCallback() {
-        override fun onAdClicked()
-        {
-            backAction(FullScreenContentBackAction.OnAdClicked)
-        }
 
-        override fun onAdDismissedFullScreenContent()
-        {
-            backAction(FullScreenContentBackAction.OnDismissed)
-        }
-
-        override fun onAdFailedToShowFullScreenContent(p0: AdError)
-        {
-            backAction(FullScreenContentBackAction.OnAdFailedToShow)
-        }
-
-        override fun onAdShowedFullScreenContent()
-        {
-            backAction(FullScreenContentBackAction.OnAdShowed)
-        }
-
-        override fun onAdImpression()
-        {
-            backAction(FullScreenContentBackAction.OnAdImpression)
+fun loadAppOpenAd(activity: Activity, action: () -> Unit) {
+    AppOpenAdLoader.takeAndLoad { result ->
+        when (result) {
+            is com.njsh.instadl.api.CallResult.Success -> {
+                result.data.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        action()
+                    }
+                }
+                result.data.show(activity)
+            }
+            is com.njsh.instadl.api.CallResult.Failed -> {
+                action()
+            }
         }
     }
-
-    ad.fullScreenContentCallback = callback
-    ad.show(activity)
-}
-
-
-fun showAd(ad: InterstitialAd, activity: Activity, backAction: (FullScreenContentBackAction)->Unit) {
-    val callback = object : FullScreenContentCallback() {
-        override fun onAdClicked()
-        {
-            backAction(FullScreenContentBackAction.OnAdClicked)
-        }
-
-        override fun onAdDismissedFullScreenContent()
-        {
-            backAction(FullScreenContentBackAction.OnDismissed)
-        }
-
-        override fun onAdFailedToShowFullScreenContent(p0: AdError)
-        {
-            backAction(FullScreenContentBackAction.OnAdFailedToShow)
-        }
-
-        override fun onAdShowedFullScreenContent()
-        {
-            backAction(FullScreenContentBackAction.OnAdShowed)
-        }
-
-        override fun onAdImpression()
-        {
-            backAction(FullScreenContentBackAction.OnAdImpression)
-        }
-    }
-
-    ad.fullScreenContentCallback = callback
-    ad.show(activity)
 }
 
 /**
  * Show the interstitial ad if failed, then provided action will be executed
  */
-fun checkAndShowAd(activity: Activity, action : ()-> Unit) {
+fun checkAndShowAd(activity: Activity, action: () -> Unit) {
     if (AdClickCounter.check()) {
-        InterstitialAdLoader.takeAndLoad { callResult ->
-            if (callResult is CallResult.Success) {
-                showAd(callResult.data, activity) {}
-            } else {
+        InterstitialAdLoader.takeAndLoad(object : CallResult<InterstitialAd> {
+            override fun onSuccess(ad: InterstitialAd) {
+                ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() {
+                        action()
+                    }
+                }
+                ad.show(activity)
+            }
+
+            override fun onFailed(ex: Exception) {
                 action()
             }
-        }
+        })
     } else {
         action()
     }
+
 }

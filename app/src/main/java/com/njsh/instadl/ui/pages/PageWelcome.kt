@@ -13,23 +13,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.njsh.instadl.App
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.nativead.NativeAd
 import com.njsh.instadl.BuildConfig
-import com.njsh.instadl.MainActivity
 import com.njsh.instadl.R
-import com.njsh.instadl.ads.AdClickCounter
-import com.njsh.instadl.ads.InterstitialAdLoader
-import com.njsh.instadl.ads.showAd
-import com.njsh.instadl.api.CallResult
+import com.njsh.instadl.ads.NativeAdLoader
+import com.njsh.instadl.ads.checkAndShowAd
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.LeftCurvedButton
 import com.njsh.instadl.ui.components.RightCurvedHeading
 import com.njsh.instadl.ui.theme.AppTheme
 
-class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
-{
-    init
-    {
+class PageWelcome(val onNavigateTo: (String) -> Unit) : Page() {
+    init {
         addContent {
             Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
                 Content()
@@ -39,8 +35,7 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
 
 
     @Composable
-    private fun Content()
-    {
+    private fun Content() {
         Column(
             Modifier.fillMaxSize()
         ) {
@@ -55,8 +50,14 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
     }
 
     @Composable
-    private fun OptionsLayout(modifier: Modifier = Modifier)
-    {
+    private fun NativeAdView(ad: NativeAd) {
+        AndroidView(factory = {
+
+        }
+    }
+
+    @Composable
+    private fun OptionsLayout(modifier: Modifier = Modifier) {
         val activity = LocalContext.current as Activity
         Box(contentAlignment = Alignment.CenterEnd, modifier = modifier) {
             Column {
@@ -66,17 +67,7 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
                         .padding(vertical = 16.dp)
                         .fillMaxWidth(0.8f),
                     onClick = {
-                        if (AdClickCounter.check()) {
-                            InterstitialAdLoader.takeAndLoad { callResult ->
-                                if (callResult is CallResult.Failed) {
-                                    onNavigateTo(Route.MainScreen.name)
-                                } else if (callResult is CallResult.Success) {
-                                    showAd(callResult.data, activity) {}
-                                }
-                            }
-                        } else {
-                            onNavigateTo(Route.MainScreen.name)
-                        }
+                        checkAndShowAd(activity) { onNavigateTo(Route.MainScreen.name) }
                     })
 
                 LeftCurvedButton(painter = painterResource(id = R.drawable.ic_share_nodes_solid),
@@ -85,15 +76,7 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
                         .padding(vertical = 16.dp)
                         .fillMaxWidth(0.8f),
                     onClick = {
-                        if (AdClickCounter.check()) {
-                            InterstitialAdLoader.takeAndLoad { callResult ->
-                                if (callResult is CallResult.Failed) {
-                                    shareThisApp(activity)
-                                } else if (callResult is CallResult.Success) {
-                                    showAd(callResult.data, activity) {}
-                                }
-                            }
-                        } else {
+                        checkAndShowAd(activity) {
                             shareThisApp(activity)
                         }
                     })
@@ -104,15 +87,7 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
                         .padding(vertical = 16.dp)
                         .fillMaxWidth(0.8f),
                     onClick = {
-                        if (AdClickCounter.check()) {
-                            InterstitialAdLoader.takeAndLoad { callResult ->
-                                if (callResult is CallResult.Failed) {
-                                    rateThisApp(activity)
-                                } else if (callResult is CallResult.Success) {
-                                    showAd(callResult.data, activity) {}
-                                }
-                            }
-                        } else {
+                        checkAndShowAd(activity) {
                             rateThisApp(activity)
                         }
                     })
@@ -126,22 +101,24 @@ class PageWelcome(val onNavigateTo: (String) -> Unit) : Page()
         myIntent.type = "text/plain"
         val url = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
         val sub: String = "All Video downloader"
-        val body: String = "Hey! This app can download any instagram and facebook video. \n Download Now its free! \n \n $url"
+        val body: String =
+            "Hey! This app can download any instagram and facebook video. \n Download Now its free! \n \n $url"
         myIntent.putExtra(Intent.EXTRA_SUBJECT, sub)
         myIntent.putExtra(Intent.EXTRA_TEXT, body)
         activity.startActivity(Intent.createChooser(myIntent, "Share Using"))
     }
 
     fun rateThisApp(activity: Activity) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID))
+        val intent = Intent(
+            Intent.ACTION_VIEW, Uri.parse("market://details?id=" + BuildConfig.APPLICATION_ID)
+        )
         activity.startActivity(intent)
     }
 }
 
 @Preview
 @Composable
-fun PrevPageWelcome()
-{
+fun PrevPageWelcome() {
     val page: Page = PageWelcome() {}
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {

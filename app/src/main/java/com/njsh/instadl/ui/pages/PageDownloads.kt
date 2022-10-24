@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,8 +31,7 @@ class DownloadControl(
     speed: Int,
     state: DownloadTask.State,
     private val textColor: Color = Color.Black,
-)
-{
+) {
     val completed = mutableStateOf(completed)
     val toBeComplete = mutableStateOf(toBeComplete)
     val speed = mutableStateOf(speed)
@@ -41,8 +43,7 @@ class DownloadControl(
     var onPlay: (() -> Unit)? = null
 
     @Composable
-    fun Compose(modifier: Modifier = Modifier)
-    {
+    fun Compose(modifier: Modifier = Modifier) {
         Column(modifier = modifier, verticalArrangement = Arrangement.Center) {
             Text(text = label, color = textColor, fontWeight = FontWeight.Black)
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -51,11 +52,9 @@ class DownloadControl(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = {
-                    if (state.value == DownloadTask.State.Downloading)
-                    {
+                    if (state.value == DownloadTask.State.Downloading) {
                         onPause?.invoke()
-                    } else
-                    {
+                    } else {
                         onPlay?.invoke()
                     }
                 }) {
@@ -84,8 +83,7 @@ class DownloadControl(
 
 @Preview
 @Composable
-fun PrevProgress()
-{
+fun PrevProgress() {
     val onBackgroundColor = MaterialTheme.colors.onBackground
     val progress = remember {
         DownloadControl(
@@ -109,17 +107,14 @@ fun PrevProgress()
 }
 
 
-class PageDownloads: Page("Downloads")
-{
+class PageDownloads : Page("Downloads") {
 
-    init
-    {
+    init {
         addContent { Compose() }
     }
 
     @Composable
-    fun Compose()
-    {
+    fun Compose() {
         val downloadsTask = DownloadManager.getInstance().tasks
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -127,8 +122,7 @@ class PageDownloads: Page("Downloads")
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            for (task in downloadsTask)
-            {
+            for (task in downloadsTask) {
                 val colorOnBg = MaterialTheme.colors.onBackground
                 val taskControl = remember {
                     DownloadControl(
@@ -141,24 +135,25 @@ class PageDownloads: Page("Downloads")
                     )
                 }
 
-                taskControl.Compose(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                taskControl.Compose(
+                    modifier = Modifier.padding(
+                        horizontal = 16.dp,
+                        vertical = 8.dp
+                    )
+                )
 
                 DisposableEffect(key1 = taskControl) {
-                    task.setUpdateListener(object : UpdateListener()
-                    {
-                        override fun onDownloadFished()
-                        {
+                    task.setUpdateListener(object : UpdateListener() {
+                        override fun onDownloadFished() {
                             taskControl.state.value = DownloadTask.State.Finished
                         }
 
-                        override fun onUpdateProgress(complete: Long, total: Long)
-                        {
+                        override fun onUpdateProgress(complete: Long, total: Long) {
                             taskControl.completed.value = toMB(complete)
                             taskControl.toBeComplete.value = toMB(total)
                         }
 
-                        override fun onUpdateSpeed(bytesPerSec: Int)
-                        {
+                        override fun onUpdateSpeed(bytesPerSec: Int) {
                             taskControl.speed.value = toMB(bytesPerSec.toLong())
                         }
                     })
@@ -171,8 +166,7 @@ class PageDownloads: Page("Downloads")
     }
 
 
-    private fun toMB(bytes: Long) : Int
-    {
+    private fun toMB(bytes: Long): Int {
         return (bytes / 10_485_76).toInt()
     }
 }

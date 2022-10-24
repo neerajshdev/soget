@@ -4,15 +4,13 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.instadl.FirebaseKeys
 
-object AdClickCounter
-{
+object AdClickCounter {
     private var count = 0
     private val clicks = Firebase.remoteConfig.getLong(FirebaseKeys.CLICK_COUNT)
 
-    fun check(): Boolean
-    {
+    fun check(): Boolean {
         val result = ++count >= clicks
-        if (result) count = -1
+        if (result) count = 0
         return result
     }
 }
