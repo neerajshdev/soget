@@ -27,14 +27,12 @@ import com.njsh.instadl.util.checkStoragePermission
 import com.njsh.instadl.util.storagePermission
 
 
-class PageFacebookVideo : Page("Facebook video Downloader")
-{
+class PageFacebookVideo : Page("Facebook video Downloader") {
     private val facebook = ViewModel.facebook
     private val inputUrl = InputPasteAndGet()
     private var isLoading = mutableStateOf(false)
 
-    init
-    {
+    init {
         val parentModifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
@@ -49,23 +47,21 @@ class PageFacebookVideo : Page("Facebook video Downloader")
                     )
 
                     val onDownloadClick: () -> Unit = {
-                        if (checkStoragePermission())
-                        {
+                        if (checkStoragePermission()) {
                             facebook.videoState.value?.download()
-                        } else
-                        {
+                        } else {
                             storagePermission(activity)
                         }
                     }
 
                     Column(modifier = parentModifier) {
                         inputUrl.Compose(inputUrlModifier)
-                        if (facebook.videoState.value != null)
-                        {
+                        if (facebook.videoState.value != null) {
                             val reel = facebook.videoState.value!!
                             Thumbnail(reel = reel, modifier = Modifier.weight(1f))
                             Button(
-                                onClick = onDownloadClick, modifier = Modifier
+                                onClick = onDownloadClick,
+                                modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
                             ) {
@@ -77,8 +73,7 @@ class PageFacebookVideo : Page("Facebook video Downloader")
                                     Text(text = "DOWNLOAD", Modifier.padding(vertical = 4.dp))
                                 }
                             }
-                        } else {
-                            // show content load on press get button
+                        } else { // show content load on press get button
                             CircularProgressBar(isLoading)
                         }
                     }
@@ -89,11 +84,9 @@ class PageFacebookVideo : Page("Facebook video Downloader")
                         checkAndShowAd(activity) {
                             isLoading.value = true
                             facebook.getContent(inputUrl.text.value) { result ->
-                                if (result is CallResult.Success)
-                                {
+                                if (result is CallResult.Success) {
                                     isLoading.value = false
-                                } else if (result is CallResult.Failed)
-                                {
+                                } else if (result is CallResult.Failed) {
                                     App.toast(result.msg)
                                 }
                             }
@@ -113,8 +106,7 @@ class PageFacebookVideo : Page("Facebook video Downloader")
 
 
     @Composable
-    private fun Thumbnail(reel: EntityFBVideo, modifier: Modifier = Modifier)
-    {
+    private fun Thumbnail(reel: EntityFBVideo, modifier: Modifier = Modifier) {
         AsyncImage(
             model = reel.thumbnail,
             contentDescription = null,

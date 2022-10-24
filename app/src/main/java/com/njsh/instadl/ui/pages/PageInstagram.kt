@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -32,14 +31,12 @@ import com.njsh.instadl.ui.theme.AppTheme
 import com.njsh.instadl.util.checkStoragePermission
 import com.njsh.instadl.util.storagePermission
 
-class PageInstagram : Page("Instagram")
-{
+class PageInstagram : Page("Instagram") {
     private val instagram = ViewModel.instagram
     private val inputUrl = InputPasteAndGet()
     private val isLoading = mutableStateOf(false)
 
-    init
-    {
+    init {
         val parentModifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
@@ -55,11 +52,9 @@ class PageInstagram : Page("Instagram")
 
                     val onDownloadClick: () -> Unit = {
                         checkAndShowAd(activity) {
-                            if (checkStoragePermission())
-                            {
+                            if (checkStoragePermission()) {
                                 instagram.reelState.value?.download()
-                            } else
-                            {
+                            } else {
                                 storagePermission(activity)
                             }
                         }
@@ -67,8 +62,7 @@ class PageInstagram : Page("Instagram")
 
                     Column(modifier = parentModifier) {
                         inputUrl.Compose(inputUrlModifier)
-                        if (instagram.reelState.value != null)
-                        {
+                        if (instagram.reelState.value != null) {
                             val reel = instagram.reelState.value!!
                             Reel(reel = reel, modifier = Modifier.weight(1f))
                             Button(
@@ -86,8 +80,7 @@ class PageInstagram : Page("Instagram")
                                     Text(text = "DOWNLOAD", Modifier.padding(vertical = 4.dp))
                                 }
                             }
-                        } else
-                        {
+                        } else {
                             CircularProgressBar(isLoading)
                         }
                     }
@@ -103,11 +96,9 @@ class PageInstagram : Page("Instagram")
                             instagram.getContent(
                                 inputUrl.text.value, dsUserId, sessionId
                             ) { result ->
-                                if (result is CallResult.Failed)
-                                {
+                                if (result is CallResult.Failed) {
                                     App.toast(result.msg)
-                                } else if (result is CallResult.Success)
-                                {
+                                } else if (result is CallResult.Success) {
                                     isLoading.value = false
                                 }
                             }
@@ -126,8 +117,7 @@ class PageInstagram : Page("Instagram")
 
 
     @Composable
-    private fun Reel(reel: EntityInstaReel, modifier: Modifier = Modifier)
-    {
+    private fun Reel(reel: EntityInstaReel, modifier: Modifier = Modifier) {
         AsyncImage(
             model = reel.imageUrl,
             contentDescription = null,
@@ -140,8 +130,7 @@ class PageInstagram : Page("Instagram")
 
 @Preview
 @Composable
-fun PrevInstagramPage()
-{
+fun PrevInstagramPage() {
     val page = PageInstagram()
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {

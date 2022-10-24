@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -20,35 +21,36 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.ktx.Firebase
 import com.njsh.instadl.App
+import com.njsh.instadl.AppPref
 import com.njsh.instadl.R
 import com.njsh.instadl.ViewModel
 import com.njsh.instadl.ui.theme.AppTheme
+import com.njsh.instadl.util.fetchAndActivate
 import kotlinx.coroutines.delay
 
 
-object ActivityContent
-{
+object ActivityContent {
     private val isSplashShown = mutableStateOf(false)
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
-    fun Content()
-    {
-        AppTheme {
-            // A surface container using the 'background' color from the theme
+    fun Content() {
+        AppTheme { // A surface container using the 'background' color from the theme
             Surface(
                 modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background
             ) {
                 if (!isSplashShown.value) {
                     ShowSplash()
-                    LaunchedEffect(key1 = Unit ) {
+                    LaunchedEffect(key1 = Unit) {
                         delay(4000)
                         isSplashShown.value = true
                     }
                     return@Surface
                 }
 
+                // after the splash scene is shown
                 val navController = rememberNavController()
 
                 if (ViewModel.isUserOnline.value) {
@@ -56,8 +58,9 @@ object ActivityContent
                         navController = navController, startDestination = Route.LoadingScreen.name
                     ) {
                         composable(route = Route.LoadingScreen.name) {
-                            val loading = PageLoadingContent(navController)
-                            loading.drawContent()
+                            PageLoadingScreen(
+                                navController
+                            ).drawContent()
                         }
 
                         composable(route = Route.MainScreen.name) {
@@ -77,42 +80,58 @@ object ActivityContent
                         composable(route = Route.InstagramReelScreen.name) { PageInstagram().drawContent() }
                         composable(route = Route.FacebookVideoScreen.name) { PageFacebookVideo().drawContent() }
                     }
+
+                    LaunchedEffect(key1 = Unit) {
+                        if (AppPref.pref.getBoolean(AppPref.FIREBASE_FETCHED, false)) {
+                            Firebase.fetchAndActivate()
+                            if (App.debug) {
+                                println("Firebase call to fetch to update values")
+                            }
+                        }
+                    }
                 } else {
                     PageUserOfflineScreen().drawContent()
                 }
 
-                LaunchedEffect(key1 = Unit ) {
-                    val connectivityManager =
-                        App.instance().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                DisposableEffect(key1 = Unit) {
+                    App.onMoveToForeground = {
+                        navController.navigate(Route.LoadingScreen.name)
+                    }
 
-                    val netReq = NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    val connectivityManager = App.instance()
+                        .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+                    val netReq = NetworkRequest.Builder()
+                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                         .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build()
 
-                    connectivityManager.registerNetworkCallback(
-                        netReq,
-                        object : ConnectivityManager.NetworkCallback()
-                        {
-                            override fun onAvailable(network: Network)
-                            {
+
+                    val networkCallback: ConnectivityManager.NetworkCallback =
+                        object : ConnectivityManager.NetworkCallback() {
+                            override fun onAvailable(network: Network) {
                                 ViewModel.isUserOnline.value = true
                             }
 
-                            override fun onLost(network: Network)
-                            {
+                            override fun onLost(network: Network) {
                                 ViewModel.isUserOnline.value = false
                             }
                         }
-                    )
+
+                    connectivityManager.registerNetworkCallback(netReq, networkCallback)
+
+                    onDispose {
+                        App.onMoveToForeground = {}
+                        connectivityManager.unregisterNetworkCallback(networkCallback)
+                    }
                 }
             }
         }
     }
 
     @Composable
-    private fun ShowSplash()
-    {
+    private fun ShowSplash() {
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
                 painter = painterResource(id = R.drawable.splash_image),

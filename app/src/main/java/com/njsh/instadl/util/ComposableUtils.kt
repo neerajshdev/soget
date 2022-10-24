@@ -18,16 +18,12 @@ fun hasRWPerm(): Boolean {
 
     val context = LocalContext.current
     returnValue = ActivityCompat.checkSelfPermission(
-        context,
-        perms[0]
-    ) == PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(
-                context,
-                perms[1]
-            ) == PackageManager.PERMISSION_GRANTED
+        context, perms[0]
+    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        context, perms[1]
+    ) == PackageManager.PERMISSION_GRANTED
     return returnValue
 }
-
 
 
 /**
@@ -40,18 +36,17 @@ fun AskForRWPerms(onAccept: () -> Unit, onReject: () -> Unit) {
         android.Manifest.permission.READ_EXTERNAL_STORAGE
     )
 
-    var resultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { result ->
-            if (result[perms[0]] == true && result[perms[1]] == true) {
-                onAccept()
-            } else {
-                onReject()
-            }
-        })
+    var resultLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { result ->
+                if (result[perms[0]] == true && result[perms[1]] == true) {
+                    onAccept()
+                } else {
+                    onReject()
+                }
+            })
 
-    LaunchedEffect(key1 = Unit)
-    {
+    LaunchedEffect(key1 = Unit) {
         resultLauncher.launch(perms);
     }
 }

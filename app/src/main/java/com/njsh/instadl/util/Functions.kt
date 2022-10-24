@@ -25,93 +25,63 @@ import java.io.File
 
 private const val TAG = "Functions.Kt"
 
-fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile) -> Int)
-{
-    if (!root.exists())
-    {
+fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile) -> Int) {
+    if (!root.exists()) {
         throw IllegalArgumentException("provided document path does not exists")
     }
     val children = root.listFiles()
-    for (child in children)
-    {
-        if (child.isFile)
-        {
-            // question: should stop after visit this file
+    for (child in children) {
+        if (child.isFile) { // question: should stop after visit this file
             if (visitor(child) == 0) break
-        } else
-        {
-            // question: should explore this directory
+        } else { // question: should explore this directory
             val ans = visitor(child)
-            if (ans == 0)
-            {
-                // go in and break
+            if (ans == 0) { // go in and break
                 visitDocumentTree(child, visitor)
                 break
-            } else if (ans == 1)
-            {
-                // go in and don't break
+            } else if (ans == 1) { // go in and don't break
                 visitDocumentTree(child, visitor)
-            } else
-            {
-                // skip
-//                console(TAG, "skipping dir ${child.name}")
+            } else { // skip
+                //                console(TAG, "skipping dir ${child.name}")
             }
         }
     }
 }
 
 
-fun visitFileTree(root: File, visitor: (File) -> Int)
-{
-    if (!root.exists())
-    {
+fun visitFileTree(root: File, visitor: (File) -> Int) {
+    if (!root.exists()) {
         throw IllegalArgumentException("provided file path does not exists")
     }
     val children = root.listFiles()
-    if (children != null) for (child in children)
-    {
-        if (child.isFile)
-        {
-            // question: should stop after visit this file
+    if (children != null) for (child in children) {
+        if (child.isFile) { // question: should stop after visit this file
             if (visitor(child) == 0) break
-        } else
-        {
-            // question: should explore this directory
+        } else { // question: should explore this directory
             val ans = visitor(child)
-            if (ans == 0)
-            {
-                // go in and break
+            if (ans == 0) { // go in and break
                 visitFileTree(child, visitor)
                 break
-            } else if (ans == 1)
-            {
-                // go in and don't break
+            } else if (ans == 1) { // go in and don't break
                 visitFileTree(child, visitor)
-            } else
-            {
-                // skip
-//                    console(TAG, "skipping dir ${child.name}")
+            } else { // skip
+                //                    console(TAG, "skipping dir ${child.name}")
             }
         }
     }
 }
 
 
-fun storagePermission(context: Context)
-{
+fun storagePermission(context: Context) {
     Dexter.withContext(context).withPermissions(
         Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ).withListener(object : MultiplePermissionsListener
-    {
-        override fun onPermissionsChecked(p0: MultiplePermissionsReport?)
-        {
+    ).withListener(object : MultiplePermissionsListener {
+        override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
             Log.d(TAG, "onPermissionsChecked: ${p0?.grantedPermissionResponses}")
         }
 
         override fun onPermissionRationaleShouldBeShown(
             p0: MutableList<PermissionRequest>?, p1: PermissionToken?
-        )
-        {
+        ) {
             TODO("Not yet implemented")
         }
 
@@ -119,18 +89,13 @@ fun storagePermission(context: Context)
 }
 
 
-fun checkStoragePermission(): Boolean
-{
-    var result = false
-    result = ActivityCompat.checkSelfPermission(
+fun checkStoragePermission(): Boolean {
+    return ActivityCompat.checkSelfPermission(
         App.instance(), Manifest.permission.READ_EXTERNAL_STORAGE
     ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
         App.instance(), Manifest.permission.WRITE_EXTERNAL_STORAGE
     ) == PackageManager.PERMISSION_GRANTED
-    return result
 }
-
-
 
 
 fun isOnline(context: Context): Boolean {
@@ -151,18 +116,17 @@ fun isOnline(context: Context): Boolean {
                 Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
                 return true
             }
-    }
+        }
 
     }
 
     return connectivityManager.activeNetworkInfo?.run {
-        isAvailable ||isConnectedOrConnecting
+        isAvailable || isConnectedOrConnecting
     } ?: false
 }
 
 
-suspend fun Firebase.fetchAndActivate()
-{
+suspend fun Firebase.fetchAndActivate() {
     val deferred = CompletableDeferred<Task<Boolean>>()
     remoteConfig.fetchAndActivate().addOnCompleteListener { deferred.complete(it) }
     val isComplete = deferred.await().isComplete
@@ -177,25 +141,19 @@ suspend fun Firebase.fetchAndActivate()
  * @param context Context reference to get the TelephonyManager instance from
  * @return country code or null
  */
-fun getUserCountry(context: Context): String?
-{
-    try
-    {
+fun getUserCountry(context: Context): String? {
+    try {
         val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val simCountry = tm.simCountryIso
-        if (simCountry != null && simCountry.length == 2)
-        { // SIM country code is available
+        if (simCountry != null && simCountry.length == 2) { // SIM country code is available
             return simCountry.lowercase()
-        } else if (tm.phoneType != TelephonyManager.PHONE_TYPE_CDMA)
-        { // device is not 3G (would be unreliable)
+        } else if (tm.phoneType != TelephonyManager.PHONE_TYPE_CDMA) { // device is not 3G (would be unreliable)
             val networkCountry = tm.networkCountryIso
-            if (networkCountry != null && networkCountry.length == 2)
-            { // network country code is available
+            if (networkCountry != null && networkCountry.length == 2) { // network country code is available
                 return networkCountry.lowercase()
             }
         }
-    } catch (e: Exception)
-    {
+    } catch (e: Exception) {
     }
     return null
 }

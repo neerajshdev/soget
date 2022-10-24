@@ -8,50 +8,41 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.instadl.App
 import com.njsh.instadl.FirebaseKeys
-import com.njsh.instadl.api.CallResult
+import com.njsh.instadl.util.CallResult
 
-object InterstitialAdLoader
-{
+object InterstitialAdLoader {
     private val adUnitId = Firebase.remoteConfig.getString(FirebaseKeys.INTERSTITIAL_AD_UNIT_ID)
     private val loadedAds = mutableListOf<InterstitialAd>()
 
-    fun load(callback: ((CallResult<InterstitialAd>) -> Unit)? = null)
-    {
+    fun load(result: CallResult<InterstitialAd>? = null) {
         val request = AdRequest.Builder().build()
-        val loadCallback = object : InterstitialAdLoadCallback()
-        {
-            override fun onAdLoaded(p0: InterstitialAd)
-            {
-                if (callback != null) {
-                    callback(CallResult.Success(p0))
+        val callback = object : InterstitialAdLoadCallback() {
+            override fun onAdLoaded(ad: InterstitialAd) {
+                if (result == null) {
+                    loadedAds.add(ad)
                 } else {
-                    loadedAds.add(p0)
+                    result.onSuccess(ad)
                 }
             }
 
-            override fun onAdFailedToLoad(p0: LoadAdError)
-            {
-                callback?.invoke(CallResult.Failed(p0.message))
+            override fun onAdFailedToLoad(p0: LoadAdError) {
+                result?.onFailed(java.io.IOException(p0.message))
             }
         }
-        InterstitialAd.load(App.instance(), adUnitId, request, loadCallback)
+
+        InterstitialAd.load(App.instance(), adUnitId, request, callback)
     }
 
-    fun take(callback: (CallResult<InterstitialAd>) -> Unit)
-    {
-        if (loadedAds.size > 0)
-        {
-            callback(CallResult.Success(loadedAds.removeFirst()))
-        } else
-        {
-            load() {
-                callback(it)
-            }
+    fun take(result: CallResult<InterstitialAd>) {
+        if (loadedAds.size > 0) {
+            result.onSuccess(loadedAds.removeFirst())
+        } else {
+            load(result)
         }
     }
 
-    fun takeAndLoad(callback: (CallResult<InterstitialAd>) -> Unit) {
-        take(callback)
+    fun takeAndLoad(result: CallResult<InterstitialAd>) {
+        take(result)
         load()
     }
 }

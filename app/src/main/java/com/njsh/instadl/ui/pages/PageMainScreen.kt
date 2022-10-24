@@ -11,13 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.njsh.instadl.R
-import com.njsh.instadl.ads.AdClickCounter
-import com.njsh.instadl.ads.InterstitialAdLoader
 import com.njsh.instadl.ads.checkAndShowAd
-import com.njsh.instadl.ads.showAd
-import com.njsh.instadl.api.CallResult
 import com.njsh.instadl.navigation.Page
 import com.njsh.instadl.ui.components.LeftCurvedButton
 import com.njsh.instadl.ui.components.RightCurvedHeading
