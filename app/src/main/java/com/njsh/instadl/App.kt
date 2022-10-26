@@ -22,7 +22,7 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 class App : android.app.Application() {
     companion object {
         val TAG = "my app"
-        val debug = true
+        val debug = BuildConfig.DEBUG
 
         var onMoveToForeground: () -> Unit = {}
 

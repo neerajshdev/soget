@@ -30,7 +30,7 @@ class FetchInstaReelImpl(private val url: String, val dsUserId: String, val sess
 
     private fun verifyUrl(url: String): String?
     {
-        var result: String? = null
+        var result: String?
         val uri = URI(url)
         if (uri.host == "www.instagram.com")
         {

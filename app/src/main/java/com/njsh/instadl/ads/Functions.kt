@@ -30,13 +30,13 @@ fun loadAppOpenAd(activity: Activity, action: () -> Unit) {
 fun checkAndShowAd(activity: Activity, action: () -> Unit) {
     if (AdClickCounter.check()) {
         InterstitialAdLoader.takeAndLoad(object : CallResult<InterstitialAd> {
-            override fun onSuccess(ad: InterstitialAd) {
-                ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onSuccess(data: InterstitialAd) {
+                data.fullScreenContentCallback = object : FullScreenContentCallback() {
                     override fun onAdDismissedFullScreenContent() {
                         action()
                     }
                 }
-                ad.show(activity)
+                data.show(activity)
             }
 
             override fun onFailed(ex: Exception) {
