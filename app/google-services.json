@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:458128866736:android:f5d2d24c96ac5f388e2a75",
+        "mobilesdk_app_id": "1:458128866736:android:d0603ffc098aaca58e2a75",
         "android_client_info": {
-          "package_name": "com.njsh.instadl"
+          "package_name": "com.njsh.reelssaver"
         }
       },
       "oauth_client": [

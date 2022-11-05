@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Myapp" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#60560A</item>
+        <item name="android:statusBarColor">#FF0F0D0E</item>
     </style>
 </resources>
