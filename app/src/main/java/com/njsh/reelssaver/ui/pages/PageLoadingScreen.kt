@@ -39,37 +39,6 @@ class PageLoadingScreen(private val navController: NavController) : Page() {
                     }
                 }
 
-                withContext(Dispatchers.IO) {
-                    if (Firebase.remoteConfig.getBoolean(FirebaseKeys.IS_USING_VPN)) {
-                        if (!VpnManager.isInitialize()) {
-                            try {
-                                val vpnConfig = Gson().fromJson(
-                                    Firebase.remoteConfig.getString(FirebaseKeys.VPN_CONFIG),
-                                    VpnConfig::class.java
-                                )
-                                val userLocation = getUserCountry(activity)
-                                VpnManager.init(
-                                    vpnConfig.getTargetLocation(userLocation!!),
-                                    vpnConfig.host!!,
-                                    vpnConfig.carrierId!!
-                                )
-                            } catch (ex: Exception) {
-                                ex.printStackTrace()
-                                App.instance().logEventVpnFailedToConnect()
-                                return@withContext
-                            }
-                        }
-
-
-                        if (!VpnManager.isConnected()) {
-                            val isConnected = VpnManager.connect()
-                            if (!isConnected) {
-                                App.instance().logEventVpnFailedToConnect()
-                            }
-                        }
-                    }
-                }
-
                 NativeAdLoader.load()
                 InterstitialAdLoader.load()
 
