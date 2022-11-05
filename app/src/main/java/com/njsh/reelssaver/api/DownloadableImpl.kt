@@ -17,7 +17,7 @@ class DownloadableImpl(val url: String, val title: String, val type: String) : D
 
         req.apply {
             setTitle(title)
-            setDescription("Instagram url")
+            setDescription("All Video Downloader")
             setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title)
             setAllowedOverMetered(true)
             setAllowedOverRoaming(true)

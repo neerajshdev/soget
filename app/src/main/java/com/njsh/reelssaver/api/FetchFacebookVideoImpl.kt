@@ -2,7 +2,6 @@ package com.njsh.reelssaver.api
 
 import com.google.gson.Gson
 import com.njsh.reelssaver.entity.EntityFBVideo
-import com.njsh.reelssaver.usecase.GsonFbVideo
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URI

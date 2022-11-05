@@ -1,4 +1,4 @@
-package com.njsh.reelssaver.usecase
+package com.njsh.reelssaver.api
 
 import com.google.gson.annotations.SerializedName
 
