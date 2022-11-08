@@ -53,7 +53,6 @@ class PageMainScreen(val navController: NavController) : Page("Video downloader"
                         .fillMaxWidth()
                         .weight(1f)
                 )
-                NativeAdView(modifier = Modifier.padding(16.dp))
             }
         }
     }

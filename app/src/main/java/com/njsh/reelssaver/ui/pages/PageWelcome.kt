@@ -62,7 +62,6 @@ class PageWelcome(val navController: NavController) : Page() {
                     .padding(16.dp)
                     .weight(1f)
             )
-            NativeAdView(modifier = Modifier.padding(16.dp))
         }
     }
 
