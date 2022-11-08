@@ -27,8 +27,8 @@ import com.njsh.reelssaver.ui.components.TopAppbar
 import com.njsh.reelssaver.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
-class PageWelcome(val navController: NavController) : Page() {
-    val topAppbar by lazy { TopAppbar("ALL VIDEO DOWNLOADER") }
+class PageWelcome(private val navController: NavController) : Page() {
+    private val topAppbar by lazy { TopAppbar(appTitle) }
 
     init {
         addContent {

@@ -23,8 +23,8 @@ import com.njsh.reelssaver.ui.components.TopAppbar
 import com.njsh.reelssaver.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
-class PageMainScreen(val navController: NavController) : Page("Video downloader") {
-    val topAppBar by lazy { TopAppbar("ALL VIDEO DOWNLOADER") }
+class PageMainScreen(private val navController: NavController) : Page("Video downloader") {
+    private val topAppBar by lazy { TopAppbar(appTitle) }
 
     init {
         addContent {
@@ -32,10 +32,12 @@ class PageMainScreen(val navController: NavController) : Page("Video downloader"
             val activity = LocalContext.current
             val scope = rememberCoroutineScope()
 
-            BackHandler {
-                scope.launch {
-                    checkAndShowAd(activity) {
-                        navController.popBackStack()
+            if (doBackPressAds) {
+                BackHandler {
+                    scope.launch {
+                        checkAndShowAd(activity) {
+                            navController.popBackStack()
+                        }
                     }
                 }
             }
@@ -88,7 +90,8 @@ class PageMainScreen(val navController: NavController) : Page("Video downloader"
                                 navController.navigate(Route.FacebookVideoScreen.name)
                             }
                         }
-                    })
+                    }
+                )
             }
         }
     }
