@@ -27,7 +27,10 @@ import com.njsh.reelssaver.ads.checkAndShowAd
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.entity.EntityInstaReel
 import com.njsh.reelssaver.navigation.Page
-import com.njsh.reelssaver.ui.components.*
+import com.njsh.reelssaver.ui.components.CircularProgressBar
+import com.njsh.reelssaver.ui.components.InputPasteAndGet
+import com.njsh.reelssaver.ui.components.NativeAdView
+import com.njsh.reelssaver.ui.components.TopAppbar
 import com.njsh.reelssaver.util.checkStoragePermission
 import com.njsh.reelssaver.util.storagePermission
 import kotlinx.coroutines.launch
@@ -44,7 +47,7 @@ class PageInstagram(private val navController: NavController) : Page("Instagram"
 
         val inputUrlModifier = Modifier.fillMaxWidth()
 
-        val topAppBar = TopAppbar("INSTAGRAM REELS")
+        val topAppBar = TopAppbar(pageTag)
 
         addContent {
             val scope = rememberCoroutineScope()
@@ -125,7 +128,8 @@ class PageInstagram(private val navController: NavController) : Page("Instagram"
                     }
                 }
             }
-            BackHandler {
+
+            if (doBackPressAds) BackHandler {
                 scope.launch {
                     checkAndShowAd(activity) {
                         navController.popBackStack()

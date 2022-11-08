@@ -40,8 +40,8 @@ val dir = "${Environment.getExternalStorageDirectory()}/${Environment.DIRECTORY_
 
 class PageYoutube : Page(pageTag = "Youtube Videos")
 {
-    val inputUrlComp = InputUrlField()
-    val ytVideoComp = YoutubeVideo()
+    private val inputUrlComp = InputUrlField()
+    private val ytVideoComp = YoutubeVideo()
 
     init
     {

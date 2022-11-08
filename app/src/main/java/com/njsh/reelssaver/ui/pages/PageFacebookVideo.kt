@@ -24,7 +24,10 @@ import com.njsh.reelssaver.ads.checkAndShowAd
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.entity.EntityFBVideo
 import com.njsh.reelssaver.navigation.Page
-import com.njsh.reelssaver.ui.components.*
+import com.njsh.reelssaver.ui.components.CircularProgressBar
+import com.njsh.reelssaver.ui.components.InputPasteAndGet
+import com.njsh.reelssaver.ui.components.NativeAdView
+import com.njsh.reelssaver.ui.components.TopAppbar
 import com.njsh.reelssaver.util.checkStoragePermission
 import com.njsh.reelssaver.util.storagePermission
 import kotlinx.coroutines.launch
@@ -36,13 +39,17 @@ class PageFacebookVideo(private val navController: NavController) : Page("Facebo
     private var isLoading = mutableStateOf(false)
 
     init {
-        val inputUrlModifier = Modifier.fillMaxWidth().padding(16.dp)
-        val topAppbar = TopAppbar("FACEBOOK VIDEO")
+        val inputUrlModifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+        val topAppbar = TopAppbar(pageTag)
 
         addContent {
             Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
                 val context = LocalContext.current
-                Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())) {
                     topAppbar.drawContent()
 
                     val onDownloadClick: () -> Unit = {
@@ -109,7 +116,7 @@ class PageFacebookVideo(private val navController: NavController) : Page("Facebo
 
             val activity = LocalContext.current
             val scope = rememberCoroutineScope()
-            BackHandler {
+            if (doBackPressAds) BackHandler {
                 scope.launch {
                     checkAndShowAd(activity) {
                         navController.popBackStack()

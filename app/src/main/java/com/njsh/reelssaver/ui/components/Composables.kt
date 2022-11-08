@@ -49,7 +49,7 @@ fun RoundedButton(
         Icon(
             painter = painter, contentDescription = null, tint = colors.onPrimary
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Text(text = label, color = colors.onPrimary)
     }
 }

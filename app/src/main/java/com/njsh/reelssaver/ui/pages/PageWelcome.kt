@@ -38,7 +38,8 @@ class PageWelcome(private val navController: NavController) : Page() {
 
             val activity = LocalContext.current
             val scope = rememberCoroutineScope()
-            BackHandler {
+
+            if (doBackPressAds) BackHandler {
                 scope.launch {
                     checkAndShowAd(activity) {
                         navController.navigate(Route.ExitDialog.name)
