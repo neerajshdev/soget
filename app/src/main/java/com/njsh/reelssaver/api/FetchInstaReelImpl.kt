@@ -51,18 +51,21 @@ class FetchInstaReelImpl(
         val jsonContent = response.body?.string()
 
         val gson = GsonBuilder().setLenient().create()
-        try {
-            val data = gson.fromJson(jsonContent, GsonReelData::class.java)
-            return fromGsonReelData(data)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
 
-        try {
-            val data = gson.fromJson(jsonContent, ExampleJson2KtKotlin::class.java)
-            return fromGraphQl(data)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
+        if(jsonContent != null && jsonContent.contains("graphql")) {
+            try {
+                val data = gson.fromJson(jsonContent, ExampleJson2KtKotlin::class.java)
+                return fromGraphQl(data)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
+        } else {
+            try {
+                val data = gson.fromJson(jsonContent, GsonReelData::class.java)
+                return fromGsonReelData(data)
+            } catch (ex: Exception) {
+                ex.printStackTrace()
+            }
         }
         return null
     }
@@ -86,7 +89,7 @@ class FetchInstaReelImpl(
 
     private fun fromGraphQl(gsonGraphQl: ExampleJson2KtKotlin): EntityInstaReel {
         val graphql = gsonGraphQl.graphql!!
-        val title = graphql.shortcodeMedia?.title!!
+        val title = graphql.shortcodeMedia?.title ?: ""
         val width = graphql.shortcodeMedia?.dimensions?.width!!
         val height = graphql.shortcodeMedia?.dimensions?.height!!
         val duration = graphql.shortcodeMedia?.videoDuration!!
