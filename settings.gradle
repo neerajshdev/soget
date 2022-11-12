@@ -17,5 +17,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "myapp"
 include ':app'
-include ':downloader'
 include ':nativetemplates'
