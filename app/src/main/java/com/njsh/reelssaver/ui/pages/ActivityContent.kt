@@ -59,19 +59,19 @@ object ActivityContent {
                         composable(route = Route.LoadingScreen.name) {
                             PageLoadingScreen(
                                 navController
-                            ).drawContent()
+                            ).ComposeContent()
                         }
 
                         composable(route = Route.MainScreen.name) {
-                            PageMainScreen(navController).drawContent()
+                            PageMainScreen(navController).ComposeContent()
                         }
 
                         composable(route = Route.WelcomeScreen.name) {
-                            PageWelcome(navController).drawContent()
+                            PageWelcome(navController).ComposeContent()
                         }
 
-                        composable(route = Route.InstagramReelScreen.name) { PageInstagram(navController).drawContent() }
-                        composable(route = Route.FacebookVideoScreen.name) { PageFacebookVideo(navController).drawContent() }
+                        composable(route = Route.InstagramReelScreen.name) { PageInstagram(navController).ComposeContent() }
+                        composable(route = Route.FacebookVideoScreen.name) { PageFacebookVideo(navController).ComposeContent() }
                         composable(route = Route.ExitDialog.name) {
                             val activity = LocalContext.current as MainActivity
                             ExitDialog(onYes ={ activity.finishAndRemoveTask()
@@ -90,7 +90,7 @@ object ActivityContent {
                         }
                     }
                 } else {
-                    PageUserOfflineScreen().drawContent()
+                    PageUserOfflineScreen().ComposeContent()
                 }
 
                 DisposableEffect(key1 = Unit) {

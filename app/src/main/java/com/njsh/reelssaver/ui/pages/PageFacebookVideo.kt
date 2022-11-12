@@ -148,6 +148,6 @@ class PageFacebookVideo(private val navController: NavController) : Page("Facebo
 fun PreviewFacebookVideoPage() {
     val page = PageFacebookVideo(rememberNavController())
     AppTheme {
-        page.drawContent()
+        page.ComposeContent()
     }
 }

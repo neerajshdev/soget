@@ -104,7 +104,7 @@ fun PrevPageMainScreen() {
     val page: Page = PageMainScreen(rememberNavController())
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {
-            page.drawContent()
+            page.ComposeContent()
         }
     }
 }

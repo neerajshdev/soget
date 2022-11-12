@@ -141,7 +141,7 @@ fun PrevPageWelcome() {
     val page: Page = PageWelcome(rememberNavController())
     AppTheme {
         Surface(color = MaterialTheme.colors.background) {
-            page.drawContent()
+            page.ComposeContent()
         }
     }
 }

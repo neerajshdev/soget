@@ -59,7 +59,7 @@ class PageNavigator(page: Page)
     fun Compose()
     {
         Crossfade(targetState = currentPage.value) {
-            it.drawContent()
+            it.ComposeContent()
         }
     }
 }
@@ -76,7 +76,7 @@ open class Page(
     }
 
     @Composable
-    fun drawContent()
+    fun ComposeContent()
     {
         content()
     }
