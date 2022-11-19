@@ -1,6 +1,10 @@
 package com.njsh.reelssaver.ui.components
 
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,32 +13,40 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.njsh.reelssaver.R
+import com.njsh.reelssaver.entity.ShortVideo
 import com.njsh.reelssaver.ui.theme.AppTheme
 
 // this file contains common compose components
 
-class TopAppbar(title: String = "", val menuIcon: ImageVector? = null)
-{
+class TopAppbar(title: String = "", val menuIcon: ImageVector? = null) {
     val title = mutableStateOf(title)
     var onMenuClick: (() -> Unit)? = null
 
 
     @Composable
-    fun drawContent(modifier: Modifier = Modifier)
-    {
+    fun drawContent(modifier: Modifier = Modifier) {
         TopAppBar(modifier = modifier.clip(
             RoundedCornerShape(
                 bottomStart = 14.dp, bottomEnd = 14.dp
@@ -43,16 +55,14 @@ class TopAppbar(title: String = "", val menuIcon: ImageVector? = null)
     }
 
     @Composable
-    private fun NavIcon()
-    {
+    private fun NavIcon() {
         IconButton(onClick = { onMenuClick?.invoke() }) {
             Icon(imageVector = menuIcon!!, contentDescription = "menu icon")
         }
     }
 
     @Composable
-    private fun Title()
-    {
+    private fun Title() {
         Text(text = title.value)
     }
 }
@@ -60,8 +70,7 @@ class TopAppbar(title: String = "", val menuIcon: ImageVector? = null)
 
 @Preview
 @Composable
-fun TopAppBarPrev()
-{
+fun TopAppBarPrev() {
     AppTheme {
         val appBar = TopAppbar().apply {
             title.value = "Sample"
@@ -71,10 +80,8 @@ fun TopAppBarPrev()
 }
 
 
-class Drawer
-{
-    sealed class Items(val text: String)
-    {
+class Drawer {
+    sealed class Items(val text: String) {
         object Share : Items("Share this app")
         object RateApp : Items("Rate this app")
         object HowTo : Items("How to use")
@@ -85,8 +92,7 @@ class Drawer
     var onItemSelect: ((Items) -> Unit)? = null
 
     @Composable
-    fun Compose()
-    {
+    fun Compose() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -95,8 +101,7 @@ class Drawer
             IconButton(onClick = { onClose?.invoke() }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
             }
-            for (item in items)
-            {
+            for (item in items) {
                 DrawerMenu(text = item.text,
                     isSelected = false,
                     modifier = Modifier
@@ -109,16 +114,13 @@ class Drawer
     }
 
     @Composable
-    fun DrawerMenu(text: String, isSelected: Boolean, modifier: Modifier = Modifier)
-    {
+    fun DrawerMenu(text: String, isSelected: Boolean, modifier: Modifier = Modifier) {
         val textColor: Color
         val fontWeight: FontWeight
-        if (isSelected)
-        {
+        if (isSelected) {
             textColor = MaterialTheme.colors.primary
             fontWeight = FontWeight.Bold
-        } else
-        {
+        } else {
             textColor = MaterialTheme.colors.onBackground
             fontWeight = FontWeight.Normal
         }
@@ -145,8 +147,7 @@ class Drawer
 
 @Preview
 @Composable
-fun PrevDrawerMenu()
-{
+fun PrevDrawerMenu() {
     val drawer = Drawer()
     AppTheme {
         drawer.Compose()
@@ -154,14 +155,12 @@ fun PrevDrawerMenu()
 }
 
 
-class InputUrlField
-{
+class InputUrlField {
     private val text = mutableStateOf("")
     var onUrlInput: ((String) -> Unit)? = null
 
     @Composable
-    fun Compose(modifier: Modifier = Modifier)
-    {
+    fun Compose(modifier: Modifier = Modifier) {
         TextField(value = text.value, onValueChange = { text.value = it }, trailingIcon = {
             IconButton(onClick = { onUrlInput?.invoke(text.value) }) {
                 Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null)
@@ -171,16 +170,14 @@ class InputUrlField
 }
 
 
-class InputPasteAndGet
-{
+class InputPasteAndGet {
     val text: MutableState<String> = mutableStateOf("");
     var eventOnPasteClick = {}
     var eventOnGetClick = {}
     val hintText = ""
 
     @Composable
-    fun drawContent(modifier: Modifier = Modifier)
-    {
+    fun drawContent(modifier: Modifier = Modifier) {
         Column(modifier = modifier) {
             val colors = MaterialTheme.colors
 
@@ -207,7 +204,7 @@ class InputPasteAndGet
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedButton(
-                    onClick = {eventOnPasteClick()},
+                    onClick = { eventOnPasteClick() },
                     border = BorderStroke(width = 2.dp, color = MaterialTheme.colors.primary),
                     modifier = Modifier
                         .weight(1f)
@@ -226,7 +223,7 @@ class InputPasteAndGet
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
-                    onClick ={ eventOnGetClick() },
+                    onClick = { eventOnGetClick() },
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -247,8 +244,7 @@ class InputPasteAndGet
 
 @Preview
 @Composable
-fun PrevInputPasteAndGet()
-{
+fun PrevInputPasteAndGet() {
     val comp = InputPasteAndGet()
     val modifier = Modifier
         .fillMaxWidth()
