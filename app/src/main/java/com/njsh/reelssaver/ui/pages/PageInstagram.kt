@@ -22,7 +22,7 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.FirebaseKeys
 import com.njsh.reelssaver.R
-import com.njsh.reelssaver.ViewModel
+import com.njsh.reelssaver.ApplicationLogic
 import com.njsh.reelssaver.ads.checkAndShowAd
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.entity.EntityInstaReel
@@ -36,7 +36,7 @@ import com.njsh.reelssaver.util.storagePermission
 import kotlinx.coroutines.launch
 
 class PageInstagram(private val navController: NavController) : Page("Instagram") {
-    private val instagram = ViewModel.instagram
+    private val instagram = ApplicationLogic.instagram
     private val inputUrl = InputPasteAndGet()
     private val isLoading = mutableStateOf(false)
 

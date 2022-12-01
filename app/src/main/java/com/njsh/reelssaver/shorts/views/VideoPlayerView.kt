@@ -1,4 +1,4 @@
-package com.njsh.reelssaver.ui.components
+package com.njsh.reelssaver.shorts.views
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -17,89 +16,64 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.njsh.reelssaver.R
-import com.njsh.reelssaver.entity.ShortVideo
+import com.njsh.reelssaver.shorts.room.ShortVideo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
 private const val TAG = "VideoPlayerView.kt"
 
 
+@Preview
 @Composable
-fun VideoPlayerView(
-    modifier: Modifier = Modifier,
-    playerProvider: () -> ExoPlayer,
-    shortVideo: ShortVideo,
-) {
-    Log.d(TAG, "VideoPlayerView()")
-    val lifecycleOwner = LocalLifecycleOwner.current
+fun PreviewOfViewPlayerView() {
+    VideoPlayerView(
+        shortVideo = ShortVideo.getDummy(),
+        modifier = Modifier.fillMaxSize(),
+        state = rememberVideoPlayerState()
+    )
+}
 
-    val player = remember {
-        playerProvider()
+class VideoPlayerState {
+    var player by mutableStateOf<ExoPlayer?>(null)
+
+    fun play() {
+        player?.prepare()
+        player?.play()
     }
 
+    fun isPlaying() = player?.isPlaying
+
+    fun pause() = player?.pause()
+
+    fun resume() = player?.play()
+}
+
+@Composable
+fun VideoPlayerView(
+    modifier: Modifier = Modifier, shortVideo: ShortVideo, state: VideoPlayerState
+) {
+    Log.d(TAG, "VideoPlayerView()")
     var progress by remember {
         mutableStateOf(0f)
     }
 
-
-    fun playVideo() = player.play()
-    fun pauseVideo() = player.pause()
-
-    fun togglePlay() {
-        if (player.isPlaying) {
-            pauseVideo()
-        } else {
-            playVideo()
-        }
-    }
-
-
-    DisposableEffect(key1 = player) {
-        val listener = object : LifecycleEventObserver {
-            var wasPlaying = false
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                if (wasPlaying || player.isPlaying) when (event) {
-                    Lifecycle.Event.ON_RESUME -> {
-                        playVideo(); wasPlaying = false
-                    }
-                    Lifecycle.Event.ON_PAUSE -> {
-                        pauseVideo(); wasPlaying = true
-                    }
-                    else -> {}
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(listener)
-
-        player.addMediaItem(MediaItem.fromUri(shortVideo.mpdUrl))
-        player.prepare()
-        playVideo()
-
-        onDispose {
-            player.release()
-            lifecycleOwner.lifecycle.removeObserver(listener)
-        }
-    }
-
     Box(modifier = modifier.background(Color.Black)) {
-        VideoView(exoPlayer = player,
-            bgColor = Color.Black,
-            modifier = Modifier.fillMaxSize(),
-            onClick = { togglePlay() })
+        if (state.player != null) {
+            VideoView(exoPlayer = state.player!!,
+                bgColor = Color.Black,
+                modifier = Modifier.fillMaxSize(),
+                onClick = {})
+        }
 
         Column(
             modifier = Modifier
@@ -113,13 +87,13 @@ fun VideoPlayerView(
                 heartIcon = { painterResource(id = R.drawable.ic_filled_heart) },
                 shareIcon = { painterResource(id = R.drawable.ic_filled_share) },
                 downloadIcon = { painterResource(id = R.drawable.ic_filled_download) },
-                likes = shortVideo.likes,
+                likes = shortVideo.likes.toString(),
                 modifier = Modifier.align(Alignment.End)
             )
             ProgressBar(progressProvider = { progress }, modifier = Modifier.fillMaxWidth())
             Text(
-                text = shortVideo.label,
-                style = MaterialTheme.typography.subtitle2,
+                text = shortVideo.title,
+                style = MaterialTheme.typography.subtitle1,
                 color = Color.White,
                 modifier = Modifier
                     .padding(16.dp)
@@ -128,7 +102,7 @@ fun VideoPlayerView(
         }
     }
 
-    UpdateProgress(player = player, onUpdate = { progress = it })
+    state.player?.let { UpdateProgress(player = it, onUpdate = { progress = it }) }
 }
 
 @Composable
@@ -140,8 +114,8 @@ private fun VideoView(
 ) {
     Log.d(TAG, "VideoView()")
     AndroidView(factory = { context ->
-        val view = LayoutInflater.from(context)
-            .inflate(R.layout.exo_player_view, null) as StyledPlayerView
+        val view =
+            LayoutInflater.from(context).inflate(R.layout.exo_player_view, null) as StyledPlayerView
         view.apply {
             layoutParams =
                 ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
@@ -149,9 +123,7 @@ private fun VideoView(
         }
     }, update = {
         it.player = exoPlayer
-    }, modifier = modifier
-        .background(color = bgColor)
-        .clickable(onClick = onClick))
+    }, modifier = modifier.background(color = bgColor))
 }
 
 
@@ -254,3 +226,6 @@ private fun UpdateProgress(
         }
     })
 }
+
+@Composable
+fun rememberVideoPlayerState() = remember { VideoPlayerState() }

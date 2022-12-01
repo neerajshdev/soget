@@ -52,7 +52,7 @@ object ActivityContent {
                 // after the splash scene is shown
                 val navController = rememberNavController()
 
-                if (ViewModel.isUserOnline.value) {
+                if (ApplicationLogic.isUserOnline.value) {
                     NavHost(
                         navController = navController, startDestination = Route.LoadingScreen.name
                     ) {
@@ -111,11 +111,11 @@ object ActivityContent {
                     val networkCallback: ConnectivityManager.NetworkCallback =
                         object : ConnectivityManager.NetworkCallback() {
                             override fun onAvailable(network: Network) {
-                                ViewModel.isUserOnline.value = true
+                                ApplicationLogic.isUserOnline.value = true
                             }
 
                             override fun onLost(network: Network) {
-                                ViewModel.isUserOnline.value = false
+                                ApplicationLogic.isUserOnline.value = false
                             }
                         }
 

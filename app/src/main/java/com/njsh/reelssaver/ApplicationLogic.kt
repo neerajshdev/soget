@@ -9,7 +9,7 @@ import com.njsh.reelssaver.entity.EntityFBVideo
 import com.njsh.reelssaver.entity.EntityInstaReel
 import com.njsh.reelssaver.util.isOnline
 
-object ViewModel {
+object ApplicationLogic {
     val isUserOnline by lazy { mutableStateOf(isOnline(App.instance())) }
     val instagram by lazy { InstagramViewModel() }
     val facebook by lazy { FacebookViewModel() }

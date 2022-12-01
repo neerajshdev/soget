@@ -21,7 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.R
-import com.njsh.reelssaver.ViewModel
+import com.njsh.reelssaver.ApplicationLogic
 import com.njsh.reelssaver.ads.checkAndShowAd
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.entity.EntityFBVideo
@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 
 
 class PageFacebookVideo(private val navController: NavController) : Page("Facebook video Downloader") {
-    private val facebook = ViewModel.facebook
+    private val facebook = ApplicationLogic.facebook
     private val inputUrl = InputPasteAndGet()
     private var isLoading = mutableStateOf(false)
 

@@ -138,7 +138,7 @@ class WhatsStatusPage
 
                 Log.d(TAG, "Compose: has rw perm")
                 LaunchedEffect(key1 = Unit, block = {
-//                        Log.d(TAG, "Compose: running launch effect")
+//                        Log.d(com.njsh.reelssaver.TAG, "Compose: running launch effect")
                     if (listOfStatus.value == null)
                     {
                         loadWhatsStatus(context)

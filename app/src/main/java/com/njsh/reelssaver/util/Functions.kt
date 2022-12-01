@@ -41,7 +41,7 @@ fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile) -> Int) {
             } else if (ans == 1) { // go in and don't break
                 visitDocumentTree(child, visitor)
             } else { // skip
-                //                console(TAG, "skipping dir ${child.name}")
+                //                console(com.njsh.reelssaver.TAG, "skipping dir ${child.name}")
             }
         }
     }
@@ -64,7 +64,7 @@ fun visitFileTree(root: File, visitor: (File) -> Int) {
             } else if (ans == 1) { // go in and don't break
                 visitFileTree(child, visitor)
             } else { // skip
-                //                    console(TAG, "skipping dir ${child.name}")
+                //                    console(com.njsh.reelssaver.TAG, "skipping dir ${child.name}")
             }
         }
     }
