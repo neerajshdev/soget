@@ -19,6 +19,7 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.Placeable
@@ -322,10 +323,8 @@ data class ValueConstraint(
 
 
 @Composable
-fun Pager(
+fun FirstPager(
     modifier: Modifier = Modifier,
-    initialIndex: Int = 0,
-    indexSelection: Float = 0.5f,
     itemFraction: Float = 1f,
     itemSpacing: Int = 0,
     state: NewPagerState = rememberPagerState(),
@@ -339,52 +338,57 @@ fun Pager(
     state.first = pagerScope.pagerItemScope.first
     state.last = pagerScope.pagerItemScope.last
     state.itemSpacing = itemSpacing
-    state.firstVisibleItemIndex = initialIndex
 
     var lastVisibleItemIndex = 0
 
-    val inputModifier = Modifier.pointerInput(Unit) {
+    val inputModifier = Modifier.pointerInput(orientation) {
+        val velocityTracker = VelocityTracker()
+        val decay = splineBasedDecay<Float>(this)
 
-        fun updateIndex() {
-            with(state) {
-                val selectorPoint = dimension * indexSelection
-                val relativeDis = selectorPoint - centerOffset + scroll.value
-                // index relative to first visible item index
-                val index = firstVisibleItemIndex + floor( relativeDis / (itemDimension + itemSpacing)).toInt().coerceIn(first, last)
-                if (currentIndex != index) {
-                    pagerScope.onItemDeSelect(currentIndex)
-                    currentIndex = index
-                    pagerScope.onItemSelect(currentIndex)
-                }
+        val dragHandler: (PointerInputChange, Float) -> Unit = { change, dragAmt ->
+            state.scope.launch {
+                velocityTracker.addPointerInputChange(change)
+                state.scrollItems(-dragAmt)
+                state.updateIndex(
+                    onSelect = pagerScope.onItemSelect,
+                    onDeSelect = pagerScope.onItemDeSelect
+                )
             }
         }
 
-        detectDragGestures { change, dragAmount ->
+        val onDragEnd: () -> Unit = {
             state.scope.launch {
-                val dragAmt = when (orientation) {
-                    Orientation.Vertical -> dragAmount.y
-                    Orientation.Horizontal -> dragAmount.x
+                val velocity = velocityTracker.calculateVelocity(orientation)
+                var target = decay.calculateTargetValue(state.scroll, -velocity)
+                target -= (target % (state.itemDimension + state.itemSpacing))
+                val min = with(state) {
+                    (first - firstVisibleItemIndex) * (itemDimension + itemSpacing)
                 }
-
-                val itemWithSpacing = state.itemSpacing + state.itemDimension
-                var value = state.scroll.value - dragAmt
-
-                // increment or decrement firstVisibleItemIndex on scroll
-                var deltaIndex = floor((value - state.centerOffset) / itemWithSpacing).toInt()
-                deltaIndex = deltaIndex.coerceIn(
-                    state.first - state.firstVisibleItemIndex,
-                    state.last - state.firstVisibleItemIndex
+                val max = with(state) {
+                    (last - firstVisibleItemIndex) * (itemDimension + itemSpacing)
+                }
+                target = target.coerceIn(min, max)
+                var prev = state.scroll
+                Animatable(prev).animateTo(
+                    targetValue = target, initialVelocity = -velocity
+                ) {
+                    state.scrollItems(value - prev)
+                    prev = value
+                }
+                state.updateIndex(
+                    onSelect = pagerScope.onItemSelect,
+                    onDeSelect = pagerScope.onItemDeSelect
                 )
-                state.firstVisibleItemIndex += deltaIndex
-                value -= deltaIndex * itemWithSpacing
-
-                state.scroll.snapTo(value)
-               /* Log.d(
-                    TAG,
-                    "Pager: itemDimen with spacing = $itemWithSpacing," + " dragAmt = $dragAmt, " + "delta = $deltaIndex, " + "firstItemIndex = ${state.firstVisibleItemIndex}, " + "lastVisibleItemIndex = $lastVisibleItemIndex " + "scroll = ${state.scroll.value}, " + "centerOffset = ${state.centerOffset}"
-                )*/
-                updateIndex()
             }
+        }
+
+        when (orientation) {
+            Orientation.Horizontal -> detectHorizontalDragGestures(
+                onHorizontalDrag = dragHandler, onDragEnd = onDragEnd
+            )
+            Orientation.Vertical -> detectVerticalDragGestures(
+                onVerticalDrag = dragHandler, onDragEnd = onDragEnd
+            )
         }
     }
 
@@ -402,6 +406,7 @@ fun Pager(
         layout(width = size.width, height = size.height) {
             val itemDimenPlusSpacing = itemDimension + itemSpacing
             val firstVisibleItemIx = state.firstVisibleItemIndex
+
             lastVisibleItemIndex =
                 firstVisibleItemIx + ceil((state.dimension - state.centerOffset) / itemDimenPlusSpacing).toInt()
 
@@ -410,10 +415,9 @@ fun Pager(
             )
 
             for (index in firstVisibleItemIx..lastVisibleItemIndex) {
-                val placeable = placeables[index]
+                val placeable = placeables[index - state.first]
                 val relativeIndex = index - firstVisibleItemIx
-                val itemPos =
-                    -state.scroll.value + centerOffset + itemDimenPlusSpacing * relativeIndex
+                val itemPos = -state.scroll + centerOffset + itemDimenPlusSpacing * relativeIndex
 
                 when (orientation) {
                     Orientation.Horizontal -> {
@@ -441,6 +445,13 @@ fun Pager(
             }
         }
     })
+
+    LaunchedEffect(key1 = state, block = {
+        state.updateIndex(
+            onSelect = pagerScope.onItemSelect,
+            onDeSelect = pagerScope.onItemDeSelect
+        )
+    })
 }
 
 class PagerScope {
@@ -455,10 +466,9 @@ class PagerScope {
 
 class PagerItemScope(val first: Int, val last: Int, val item: @Composable (item: Int) -> Unit)
 
-
 class NewPagerState {
     lateinit var scope: CoroutineScope
-    var scroll = Animatable(0f)
+    var scroll by mutableStateOf(0f)
     var first = 0
     var last = 0
     var itemDimension = 0f
@@ -466,7 +476,7 @@ class NewPagerState {
     var itemSpacing = 0 // in pixels
     var currentIndex = 0
     var centerOffset = 0f
-
+    var selectorFraction = 0.5f
     var firstVisibleItemIndex by mutableStateOf(0)
 
     fun snapTo(index: Int) {
@@ -484,13 +494,43 @@ class NewPagerState {
 
         scope.launch {
             firstVisibleItemIndex += indexDelta
-            scroll.snapTo(scrollDelta)
         }
+    }
+
+    fun updateIndex(
+        onSelect: ((index: Int) -> Unit)? = null,
+        onDeSelect: ((index: Int) -> Unit)? = null
+    ) {
+        val selectorPoint = dimension * selectorFraction
+        val relativeDis =
+            selectorPoint - centerOffset + scroll // index relative to first visible item index
+        val index =
+            firstVisibleItemIndex + floor(relativeDis / (itemDimension + itemSpacing)).toInt()
+                .coerceIn(first, last)
+        if (currentIndex != index) {
+            onDeSelect?.invoke(currentIndex)
+            currentIndex = index
+            onSelect?.invoke(currentIndex)
+        }
+    }
+
+    fun scrollItems(deltaScroll: Float) {
+        val scrollValue = deltaScroll + scroll
+        val itemWithSpacing = itemSpacing + itemDimension
+        var deltaIndex = floor((scrollValue - centerOffset) / itemWithSpacing).toInt()
+        deltaIndex = deltaIndex.coerceIn(
+            first - firstVisibleItemIndex, last - firstVisibleItemIndex
+        )
+        firstVisibleItemIndex += deltaIndex
+        scroll = scrollValue - deltaIndex * itemWithSpacing
     }
 }
 
 @Composable
 fun rememberPagerState() = remember { NewPagerState() }
+
+
+private fun updateFirstVisibleItemIndex() {}
 
 
 

@@ -23,8 +23,8 @@ interface ShortVideoDao {
     suspend fun getAll(): List<ShortVideo>
 
 
-    @Query("SELECT * FROM ShortVideo LIMIT :size OFFSET :offset" )
-    suspend fun get(offset: Int, size: Int): List<ShortVideo>
+    @Query("SELECT * FROM ShortVideo LIMIT :limit OFFSET :offset;" )
+    suspend fun get(offset: Int, limit: Int): List<ShortVideo>
 
     @Query("SELECT COUNT(id) FROM ShortVideo")
     suspend fun count(): Long

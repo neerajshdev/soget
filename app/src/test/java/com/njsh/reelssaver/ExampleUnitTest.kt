@@ -29,4 +29,17 @@ class ExampleUnitTest
             }
         }
     }
+
+    @Test
+    fun nodeTest() {
+        var head = Node(-1, null, null, Unit)
+        var current : Node<Unit>? = head
+
+        for (i in 0..10) {
+            current = current?.addToStart(Unit)
+        }
+        checkNode(head).also {
+            println(it)
+        }
+    }
 }

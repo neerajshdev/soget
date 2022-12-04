@@ -20,9 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.njsh.reelssaver.R
@@ -45,6 +45,7 @@ fun PreviewOfViewPlayerView() {
 
 class VideoPlayerState {
     var player by mutableStateOf<ExoPlayer?>(null)
+    var isPlaying by mutableStateOf(false)
 
     fun play() {
         player?.prepare()
@@ -68,11 +69,17 @@ fun VideoPlayerView(
     }
 
     Box(modifier = modifier.background(Color.Black)) {
-        if (state.player != null) {
+        if (state.isPlaying && state.player != null) {
             VideoView(exoPlayer = state.player!!,
                 bgColor = Color.Black,
                 modifier = Modifier.fillMaxSize(),
                 onClick = {})
+        } else {
+            AsyncImage(
+                model = shortVideo.thumbnailUrl,
+                contentDescription = "thumbnail",
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         Column(
@@ -102,7 +109,7 @@ fun VideoPlayerView(
         }
     }
 
-    state.player?.let { UpdateProgress(player = it, onUpdate = { progress = it }) }
+    state.player?.let { UpdateProgress(state, onUpdate = { progress = it }) }
 }
 
 @Composable
@@ -197,32 +204,31 @@ private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> F
 
 @Composable
 private fun UpdateProgress(
-    player: ExoPlayer, onUpdate: (Float) -> Unit
+    state: VideoPlayerState, onUpdate: (Float) -> Unit
 ) {
     Log.d(TAG, "UpdateProgress()")
-    var isPlaying by remember {
-        mutableStateOf(false)
-    }
 
-    if (isPlaying) LaunchedEffect(Unit) {
+    if (state.isPlaying) LaunchedEffect(Unit) {
         while (isActive) {
-            if (player.duration != C.TIME_UNSET) {
-                val newValue = (player.currentPosition.toFloat() / player.duration)
-                onUpdate(newValue)
+            state.player?.let {
+                if (state.player?.duration != C.TIME_UNSET) {
+                    val newValue = (it.currentPosition.toFloat() / it.duration)
+                    onUpdate(newValue)
+                }
             }
             delay(100)
         }
     }
 
-    DisposableEffect(key1 = player, effect = {
+    DisposableEffect(key1 = state, effect = {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(value: Boolean) {
-                isPlaying = value
+                state.isPlaying = value
             }
         }
-        player.addListener(listener)
+        state.player?.addListener(listener)
         onDispose {
-            player.removeListener(listener)
+            state.player?.removeListener(listener)
         }
     })
 }
