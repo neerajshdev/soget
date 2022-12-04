@@ -16,12 +16,8 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
+import kotlinx.coroutines.*
 import kotlin.math.absoluteValue
-import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 import kotlin.reflect.KProperty
@@ -190,16 +186,22 @@ class ScrollAnimatorImpl(private val state: MyPagerState) : ScrollAnimator<Scrol
                     initialVelocity = animatable.velocity
                 }
             }
+
+            var prev = state.scroll
+
+            Log.d(TAG, "animatedScrollTo: from = $prev to = $some")
+            
             animatable.animateTo(
                 targetValue = some,
                 animationSpec = c.animationSpec,
                 initialVelocity = c.initialVelocity
             ) {
-                state.scroll = value
+                state.scroll += value - prev
+                Log.d(TAG, "animatedScrollTo: ${state.scroll}")
+                prev = value
             }
 
             c.onFinish(state)
-            Log.d(TAG, "animatedScrollTo: completes")
         }
     }
 }
@@ -256,9 +258,10 @@ fun Pager(
             }
         }
 
-
-        Log.d(TAG, "all nodes " + checkNode(state.head, state.tail))
-        Log.d(TAG, "visible nodes " + checkNode(state.first, state.last))
+        state.scope.launch(Dispatchers.Default) {
+//            Log.d(TAG, "all nodes " + checkNode(state.head, state.tail))
+            Log.d(TAG, "visible nodes " + checkNode(state.first, state.last))
+        }
 
         layout(constraints.maxWidth, constraints.maxHeight) {
             val x = 0
@@ -272,25 +275,13 @@ fun Pager(
     }
 }
 
-
-private fun updateFirstVisibleNode(state: MyPagerState) = with(state) {
-    if (scroll > 0) scope.launch {
-        val count = ceil(scroll / itemDimension).toInt()
-        scroll -= count * itemDimension
-    }
-}
-
-
-private fun doSlicing(state: MyPagerState) = with(state) {
+private fun doSlicing(state: MyPagerState): Unit = with(state) {
     if (scroll < 0) state.scope.launch(CoroutineExceptionHandler { coroutineContext, throwable -> throwable.printStackTrace() }) {
-        Log.d(TAG, "before doSlicing: scroll = $scroll")
+        Log.d(TAG, "before doSlicing: scroll = $scroll, first node = ${first.index}")
         val count = (scroll / itemDimension).toInt().absoluteValue
         first = first.shiftBy(count)
         scroll += count * itemDimension
         Log.d(TAG, "after doSlicing: scroll = $scroll, first node = ${first.index}")
-    }
-    scope.launch {
-        updateFirstVisibleNode(state)
     }
 }
 
@@ -314,7 +305,7 @@ private fun inputModifier(state: MyPagerState) = Modifier.pointerInput(state) {
 
         animator.animatedScrollTo(target) {
             initialVelocity = velocity
-           /* onFinish = { doSlicing(it) }*/
+            onFinish = ::doSlicing
         }
     }
 
