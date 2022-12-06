@@ -1,3 +1,4 @@
+/*
 package com.njsh.reelssaver
 
 import android.util.Log
@@ -33,6 +34,7 @@ import kotlin.math.roundToInt
 
 private const val TAG = "Pager.kt"
 
+*/
 /**
  * @see
  * <h2>Specification</h2>
@@ -49,10 +51,11 @@ private const val TAG = "Pager.kt"
  * @param state: Pager state
  * @contentBuilder: You will compose your item in it.
  * @onItemSelect: callback for page change, you will get index and item in lambda params.
- */
+ *//*
+
 
 @Composable
-fun <T : Any> Pager(
+fun <T : Any> InfiniteList(
     modifier: Modifier = Modifier,
     state: PagerState<T>,
     initialIndex: Int = 0,
@@ -317,9 +320,11 @@ data class ValueConstraint(
 )
 
 
+*/
 /**** NEW PAGER IMPLEMENTATION **** /
  *
- */
+ *//*
+
 
 
 @Composable
@@ -537,3 +542,4 @@ private fun updateFirstVisibleItemIndex() {}
 
 
 
+*/
