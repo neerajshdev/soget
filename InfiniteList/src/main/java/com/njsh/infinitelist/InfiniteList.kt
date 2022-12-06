@@ -25,7 +25,12 @@ fun <T : Any> InfiniteList(
             .fillMaxSize()
             .then(inputModifier(state.scrollHandler))
     ) { constraints ->
+
+        Log.d(TAG, "SubcomposeLayout()")
+
         layout(constraints.maxWidth, constraints.maxHeight) {
+            Log.d(TAG, "SubcomposeLayout().layout()")
+
             var tempScroll = state.scroll
             val itemsToPlace = mutableListOf<Pair<Placeable, Node<T>>>()
             val toFill = tempScroll + constraints.maxHeight
@@ -46,25 +51,23 @@ fun <T : Any> InfiniteList(
 
             val startingFrom: Node<T> = datasource.left ?: datasource.createFirst()
 
-            if (state.scroll < 0) {
-                var temp = state.scroll
-                while (temp < 0) {
+            if (tempScroll < 0) {
+                while (tempScroll < 0) {
                     if (startingFrom.index > 0) {
                         val p = startingFrom.prev ?: datasource.createPrev(startingFrom)
                         if (p != null) {
                             composeNode(p).also {
-                                temp += it.height
+                                tempScroll += it.height
                                 itemsToPlace.add(it to p)
                             }
                             datasource.left = p
                         } else {
-                            temp = 0f
+                            tempScroll = 0f
                         }
                         continue
                     }
-                    temp = 0f
+                    tempScroll = 0f
                 }
-                state.scroll = temp
             }
 
             var filled = 0
@@ -78,7 +81,7 @@ fun <T : Any> InfiniteList(
             }
 
             val x = 0
-            var y = -state.scroll.roundToInt()
+            var y = -tempScroll.roundToInt()
             val visibleItems = mutableListOf<VisibleItems>()
 
             for (i in 0..itemsToPlace.lastIndex) {
@@ -88,32 +91,39 @@ fun <T : Any> InfiniteList(
 
                 if (placeable.height + y < 0) {
                     datasource.left = datasource.left?.next
-                    state.scroll -= placeable.height
+                    tempScroll -= placeable.height
                     Log.d(
                         TAG,
-                        "InfiniteList: visibleNodes: ${checkNode(datasource.left!!, datasource.rightNode!!)}"
+                        "InfiniteList: visibleNodes: ${
+                            checkNode(
+                                datasource.left!!,
+                                datasource.rightNode!!
+                            )
+                        }"
                     )
+
                     Log.d(
                         TAG,
-                        "InfiniteList: nodes: ${checkNode(datasource.headNode!!, datasource.tailNode!!)}"
+                        "InfiniteList: nodes: ${
+                            checkNode(
+                                datasource.headNode!!,
+                                datasource.tailNode!!
+                            )
+                        }"
                     )
-                    continue
                 }
 
                 item.first.place(x, y)
-                y += item.first.height
+                y += placeable.height
+
                 visibleItems.add(
                     VisibleItems(
-                        node.index,
-                        node.data,
-                        placeable.width,
-                        placeable.height,
-                        x,
-                        y
+                        node.index, node.data, placeable.width, placeable.height, x, y
                     )
                 )
             }
             state.visibleItems = visibleItems
+            state.scroll = tempScroll
         }
     }
 }
