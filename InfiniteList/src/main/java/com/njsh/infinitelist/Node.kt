@@ -7,15 +7,15 @@ data class Node<T>(
     var prev: Node<T>? = null
 ) {
     fun addNext(index: Int, data: T): Node<T> {
-        val nextNode = Node(index, data)
-        this.next = nextNode
-        return nextNode
+        val newNode = Node(index, data, next, this)
+        this.next = newNode
+        return newNode
     }
 
     fun addPrev(index: Int, data: T): Node<T> {
-        val prevNode = Node(index, data)
-        this.prev = prevNode
-        return prevNode
+        val newNode = Node(index, data, this, prev)
+        this.prev = newNode
+        return newNode
     }
 
     fun leaveLeft(): Node<T> {
@@ -34,9 +34,5 @@ data class Node<T>(
             node.next = null
         }
         return node
-    }
-
-    fun moveNext(): Node<T>? {
-        return this.next
     }
 }

@@ -92,25 +92,6 @@ fun <T : Any> InfiniteList(
                 if (placeable.height + y < 0) {
                     datasource.left = datasource.left?.next
                     tempScroll -= placeable.height
-                    Log.d(
-                        TAG,
-                        "InfiniteList: visibleNodes: ${
-                            checkNode(
-                                datasource.left!!,
-                                datasource.rightNode!!
-                            )
-                        }"
-                    )
-
-                    Log.d(
-                        TAG,
-                        "InfiniteList: nodes: ${
-                            checkNode(
-                                datasource.headNode!!,
-                                datasource.tailNode!!
-                            )
-                        }"
-                    )
                 }
 
                 item.first.place(x, y)
@@ -138,14 +119,3 @@ private fun inputModifier(scrollHandler: VerticalScrollHandler) =
         )
     }
 
-private fun <T> checkNode(head: Node<T>, tail: Node<T>): String {
-    val stringBuilder = StringBuilder()
-    var current = head
-
-    while (current != tail) {
-        stringBuilder.append("node(${current.index}) ==> ")
-        current = current.next ?: break
-    }
-    stringBuilder.append("node(${tail.index})")
-    return stringBuilder.toString()
-}

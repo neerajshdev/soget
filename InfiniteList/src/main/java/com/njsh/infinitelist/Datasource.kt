@@ -1,5 +1,8 @@
 package com.njsh.infinitelist
 
+import android.util.Log
+
+private const val TAG = "Datasource"
 abstract class Datasource<T> {
     private var maxSize: Int = 20
     private var size: Int = 0
@@ -32,8 +35,8 @@ abstract class Datasource<T> {
         var newNode: Node<T>? = null
         if (data != null) {
             newNode = node.addNext(nextIndex, data)
-            size++
             tailNode = newNode
+            size++
 
             // drop extra node
             if (size > maxSize) {
@@ -50,11 +53,12 @@ abstract class Datasource<T> {
 
     fun createPrev(node: Node<T>): Node<T>? {
         val prevIndex = node.index - 1
-        var prevNode: Node<T>? = null
+        var newNode: Node<T>? = null
         if (!(prevIndex < 0)) {
             val data = onCreate(prevIndex)
             if (data != null) {
-                prevNode = node.addPrev(prevIndex, data)
+                newNode = node.addPrev(prevIndex, data)
+                headNode = newNode
                 size++
 
                 if (size > maxSize) {
@@ -66,7 +70,7 @@ abstract class Datasource<T> {
             }
         }
 
-        return prevNode
+        return newNode
     }
 
     /**
@@ -78,4 +82,24 @@ abstract class Datasource<T> {
      * it is required to not give a null for index 0
      */
     abstract fun onCreate(index: Int): T?
+
+    abstract fun nextOf(from: T): List<T>
+    abstract fun prevOf(from: T): List<T>
+
+    fun printNodes() {
+        printNodes(headNode!!, tailNode!!)
+        printNodes(left!!, rightNode!!)
+    }
+
+    private fun printNodes(from: Node<T>, to: Node<T>) {
+        val stringBuilder = StringBuilder()
+        var current = from
+
+        while (current != to) {
+            stringBuilder.append("node(${current.index}) \u2190 ")
+            current = current.next!!
+        }
+        stringBuilder.append("$to")
+        Log.d(TAG, "printNodes: (${from.index} to ${to.index}): $stringBuilder")
+    }
 }
