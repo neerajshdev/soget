@@ -1,114 +1,124 @@
 package com.njsh.infinitelist
 
 
-class LinkedList<T : Any> {
-    class Node<T>(
-        val value: T,
-        var next: Node<T>? = null,
-        var prev: Node<T>? = null,
+class LinkedList<T>(
+    val value: T
+) {
+    var next: LinkedList<T>? = null
+    var prev: LinkedList<T>? = null
+
+    companion object {
+        fun <T> with(initialValue: T): LinkedList<T> {
+            return LinkedList(initialValue).apply {
+                info = Info(this, this)
+            }
+        }
+
+        fun <T> fromList(items : List<T>): LinkedList<T> {
+            val list = LinkedList(items[0]).apply { info = Info(this, this) }
+            for (i in 1 .. items.lastIndex) {
+                list.add(items[i])
+            }
+            return list
+        }
+    }
+
+    private lateinit var info: Info<T>
+    val size: Int get() = info.size
+    val head: LinkedList<T> get() = info.head
+    val tail: LinkedList<T> get() = info.tail
+
+    internal class Info<T>(
+        var head: LinkedList<T>, var tail: LinkedList<T>, var size: Int = 1
     )
 
-    class Anchor<T>(var pointer: Node<T>) {
-        private var t: Node<T> = pointer
-
-        fun get(): T {
-            return pointer.value
-        }
-
-        fun next(): Boolean {
-            t = t.next ?: return false
-            return true
-        }
-
-        fun reset() {
-            t = pointer
-        }
-
-        fun new(): Anchor<T> {
-            val a = Anchor(pointer)
-            a.t = t
-            return a
-        }
-    }
-
-    var head: Node<T>? = null
-    var tail: Node<T>? = null
-    var size: Int = 0
-
-    fun getAnchor(): Anchor<T> {
-        return if (size > 0) Anchor(head!!) else throw java.lang.RuntimeException("list is empty")
-    }
-
     fun add(value: T) {
-        val node = Node(value)
-        if (size == 0) {
-            head = node
-            tail = node
-        } else {
-            tail?.next = node
-            node.prev = tail
-            tail = node
-        }
-        size++
+        val end = info.tail
+        val new = LinkedList(value)
+        new.info = info
+        end.next = new
+        new.prev = end
+        info.tail = new
+        info.size++
     }
+
+    fun add(items: List<T>) {
+        for (item in items) {
+            add(item)
+        }
+    }
+
 
     fun addFront(value: T) {
-        val node = Node(value)
-        if (size == 0) {
-            head = node
-            tail = node
-        } else {
-            head?.prev = node
-            node.next = head
-            head = node
+        val front = info.head
+        val new = LinkedList(value)
+        new.info = info
+        new.next = front
+        front.prev = new
+        info.head = new
+        info.size++
+    }
+
+    fun addFront(items: List<T>) {
+        for (item in items.asReversed()) {
+            addFront(item)
         }
-        size++
     }
 
     fun remove(): T {
-        if (size > 0) {
-            val removedElemt = head
-            head = head?.next
-            head?.prev = null
-            size--
-            return removedElemt!!.value
+        if (this === info.tail) {
+            throw RuntimeException("Cannot remove because this is the last element you are calling remove. To avoid this you can check by calling isEnd() before remove.")
         }
-        throw RuntimeException("No elements to remove")
+        val end = info.tail
+        val p = end.prev!!
+        p.next = null
+        end.prev = null
+        info.tail = p
+        info.size--
+        return end.value
     }
 
 
     fun removeFront(): T {
-        if (size > 0) {
-            val removedElemt = tail
-            tail = tail?.prev
-            tail?.next = null
-            size--
-            return removedElemt!!.value
+        if (this === info.head) {
+            throw RuntimeException("Cannot remove because this is the head element you are trying to remove. To avoid this you can check by calling isHead() before remove.")
         }
-        throw RuntimeException("No elements to remove")
+        val f = info.head
+        val n = f.next!!
+        f.next = null
+        n.prev = null
+        info.head = n
+        info.size--
+        return f.value
     }
 
-
-    fun print() {
-        var p = head
-        while (p != null) {
-
-            print("=>(${p.value})")
-            p = p.next
+    fun format(): String {
+        var f = info.head
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("(${f.value})")
+        while (!f.isEnd()) {
+            f = f.next!!
+            stringBuilder.append(" => (${f.value})")
         }
-        println()
-        p = tail
-        while (p != null) {
-            print("=>(${p.value})")
-            p = p.prev
-        }
+        return stringBuilder.toString()
     }
 
+    fun formatReverse(): String {
+        var e = info.tail
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("(${e.value})")
+        while (!e.isFront()) {
+            e = e.prev!!
+            stringBuilder.append(" => (${e.value})")
+        }
+        return stringBuilder.toString()
+    }
 
-    fun main(args: Array<String>) {
-        val list = LinkedList<Int>()
-        list.add(10)
-        list.addFront(9)
-        list.print()
+    fun isEnd(): Boolean {
+        return this === info.tail
+    }
+
+    fun isFront(): Boolean {
+        return this === info.head
     }
 }

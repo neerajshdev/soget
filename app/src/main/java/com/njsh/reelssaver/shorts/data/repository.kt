@@ -155,5 +155,9 @@ object Repository {
         Log.d(TAG, "get: count = $count, from = $from, limit = $limit")
         localSource.getData(from, limit)
     }
+
+    suspend fun clear() {
+        localSource.deleteAll()
+    }
 }
 

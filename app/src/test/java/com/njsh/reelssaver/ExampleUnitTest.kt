@@ -1,5 +1,6 @@
 package com.njsh.reelssaver
 
+import com.njsh.infinitelist.LinkedList
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.api.FetchFacebookVideoImpl
 import org.junit.Test
@@ -32,14 +33,25 @@ class ExampleUnitTest
 
     @Test
     fun nodeTest() {
-        var head = Node(-1, null, null, Unit)
-        var current : Node<Unit>? = head
+        val list = LinkedList.with(listOf(0, 1, 2, 3, 4, 4, 6))
 
-        for (i in 0..10) {
-            current = current?.addToStart(Unit)
-        }
-        checkNode(head).also {
-            println(it)
-        }
+        println(list.format())
+        println(list.formatReverse())
+
+      /*  list.remove()
+        list.removeFront()
+
+        list.add(listOf(14, 78, 98, 0, 12, 13))
+        list.addFront(listOf(14, 78))
+
+        println(list.format())
+        println(list.formatReverse())
+        println("current: ${list.value}, size = ${list.size}")
+        val head = list.head
+
+        while (!head.isEnd()) {
+            head.remove()
+            println(head.format())
+        }*/
     }
 }
