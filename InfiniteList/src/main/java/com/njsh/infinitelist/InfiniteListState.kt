@@ -44,35 +44,38 @@ class InfiniteListState {
     val inputModifier = Modifier.pointerInput(this) {
         val velocityTracker = VelocityTracker()
         val decay = splineBasedDecay<Float>(this)
+        val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+            throwable.printStackTrace()
+        }
 
         detectVerticalDragGestures(
             onDragStart = { isScrolling = true },
             onVerticalDrag = { change, dragAmount ->
-                scope.launch {
+                scope.launch(exceptionHandler) {
                     scrollBy(-dragAmount)
                     velocityTracker.addPointerInputChange(change)
                 }
             },
             onDragEnd = {
-                scope.launch {
+                scope.launch(exceptionHandler) {
                     val v = -velocityTracker.calculateVelocity().y
                     var target = decay.calculateTargetValue(scroll, v)
-                    var diff = target - scroll
+                    val diff = target - scroll
 
                     val force = 200
 
                     if (diff > 0) {
-                        if (diff > force) {
-                            target = visibleItems[0].height.toFloat() + 1
+                      /*  if (diff > force) {
+//                            target = visibleItems[0].height.toFloat() + 1
                         } else {
                             target = 0f
-                        }
+                        }*/
                     } else {
-                        if (diff < -force) {
+                        /*if (diff < -force) {
                             target = 0f
                         } else {
                             target = visibleItems[0].height.toFloat() + 1
-                        }
+                        }*/
                     }
 
                     var old = scroll

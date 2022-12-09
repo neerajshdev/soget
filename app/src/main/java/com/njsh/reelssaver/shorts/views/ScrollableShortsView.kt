@@ -1,94 +1,106 @@
 package com.njsh.reelssaver.shorts.views
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import com.njsh.infinitelist.Datasource
-import com.njsh.infinitelist.InfiniteList
-import com.njsh.infinitelist.rememberInfiniteListState
-import com.njsh.reelssaver.shorts.DataModel
-import com.njsh.reelssaver.shorts.data.Repository
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.launch
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.njsh.infinitelist.VerticalList
 
+
+private const val TAG = "ScrollableShortsView.kt"
 
 @Composable
 fun ScrollableShorts() {
-    val state = rememberInfiniteListState()
-    InfiniteList(datasource = rememberDatasource(), state = state) { item ->
-        when (item) {
-            is DataModel.ShortVideoModel -> {
-                if (item.shortVideo != null) VideoPlayerView(
-                    shortVideo = item.shortVideo!!,
-                    state = VideoPlayerState()
-                )
+    VerticalList {
+        items(listOf(0x898989, 0x9999887 , 0x9991ff, 0xff1155, 0xff99005)) {
+            val isCenter = remember {
+                mutableStateOf(false)
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .height(360.dp)
+                    .background(
+                        color = androidx.compose.ui.graphics
+                            .Color(it)
+                            .copy(alpha = 1f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "isCenter: ${isCenter.value}")
+            }
+
+            onLayout {
+                isCenter.value = viewport.height/2 in y..y+ height
             }
         }
-    }
 
-    DisposableEffect(key1 = state) {
-        val observer = state.observeVisibleItems {
+        onEndOfFrame {
 
         }
-        onDispose {
-            state.removeItemsObserver(observer)
+
+        handleDrag {
+
         }
     }
+
+/*
+    LazyColumn() {
+        items(10) {
+            val random = remember {
+                Random.nextInt(100)
+            }
+
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(360.dp)
+                .background(color = Color(random)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "$random")
+            }
+        }
+    }*/
 }
 
-
+/*
 @Composable
 fun rememberDatasource(): Datasource<DataModel> {
-    val scope = rememberCoroutineScope()
-    val exceptionHandler =CoroutineExceptionHandler() {coroutineContext, throwable -> throwable.printStackTrace() }
     return remember {
         object : Datasource<DataModel>() {
-            override fun onFreshData(): List<DataModel> {
-                val list = mutableListOf<DataModel.ShortVideoModel>()
-                repeat(5) {
-                    val model = DataModel.ShortVideoModel(it)
-                    list.add(model)
-                }
-
-                scope.launch(exceptionHandler) {
-                    Repository.clear()
-                    val shortVideo = Repository.get(0, 5)
-                    for (i in 0..shortVideo.lastIndex) {
-                        list[i].shortVideo = shortVideo[i]
+            override suspend fun onFreshData(): List<DataModel> {
+                var count = 0
+                return Repository.get(0, 5).map {
+                    DataModel.ShortVideoModel(count++).apply {
+                        shortVideo = it
                     }
                 }
-                return list
             }
-            override fun onNextOf(item: DataModel): List<DataModel> {
+            override suspend fun onNextOf(item: DataModel): List<DataModel> {
+                var count = 0
                 val offset = item.key + 1
-                val list = mutableListOf<DataModel.ShortVideoModel>()
-                for (i in offset..offset + 5) {
-                    list.add(DataModel.ShortVideoModel(i))
-                }
-                scope.launch(exceptionHandler) {
-                    val shortVideo = Repository.get(offset, 5)
-                    for (i in 0..shortVideo.lastIndex) {
-                        list[i].shortVideo = shortVideo[i]
+                return Repository.get(offset, offset + 5).map {
+                    DataModel.ShortVideoModel(offset + count++).apply {
+                        shortVideo = it
                     }
                 }
-                return list
             }
-            override fun onPrevOf(item: DataModel): List<DataModel> {
+            override suspend fun onPrevOf(item: DataModel): List<DataModel> {
                 val to = item.key - 1
-                val offset = (to - 5).coerceAtLeast(0)
-                val list = mutableListOf<DataModel.ShortVideoModel>()
-                for (i in offset..to) {
-                    list.add(DataModel.ShortVideoModel(i))
-                }
-                scope.launch(exceptionHandler) {
-                    val shortVideo = Repository.get(offset, to)
-                    for (i in 0..shortVideo.lastIndex) {
-                        list[i].shortVideo = shortVideo[i]
+                var offset = (to - 5).coerceAtLeast(0)
+                if (to == 0) return emptyList()
+                return Repository.get(offset, to).map {
+                    DataModel.ShortVideoModel(offset++).apply {
+                        shortVideo = it
                     }
                 }
-                return list
             }
         }
     }
-}
+}*/

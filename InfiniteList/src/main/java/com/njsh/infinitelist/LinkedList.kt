@@ -2,20 +2,20 @@ package com.njsh.infinitelist
 
 
 class LinkedList<T>(
-    val value: T
+    val value: T, val pos: Int
 ) {
     var next: LinkedList<T>? = null
     var prev: LinkedList<T>? = null
 
     companion object {
         fun <T> with(initialValue: T): LinkedList<T> {
-            return LinkedList(initialValue).apply {
+            return LinkedList(initialValue, 0).apply {
                 info = Info(this, this)
             }
         }
 
         fun <T> fromList(items : List<T>): LinkedList<T> {
-            val list = LinkedList(items[0]).apply { info = Info(this, this) }
+            val list = LinkedList(items[0], 0).apply { info = Info(this, this) }
             for (i in 1 .. items.lastIndex) {
                 list.add(items[i])
             }
@@ -34,7 +34,7 @@ class LinkedList<T>(
 
     fun add(value: T) {
         val end = info.tail
-        val new = LinkedList(value)
+        val new = LinkedList(value, this.tail.pos + 1)
         new.info = info
         end.next = new
         new.prev = end
@@ -51,7 +51,7 @@ class LinkedList<T>(
 
     fun addFront(value: T) {
         val front = info.head
-        val new = LinkedList(value)
+        val new = LinkedList(value, this.head.pos - 1)
         new.info = info
         new.next = front
         front.prev = new
@@ -121,4 +121,26 @@ class LinkedList<T>(
     fun isFront(): Boolean {
         return this === info.head
     }
+
+    inline fun moveNext(block: (LinkedList<T>) -> Unit): Boolean{
+        if (!this.isEnd()) {
+            block(next!!)
+            return true
+        }
+        return false
+    }
+
+
+    fun movePrev(block: (LinkedList<T>) -> Unit): Boolean {
+        if (!this.isFront()) {
+            block(prev!!)
+            return true
+        }
+        return false
+    }
 }
+
+
+fun <T> LinkedList<T>.isCloseToEnd(closeDis: Int = 5): Boolean = this.tail.pos - this.pos <= closeDis
+
+fun <T> LinkedList<T>.isCloseToHead(closeDis: Int = 5): Boolean = this.head.pos - this.pos <= closeDis

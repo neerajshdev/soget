@@ -10,7 +10,7 @@ abstract class Datasource<T> {
         maxSize = max
     }
 
-    abstract fun onFreshData(): List<T>
-    abstract fun onNextOf(item: T): List<T>
-    abstract fun onPrevOf(item: T): List<T>
+    abstract suspend fun onFreshData(): List<T>
+    abstract suspend fun onNextOf(item: T): List<T>
+    abstract suspend fun onPrevOf(item: T): List<T>
 }
