@@ -25,7 +25,7 @@ interface ReadableNetworkSource<T> {
 }
 
 interface WriteAbleDataSource<T> {
-    suspend fun insert(data: T)
+    suspend fun insertOrIgnore(data: T)
     suspend fun update(data: T)
     suspend fun deleteById(id: Long)
     suspend fun delete(data: T)
@@ -67,9 +67,9 @@ class LocalSource : ReadableDataSource<ShortVideo>, WriteAbleDataSource<ShortVid
         return dao.getAll()
     }
 
-    override suspend fun insert(data: ShortVideo) {
+    override suspend fun insertOrIgnore(data: ShortVideo) {
         val dao = database.shorVideoDao()
-        dao.insert(data)
+        dao.insertOrIgnore(data)
     }
 
     override suspend fun update(data: ShortVideo) {
@@ -147,7 +147,7 @@ object Repository {
         Log.d(TAG, "get(form = $from, limit = $limit) count = $count")
         while (from + limit > count - 1) {
             networkSource.getData(limit).forEach {
-                localSource.insert(it)
+                localSource.insertOrIgnore(it)
                 Log.d(TAG, "inserting $it to localSource")
             }
             count = localSource.count()

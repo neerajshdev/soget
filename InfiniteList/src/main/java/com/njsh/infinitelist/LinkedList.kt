@@ -42,7 +42,7 @@ class LinkedList<T>(
         info.size++
     }
 
-    fun add(items: List<T>) {
+    fun addAll(items: List<T>) {
         for (item in items) {
             add(item)
         }
@@ -59,7 +59,7 @@ class LinkedList<T>(
         info.size++
     }
 
-    fun addFront(items: List<T>) {
+    fun addAllFront(items: List<T>) {
         for (item in items.asReversed()) {
             addFront(item)
         }
@@ -95,10 +95,10 @@ class LinkedList<T>(
     fun format(): String {
         var f = info.head
         val stringBuilder = StringBuilder()
-        stringBuilder.append("(${f.value})")
+        stringBuilder.append("(${f.pos})")
         while (!f.isEnd()) {
             f = f.next!!
-            stringBuilder.append(" => (${f.value})")
+            stringBuilder.append(" => (${f.pos})")
         }
         return stringBuilder.toString()
     }
@@ -106,10 +106,10 @@ class LinkedList<T>(
     fun formatReverse(): String {
         var e = info.tail
         val stringBuilder = StringBuilder()
-        stringBuilder.append("(${e.value})")
+        stringBuilder.append("(${e.pos})")
         while (!e.isFront()) {
             e = e.prev!!
-            stringBuilder.append(" => (${e.value})")
+            stringBuilder.append(" => (${e.pos})")
         }
         return stringBuilder.toString()
     }
@@ -141,6 +141,6 @@ class LinkedList<T>(
 }
 
 
-fun <T> LinkedList<T>.isCloseToEnd(closeDis: Int = 5): Boolean = this.tail.pos - this.pos <= closeDis
+fun <T> LinkedList<T>.isCloseToEnd(closeDis: Int = 5): Boolean = tail.pos - pos <= closeDis
 
-fun <T> LinkedList<T>.isCloseToHead(closeDis: Int = 5): Boolean = this.head.pos - this.pos <= closeDis
+fun <T> LinkedList<T>.isCloseToHead(closeDis: Int = 5): Boolean = pos - head.pos <= closeDis

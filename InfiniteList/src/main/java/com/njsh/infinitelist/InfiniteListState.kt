@@ -1,5 +1,6 @@
 package com.njsh.infinitelist
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.splineBasedDecay
@@ -13,6 +14,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlin.math.floor
 
 class InfiniteListState {
     private lateinit var _scope: CoroutineScope
@@ -20,7 +22,7 @@ class InfiniteListState {
     var scroll by mutableStateOf(0f)
     val visibleItemsObserver = mutableListOf<(List<VisibleItems>) -> Unit>()
     var dimension: Int = 0
-    var isScrolling = false
+    var itemDimension: Int = 0
 
     var visibleItems = emptyList<VisibleItems>()
 
@@ -36,66 +38,51 @@ class InfiniteListState {
         scroll += delta
     }
 
-    fun observeVisibleItems(observer: (List<VisibleItems>) -> Unit): (List<VisibleItems>)->Unit {
+    fun observeVisibleItems(observer: (List<VisibleItems>) -> Unit): (List<VisibleItems>) -> Unit {
         visibleItemsObserver.add(observer)
         return observer
     }
 
     val inputModifier = Modifier.pointerInput(this) {
         val velocityTracker = VelocityTracker()
-        val decay = splineBasedDecay<Float>(this)
         val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
             throwable.printStackTrace()
         }
 
-        detectVerticalDragGestures(
-            onDragStart = { isScrolling = true },
-            onVerticalDrag = { change, dragAmount ->
-                scope.launch(exceptionHandler) {
-                    scrollBy(-dragAmount)
-                    velocityTracker.addPointerInputChange(change)
-                }
-            },
-            onDragEnd = {
-                scope.launch(exceptionHandler) {
-                    val v = -velocityTracker.calculateVelocity().y
-                    var target = decay.calculateTargetValue(scroll, v)
-                    val diff = target - scroll
+        detectVerticalDragGestures(onVerticalDrag = { change, dragAmount ->
+            scope.launch(exceptionHandler) {
+                scrollBy(-dragAmount)
+                velocityTracker.addPointerInputChange(change)
+            }
+        }, onDragEnd = {
+            scope.launch(exceptionHandler) {
+                val v = -velocityTracker.calculateVelocity().y
+                val threshold = 200f
+                var target = scroll
 
-                    val force = 200
-
-                    if (diff > 0) {
-                      /*  if (diff > force) {
-//                            target = visibleItems[0].height.toFloat() + 1
-                        } else {
-                            target = 0f
-                        }*/
-                    } else {
-                        /*if (diff < -force) {
-                            target = 0f
-                        } else {
-                            target = visibleItems[0].height.toFloat() + 1
-                        }*/
+                when  {
+                    v > threshold -> {
+                        target = itemDimension + 1f
                     }
-
-                    var old = scroll
-                    Animatable(old).animateTo(target) {
-                        scroll += value - old
-                        old = value
+                    v < -threshold -> {
+                        target -= target
                     }
-                    isScrolling = false
+                    target > itemDimension / 2f -> {
+                        target = itemDimension + 0.1f
+                    }
+                    target < itemDimension -> {
+                        target = 0f
+                    }
                 }
-            })
-    }
 
-    fun fireListeners() {
-        if (!isScrolling) visibleItemsObserver.forEach {
-            it(visibleItems)
-        }
-    }
-
-    fun removeItemsObserver(observer: (List<VisibleItems>) -> Unit) {
-        visibleItemsObserver.remove(observer)
+//                println("current scroll = $scroll, target = $target")
+                var old = scroll
+                Animatable(old).animateTo(target) {
+                    scroll += value - old
+                    old = value
+                }
+            }
+        })
     }
 }
 

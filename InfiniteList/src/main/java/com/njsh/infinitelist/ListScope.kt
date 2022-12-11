@@ -1,16 +1,12 @@
 package com.njsh.infinitelist
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.PointerInputScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class ListScope<T>(
-    private val config: Configuration<T> = Configuration(),
+    private val config: Configuration<T>,
     private val scope: CoroutineScope
 ) {
     private val exceptionHandler = CoroutineExceptionHandler {coroutineContext, throwable ->
@@ -22,12 +18,11 @@ class ListScope<T>(
     class Configuration<T> {
         lateinit var from: LinkedList<T>
         lateinit var to: LinkedList<T>
-        lateinit var onEndOfFrame: suspend EndScope<T>.() -> Unit
+        var onEndOfFrame: (suspend EndScope<T>.() -> Unit)? = null
         lateinit var composer: @Composable LayoutScope.(T) -> Unit
     }
 
     private var isLoading = false
-    var scroll by mutableStateOf(0f)
 
     fun items(items: List<T>, block: @Composable LayoutScope.(T) -> Unit) {
         config.from = LinkedList.fromList(items)
@@ -44,14 +39,10 @@ class ListScope<T>(
         if (!isLoading) {
             scope.launch(exceptionHandler) {
                 isLoading  = true
-                config.onEndOfFrame(EndScope(config.from, config.to))
+                config.onEndOfFrame?.let { it(EndScope(config.from, config.to)) }
                 isLoading = false
             }
         }
-    }
-
-    fun handleDrag(block: suspend PointerInputScope.() -> Unit) {
-
     }
 }
 

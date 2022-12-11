@@ -2,10 +2,10 @@ package com.njsh.reelssaver.shorts.views
 
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.njsh.reelssaver.R
@@ -37,50 +39,31 @@ private const val TAG = "VideoPlayerView.kt"
 @Composable
 fun PreviewOfViewPlayerView() {
     VideoPlayerView(
-        shortVideo = ShortVideo.getDummy(),
-        modifier = Modifier.fillMaxSize(),
-        state = rememberVideoPlayerState()
+        shortVideo = ShortVideo.getDummy(), modifier = Modifier.fillMaxSize(), isSelected = false
     )
-}
-
-class VideoPlayerState {
-    var player by mutableStateOf<ExoPlayer?>(null)
-    var isPlaying by mutableStateOf(false)
-
-    fun play() {
-        player?.prepare()
-        player?.play()
-    }
-
-    fun isPlaying() = player?.isPlaying
-
-    fun pause() = player?.pause()
-
-    fun resume() = player?.play()
 }
 
 @Composable
 fun VideoPlayerView(
-    modifier: Modifier = Modifier, shortVideo: ShortVideo, state: VideoPlayerState
+    modifier: Modifier = Modifier, shortVideo: ShortVideo, isSelected: Boolean
 ) {
-    Log.d(TAG, "VideoPlayerView()")
-    var progress by remember {
-        mutableStateOf(0f)
-    }
+    var progress by remember { mutableStateOf(0f) }
+    var isVideoLoading by remember { mutableStateOf(true) }
 
     Box(modifier = modifier.background(Color.Black)) {
-        if (state.isPlaying && state.player != null) {
-            VideoView(exoPlayer = state.player!!,
+        if (isSelected) {
+            ExoPlayer(url = shortVideo.mpdUrl,
                 bgColor = Color.Black,
                 modifier = Modifier.fillMaxSize(),
-                onClick = {})
-        } else {
-            AsyncImage(
-                model = shortVideo.thumbnailUrl,
-                contentDescription = "thumbnail",
-                modifier = Modifier.fillMaxWidth()
-            )
+                onProgressUpdate = { progress = it },
+                isLoadingChange = { isVideoLoading = it })
         }
+
+        if (!isSelected || isVideoLoading) AsyncImage(
+            model = shortVideo.thumbnailUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize()
+        )
 
         Column(
             modifier = Modifier
@@ -108,29 +91,82 @@ fun VideoPlayerView(
             )
         }
     }
-
-    state.player?.let { UpdateProgress(state, onUpdate = { progress = it }) }
 }
 
 @Composable
-private fun VideoView(
+private fun ExoPlayer(
     modifier: Modifier = Modifier,
-    exoPlayer: ExoPlayer,
-    onClick: () -> Unit,
+    url: String,
+    onProgressUpdate: (Float) -> Unit,
+    isLoadingChange: (Boolean) -> Unit,
     bgColor: Color = Color.Black,
 ) {
-    Log.d(TAG, "VideoView()")
+    val context = LocalContext.current
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build()
+    }
+
+    var isPlaying by remember { mutableStateOf(false) }
+
+    fun togglePlay() {
+        if (exoPlayer.isPlaying) exoPlayer.pause()
+        else exoPlayer.play()
+    }
+
     AndroidView(factory = { context ->
-        val view =
-            LayoutInflater.from(context).inflate(R.layout.exo_player_view, null) as StyledPlayerView
+        val view = LayoutInflater.from(context)
+            .inflate(R.layout.exo_player_view, null) as StyledPlayerView
         view.apply {
-            layoutParams =
-                ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             useController = false
+            player = exoPlayer
         }
-    }, update = {
-        it.player = exoPlayer
-    }, modifier = modifier.background(color = bgColor))
+    }, modifier = modifier
+        .background(color = bgColor)
+        .clickable { togglePlay() })
+
+    DisposableEffect(key1 = exoPlayer, effect = {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(state: Boolean) {
+                isPlaying = state
+                Log.d(TAG, "onIsPlayingChanged: $state")
+            }
+
+            override fun onIsLoadingChanged(isLoading: Boolean) {
+                Log.d(TAG, "onIsLoadingChanged: $isLoading")
+                if (!isLoading) {
+                    isLoadingChange(isLoading)
+                }
+            }
+        }
+        try {
+            exoPlayer.addListener(listener)
+            exoPlayer.addMediaItem(MediaItem.fromUri(url))
+            exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
+            exoPlayer.prepare()
+            exoPlayer.play()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.pause()
+            exoPlayer.release()
+        }
+    })
+
+    if (isPlaying) {
+        LaunchedEffect(key1 = exoPlayer, block = {
+            while (isActive) {
+                if (exoPlayer.duration != C.TIME_UNSET) {
+                    val newValue = (exoPlayer.currentPosition / exoPlayer.duration.toFloat())
+                    onProgressUpdate(newValue)
+                }
+                delay(100)
+            }
+        })
+    }
 }
 
 
@@ -160,8 +196,6 @@ private fun EdgeIconsView(
         )
     }
     Spacer(modifier = Modifier.height(32.dp))
-
-    Log.d(TAG, "EdgeIconsView()")
 }
 
 
@@ -183,7 +217,6 @@ private fun IconButton(
 
 @Composable
 private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> Float) {
-    Log.d(TAG, "ProgressBar()")
     Canvas(
         modifier = modifier
     ) {
@@ -201,37 +234,3 @@ private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> F
         )
     }
 }
-
-@Composable
-private fun UpdateProgress(
-    state: VideoPlayerState, onUpdate: (Float) -> Unit
-) {
-    Log.d(TAG, "UpdateProgress()")
-
-    if (state.isPlaying) LaunchedEffect(Unit) {
-        while (isActive) {
-            state.player?.let {
-                if (state.player?.duration != C.TIME_UNSET) {
-                    val newValue = (it.currentPosition.toFloat() / it.duration)
-                    onUpdate(newValue)
-                }
-            }
-            delay(100)
-        }
-    }
-
-    DisposableEffect(key1 = state, effect = {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(value: Boolean) {
-                state.isPlaying = value
-            }
-        }
-        state.player?.addListener(listener)
-        onDispose {
-            state.player?.removeListener(listener)
-        }
-    })
-}
-
-@Composable
-fun rememberVideoPlayerState() = remember { VideoPlayerState() }
