@@ -3,8 +3,7 @@ package com.njsh.reelssaver
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.ui.graphics.Color
-import com.njsh.reelssaver.shorts.views.ScrollableShorts
+import com.njsh.reelssaver.ui.pages.ActivityContent
 
 private const val TAG = "MainActivity.kt"
 
@@ -13,7 +12,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ScrollableShorts()
+            ActivityContent.Content()
         }
     }
 }

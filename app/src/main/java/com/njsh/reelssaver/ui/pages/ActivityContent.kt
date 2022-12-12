@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.ktx.Firebase
 import com.njsh.reelssaver.*
 import com.njsh.reelssaver.R
+import com.njsh.reelssaver.shorts.views.ScrollableShortVideos
 import com.njsh.reelssaver.ui.theme.AppTheme
 import com.njsh.reelssaver.util.fetchAndActivate
 import kotlinx.coroutines.delay
@@ -78,6 +79,9 @@ object ActivityContent {
                             }, onNo = {
                                 navController.popBackStack()
                             })
+                        }
+                        composable(route = Route.ShortVideos.name) {
+                            ScrollableShortVideos()
                         }
                     }
 

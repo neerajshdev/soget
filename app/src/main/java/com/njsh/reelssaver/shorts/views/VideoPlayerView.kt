@@ -1,6 +1,5 @@
 package com.njsh.reelssaver.shorts.views
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup.LayoutParams
 import androidx.compose.foundation.Canvas
@@ -17,18 +16,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import com.google.android.exoplayer2.C
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
+import com.njsh.reelssaver.App
 import com.njsh.reelssaver.R
 import com.njsh.reelssaver.shorts.room.ShortVideo
+import com.njsh.reelssaver.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -72,12 +77,12 @@ fun VideoPlayerView(
                 .align(Alignment.BottomCenter)
         ) {
             EdgeIconsView(onHeartClick = { /*TODO*/ },
-                onDownloadClick = { /*TODO*/ },
-                onShareClick = { /*TODO*/ },
+                onDownloadClick = { handleDownload(shortVideo) },
+                onShareClick = { onShareClick(shortVideo) },
                 heartIcon = { painterResource(id = R.drawable.ic_filled_heart) },
                 shareIcon = { painterResource(id = R.drawable.ic_filled_share) },
                 downloadIcon = { painterResource(id = R.drawable.ic_filled_download) },
-                likes = shortVideo.likes.toString(),
+                likes = shortVideo.likes.toPrettyNum(),
                 modifier = Modifier.align(Alignment.End)
             )
             ProgressBar(progressProvider = { progress }, modifier = Modifier.fillMaxWidth())
@@ -101,6 +106,7 @@ private fun ExoPlayer(
     isLoadingChange: (Boolean) -> Unit,
     bgColor: Color = Color.Black,
 ) {
+    val localLifecycle = LocalLifecycleOwner.current
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
@@ -129,11 +135,9 @@ private fun ExoPlayer(
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(state: Boolean) {
                 isPlaying = state
-                Log.d(TAG, "onIsPlayingChanged: $state")
             }
 
             override fun onIsLoadingChanged(isLoading: Boolean) {
-                Log.d(TAG, "onIsLoadingChanged: $isLoading")
                 if (!isLoading) {
                     isLoadingChange(isLoading)
                 }
@@ -149,12 +153,38 @@ private fun ExoPlayer(
             ex.printStackTrace()
         }
 
+
+        val lifecycleObserver = object : LifecycleEventObserver {
+            var wasPlaying = false
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                when(event) {
+                    Lifecycle.Event.ON_PAUSE-> {
+                        wasPlaying = exoPlayer.isPlaying
+                        if (wasPlaying) {
+                            exoPlayer.pause()
+                        }
+                    }
+                    Lifecycle.Event.ON_RESUME-> {
+                        if (wasPlaying) {
+                            exoPlayer.play()
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
+
+        localLifecycle.lifecycle.addObserver(lifecycleObserver)
+
         onDispose {
             exoPlayer.removeListener(listener)
             exoPlayer.pause()
             exoPlayer.release()
+
+            localLifecycle.lifecycle.removeObserver(lifecycleObserver)
         }
-    })
+    }
+    )
 
     if (isPlaying) {
         LaunchedEffect(key1 = exoPlayer, block = {
@@ -232,5 +262,26 @@ private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> F
             end = Offset(size.width * progressProvider(), 0f),
             strokeWidth = 6f
         )
+    }
+}
+
+
+private fun onShareClick(shortVideo: ShortVideo) {
+    share(shortVideo.videoUrl, App.instance())
+}
+
+private fun handleDownload(shortVideo: ShortVideo) {
+    if (checkStoragePermission()) {
+        try {
+            download(
+                title = shortVideo.title,
+                url = shortVideo.videoUrl,
+                description = "Short status video"
+            )
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    } else {
+        storagePermission(App.instance())
     }
 }

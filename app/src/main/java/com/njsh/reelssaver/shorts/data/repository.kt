@@ -1,6 +1,9 @@
 package com.njsh.reelssaver.shorts.data
 
 import android.util.Log
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.njsh.reelssaver.FirebaseKeys
 import com.njsh.reelssaver.shorts.room.ShortVideo
 import com.njsh.reelssaver.shorts.room.ShortVideoDatabase
 import io.ktor.client.*
@@ -36,17 +39,17 @@ interface WriteAbleDataSource<T> {
  * ShortVideo network source
  */
 class NetworkSource : ReadableNetworkSource<ShortVideo> {
-    private val uri = "http://192.168.0.102:80/status/random"
+    private val uri = Firebase.remoteConfig.getString(FirebaseKeys.SHORT_API_URI)
 
     override suspend fun getData(size: Int): List<ShortVideo> {
-        val httpClient = HttpClient(CIO) {
+        val clien = HttpClient(CIO) {
             install(ContentNegotiation) {
                 gson()
             }
         }
-        val response = httpClient.get("$uri?many=$size")
+        val response = clien.get("$uri?many=$size")
         val result = response.body<List<ShortVideo>>()
-        httpClient.close()
+        clien.close()
         return result
     }
 }
@@ -138,7 +141,7 @@ class Part<T: Any> (val startIndex: Int, val array: Array<T>) {
     }
 }
 
-object Repository {
+object ShortVideoRepo {
     private val localSource = LocalSource()
     private val networkSource = NetworkSource()
 

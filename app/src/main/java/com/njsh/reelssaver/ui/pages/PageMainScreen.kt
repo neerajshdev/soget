@@ -49,12 +49,12 @@ class PageMainScreen(private val navController: NavController) : Page("Video dow
         Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize()) {
                 topAppBar.drawContent()
-                NativeAdView(modifier = Modifier.padding(16.dp))
                 OptionsLayout(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                 )
+                NativeAdView(modifier = Modifier.padding(16.dp))
             }
         }
     }
@@ -88,6 +88,20 @@ class PageMainScreen(private val navController: NavController) : Page("Video dow
                         scope.launch {
                             checkAndShowAd(context) {
                                 navController.navigate(Route.FacebookVideoScreen.name)
+                            }
+                        }
+                    }
+                )
+
+                RoundedButton(painter = painterResource(id = R.drawable.ic_short_clip),
+                    label = "SHORT STATUS VIDEOS",
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .fillMaxWidth(0.8f),
+                    onClick = {
+                        scope.launch {
+                            checkAndShowAd(context) {
+                                navController.navigate(Route.ShortVideos.name)
                             }
                         }
                     }

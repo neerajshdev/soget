@@ -56,13 +56,13 @@ class PageWelcome(private val navController: NavController) : Page() {
             Modifier.fillMaxSize()
         ) {
             topAppbar.drawContent()
-            NativeAdView(modifier = Modifier.padding(16.dp))
             OptionsLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .weight(1f)
             )
+            NativeAdView(modifier = Modifier.padding(16.dp))
         }
     }
 
@@ -116,12 +116,12 @@ class PageWelcome(private val navController: NavController) : Page() {
 
 
     fun shareThisApp(activity: Activity) {
+
         val myIntent = Intent(Intent.ACTION_SEND)
         myIntent.type = "text/plain"
         val url = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
         val sub: String = "All Video downloader"
-        val body: String =
-            "Hey! This app can download any instagram and facebook video. \n Download Now its free! \n \n $url"
+        val body: String = "Hey! This app can download any instagram and facebook video. \n Download Now its free! \n \n $url"
         myIntent.putExtra(Intent.EXTRA_SUBJECT, sub)
         myIntent.putExtra(Intent.EXTRA_TEXT, body)
         activity.startActivity(Intent.createChooser(myIntent, "Share Using"))

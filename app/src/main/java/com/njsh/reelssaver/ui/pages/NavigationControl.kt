@@ -7,4 +7,5 @@ sealed class Route(val name: String) {
     object InstagramReelScreen : Route("InstagramReelScreen")
     object FacebookVideoScreen : Route("FacebookVideoScreen")
     object ExitDialog : Route("ExitDialog")
+    object ShortVideos : Route("ShortVideos")
 }
