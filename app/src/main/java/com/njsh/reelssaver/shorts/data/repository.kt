@@ -1,8 +1,9 @@
 package com.njsh.reelssaver.shorts.data
 
-import android.util.Log
+import android.widget.Toast
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.njsh.reelssaver.App
 import com.njsh.reelssaver.FirebaseKeys
 import com.njsh.reelssaver.shorts.room.ShortVideo
 import com.njsh.reelssaver.shorts.room.ShortVideoDatabase
@@ -98,64 +99,19 @@ class LocalSource : ReadableDataSource<ShortVideo>, WriteAbleDataSource<ShortVid
     }
 }
 
-class Part<T: Any> (val startIndex: Int, val array: Array<T>) {
-    val lastIndex: Int get() = array.lastIndex + startIndex
-    val size: Int get() = array.size + startIndex
-
-    fun addToEnd(other: Part<T>): Part<T> {
-        val newArray = array + other.array
-        return Part(startIndex, newArray)
-    }
-
-    fun addToStart(other: Part<T>): Part<T> {
-        val newArray = array + other.array
-        return Part(startIndex - other.array.size, newArray)
-    }
-
-    fun dropFromStart(many: Int):Part<T> {
-        val newArray = array.copyOfRange(0 + many, array.lastIndex)
-        return Part(startIndex + many, newArray)
-    }
-
-
-    fun dropFromEnd(many: Int): Part<T> {
-        val newArray = array.copyOfRange(0, array.lastIndex - many)
-        return Part(startIndex, newArray)
-    }
-
-    operator fun get(index: Int): T {
-        val actualIndex = index - startIndex
-        return array[actualIndex]
-    }
-
-    fun isEmpty() = array.isEmpty()
-    fun isNotEmpty() = array.isNotEmpty()
-
-    override fun toString(): String {
-        val stringBuilder = StringBuilder()
-        array.forEach {
-            stringBuilder.append(it)
-            stringBuilder.append("\n")
-        }
-        return stringBuilder.toString()
-    }
-}
-
 object ShortVideoRepo {
     private val localSource = LocalSource()
     private val networkSource = NetworkSource()
 
     suspend fun get(from: Int, limit: Int): List<ShortVideo> = withContext(Dispatchers.IO) {
         var count = localSource.count()
-        Log.d(TAG, "get(form = $from, limit = $limit) count = $count")
         while (from + limit > count - 1) {
             networkSource.getData(limit).forEach {
                 localSource.insertOrIgnore(it)
-                Log.d(TAG, "inserting $it to localSource")
             }
             count = localSource.count()
+            App.toast("local data count: $count", Toast.LENGTH_SHORT)
         }
-        Log.d(TAG, "get: count = $count, from = $from, limit = $limit")
         localSource.getData(from, limit)
     }
 
