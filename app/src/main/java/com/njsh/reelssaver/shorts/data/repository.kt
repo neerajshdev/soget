@@ -110,7 +110,6 @@ object ShortVideoRepo {
                 localSource.insertOrIgnore(it)
             }
             count = localSource.count()
-            App.toast("local data count: $count", Toast.LENGTH_SHORT)
         }
         localSource.getData(from, limit)
     }

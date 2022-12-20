@@ -6,9 +6,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +87,6 @@ fun VideoPlayerView(
             ProgressBar(progressProvider = { progress }, modifier = Modifier.fillMaxWidth())
             Text(
                 text = shortVideo.title,
-                style = MaterialTheme.typography.subtitle1,
                 color = Color.White,
                 modifier = Modifier
                     .padding(16.dp)
@@ -233,12 +231,12 @@ private fun EdgeIconsView(
 private fun IconButton(
     painter: Painter, label: String?, onClick: () -> Unit, color: Color
 ) {
-    androidx.compose.material.IconButton(onClick = onClick) {
+    androidx.compose.material3.IconButton(onClick = onClick) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(painter = painter, contentDescription = null, tint = color)
             Spacer(modifier = Modifier.height(4.dp))
             label?.let {
-                Text(text = label, style = MaterialTheme.typography.body1, color = color)
+                Text(text = label, color = color)
             }
         }
     }

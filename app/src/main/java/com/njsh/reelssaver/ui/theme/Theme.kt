@@ -1,3 +1,4 @@
+/*
 package com.njsh.reelssaver.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,14 +21,16 @@ private val LightColorPalette = lightColors(
     background = lightBackground,
     onBackground = Color(0xFF463939),
 
-    /* Other default colors to override
+    */
+/* Other default colors to override
     background = Color.White,
     surface = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onBackground = Color.Black,
     onSurface = Color.Black,
-    */
+    *//*
+
 )
 
 @Composable
@@ -44,4 +47,4 @@ fun AppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable ()
         shapes = Shapes,
         content = content
     )
-}
+}*/

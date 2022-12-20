@@ -1,9 +1,6 @@
 package com.njsh.infinitelist
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.calculateTargetValue
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -14,7 +11,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
-import kotlin.math.floor
 
 class InfiniteListState {
     private lateinit var _scope: CoroutineScope
