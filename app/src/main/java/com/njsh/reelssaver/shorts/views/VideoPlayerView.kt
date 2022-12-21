@@ -31,7 +31,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.R
-import com.njsh.reelssaver.shorts.room.ShortVideo
+import com.njsh.reelssaver.layer.data.room.ShortVideoEntity
 import com.njsh.reelssaver.util.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -42,14 +42,14 @@ private const val TAG = "VideoPlayerView.kt"
 @Preview
 @Composable
 fun PreviewOfViewPlayerView() {
-    VideoPlayerView(
+  /*  VideoPlayerView(
         shortVideo = ShortVideo.getDummy(), modifier = Modifier.fillMaxSize(), isSelected = false
-    )
+    )*/
 }
 
 @Composable
 fun VideoPlayerView(
-    modifier: Modifier = Modifier, shortVideo: ShortVideo, isSelected: Boolean
+    modifier: Modifier = Modifier, shortVideo: ShortVideoEntity, isSelected: Boolean
 ) {
     var progress by remember { mutableStateOf(0f) }
     var isVideoLoading by remember { mutableStateOf(true) }
@@ -264,11 +264,11 @@ private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> F
 }
 
 
-private fun onShareClick(shortVideo: ShortVideo) {
+private fun onShareClick(shortVideo: ShortVideoEntity) {
     share(shortVideo.videoUrl, App.instance())
 }
 
-private fun handleDownload(shortVideo: ShortVideo) {
+private fun handleDownload(shortVideo: ShortVideoEntity) {
     if (checkStoragePermission()) {
         try {
             download(

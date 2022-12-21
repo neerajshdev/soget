@@ -1,6 +1,7 @@
-package com.njsh.reelssaver.layer.ui
+package com.njsh.reelssaver.layer.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -21,12 +22,14 @@ import androidx.compose.ui.unit.sp
 import com.njsh.reelssaver.R
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
 
+
 @Composable
 fun BigButtonLayer(
     modifier: Modifier = Modifier,
     icon: Painter,
     text: String,
     desText: String,
+    onClick: (() -> Unit)? = null,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     textColor: Color = MaterialTheme.colorScheme.primary,
@@ -35,6 +38,7 @@ fun BigButtonLayer(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
+            .clickable(onClick = { onClick?.invoke() })
             .background(color = backgroundColor)
             .padding(vertical = 8.dp, horizontal = 16.dp)
     ) {
@@ -49,12 +53,17 @@ fun BigButtonLayer(
                 .wrapContentSize()
                 .size(24.dp)
         )
-        
+
         Spacer(modifier = Modifier.width(14.dp))
-        
+
         Column {
             Text(text = text, color = textColor, fontSize = 14.sp)
-            Text(text = desText, color = desTextColor, fontSize = 11.sp, textAlign = TextAlign.Justify)
+            Text(
+                text = desText,
+                color = desTextColor,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Justify
+            )
         }
     }
 }
@@ -63,10 +72,9 @@ fun BigButtonLayer(
 @Composable
 fun PBigButtonLayer() {
     AppTheme {
-        BigButtonLayer(
-            icon = painterResource(id = R.drawable.ic_outlined_instagram),
+        BigButtonLayer(icon = painterResource(id = R.drawable.ic_outlined_instagram),
             text = "Instagram",
-            desText = "Paste link & download instagram reels"
-        )
+            desText = "Paste link & download instagram reels",
+            onClick = {})
     }
 }

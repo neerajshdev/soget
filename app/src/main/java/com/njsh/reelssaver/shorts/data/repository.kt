@@ -1,12 +1,10 @@
 package com.njsh.reelssaver.shorts.data
 
-import android.widget.Toast
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.njsh.reelssaver.App
 import com.njsh.reelssaver.FirebaseKeys
-import com.njsh.reelssaver.shorts.room.ShortVideo
-import com.njsh.reelssaver.shorts.room.ShortVideoDatabase
+import com.njsh.reelssaver.layer.data.room.ShortVideoEntity
+import com.njsh.reelssaver.layer.data.room.ShortVideoDatabase
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
@@ -39,17 +37,17 @@ interface WriteAbleDataSource<T> {
 /**
  * ShortVideo network source
  */
-class NetworkSource : ReadableNetworkSource<ShortVideo> {
+class NetworkSource : ReadableNetworkSource<ShortVideoEntity> {
     private val uri = Firebase.remoteConfig.getString(FirebaseKeys.SHORT_API_URI)
 
-    override suspend fun getData(size: Int): List<ShortVideo> {
+    override suspend fun getData(size: Int): List<ShortVideoEntity> {
         val clien = HttpClient(CIO) {
             install(ContentNegotiation) {
                 gson()
             }
         }
         val response = clien.get("$uri?many=$size")
-        val result = response.body<List<ShortVideo>>()
+        val result = response.body<List<ShortVideoEntity>>()
         clien.close()
         return result
     }
@@ -58,25 +56,25 @@ class NetworkSource : ReadableNetworkSource<ShortVideo> {
 /**
  * ShortVideos local data source
  */
-class LocalSource : ReadableDataSource<ShortVideo>, WriteAbleDataSource<ShortVideo> {
+class LocalSource : ReadableDataSource<ShortVideoEntity>, WriteAbleDataSource<ShortVideoEntity> {
     private val database = ShortVideoDatabase.database()
 
-    override suspend fun getData(offset: Int, limit: Int): List<ShortVideo> {
+    override suspend fun getData(offset: Int, limit: Int): List<ShortVideoEntity> {
         val dao = database.shorVideoDao()
-        return dao.get(offset, limit)
+        return dao.get(offset.toLong(), limit)
     }
 
-    override suspend fun getAllData(): List<ShortVideo> {
+    override suspend fun getAllData(): List<ShortVideoEntity> {
         val dao = database.shorVideoDao()
         return dao.getAll()
     }
 
-    override suspend fun insertOrIgnore(data: ShortVideo) {
+    override suspend fun insertOrIgnore(data: ShortVideoEntity) {
         val dao = database.shorVideoDao()
         dao.insertOrIgnore(data)
     }
 
-    override suspend fun update(data: ShortVideo) {
+    override suspend fun update(data: ShortVideoEntity) {
         val dao = database.shorVideoDao()
         dao.update(data)
     }
@@ -90,7 +88,7 @@ class LocalSource : ReadableDataSource<ShortVideo>, WriteAbleDataSource<ShortVid
         database.shorVideoDao().delete(id)
     }
 
-    override suspend fun delete(data: ShortVideo) {
+    override suspend fun delete(data: ShortVideoEntity) {
         database.shorVideoDao().delete(data.id)
     }
 
@@ -103,7 +101,7 @@ object ShortVideoRepo {
     private val localSource = LocalSource()
     private val networkSource = NetworkSource()
 
-    suspend fun get(from: Int, limit: Int): List<ShortVideo> = withContext(Dispatchers.IO) {
+    suspend fun get(from: Int, limit: Int): List<ShortVideoEntity> = withContext(Dispatchers.IO) {
         var count = localSource.count()
         while (from + limit > count - 1) {
             networkSource.getData(limit).forEach {

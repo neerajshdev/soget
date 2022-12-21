@@ -7,7 +7,7 @@ import com.njsh.infinitelist.VerticalList
 import com.njsh.infinitelist.isCloseToEnd
 import com.njsh.reelssaver.MainActivity
 import com.njsh.reelssaver.shorts.data.ShortVideoRepo
-import com.njsh.reelssaver.shorts.room.ShortVideo
+import com.njsh.reelssaver.layer.data.room.ShortVideoEntity
 
 
 private const val TAG = "ScrollableShortsView.kt"
@@ -16,7 +16,7 @@ private const val TAG = "ScrollableShortsView.kt"
 fun ScrollableShortVideos() {
     RemoveStatusBar()
     var initialData by remember {
-        mutableStateOf(emptyList<ShortVideo>())
+        mutableStateOf(emptyList<ShortVideoEntity>())
     }
 
     LaunchedEffect(key1 = Unit) {

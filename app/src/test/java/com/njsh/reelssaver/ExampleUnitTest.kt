@@ -2,7 +2,7 @@ package com.njsh.reelssaver
 
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.api.FetchFacebookVideoImpl
-import com.njsh.reelssaver.shorts.toPrettyNum
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 
@@ -11,21 +11,17 @@ import org.junit.Test
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest
-{
+class ExampleUnitTest {
     @Test
-    fun sample()
-    {
+    fun sample() {
         val fbVideoLink = "https://fb.watch/gesoBtUCWa/"
         val fetch = FetchFacebookVideoImpl(fbVideoLink)
         fetch.fetchVideo { result ->
-            if (result is CallResult.Success)
-            {
+            if (result is CallResult.Success) {
                 println(result.data)
             }
 
-            if (result is CallResult.Failed)
-            {
+            if (result is CallResult.Failed) {
                 println(result.msg)
             }
         }
@@ -33,7 +29,9 @@ class ExampleUnitTest
 
     @Test
     fun myTestCode() {
-        val views = 45000L
-        println(views.toPrettyNum())
+        val usecase = FetchShortVideosUseCase(10, "http://64.227.136.93:80/status/random")
+        runBlocking {
+            usecase()
+        }
     }
 }

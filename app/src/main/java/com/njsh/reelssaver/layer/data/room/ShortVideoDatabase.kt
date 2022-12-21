@@ -1,11 +1,11 @@
-package com.njsh.reelssaver.shorts.room
+package com.njsh.reelssaver.layer.data.room
 
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.njsh.reelssaver.App
 
-@Database(entities = [ShortVideo::class], version = 1)
+@Database(entities = [ShortVideoEntity::class], version = 1)
 abstract class ShortVideoDatabase : RoomDatabase() {
     abstract fun shorVideoDao(): ShortVideoDao
 

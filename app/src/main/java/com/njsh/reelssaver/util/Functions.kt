@@ -5,9 +5,7 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.Uri
+import android.net.*
 import android.os.Build
 import android.os.Environment
 import android.telephony.TelephonyManager
@@ -128,7 +126,6 @@ fun isOnline(context: Context): Boolean {
         isAvailable || isConnectedOrConnecting
     } ?: false
 }
-
 
 suspend fun Firebase.fetchAndActivate() {
     val deferred = CompletableDeferred<Task<Boolean>>()

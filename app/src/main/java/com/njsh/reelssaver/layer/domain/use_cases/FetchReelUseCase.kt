@@ -1,25 +1,26 @@
-package com.njsh.reelssaver.api
+package com.njsh.reelssaver.layer.domain.use_cases
 
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.njsh.reelssaver.App
+import com.njsh.reelssaver.api.GsonReelData
 import com.njsh.reelssaver.api.format.instagram.GsonGraphQl
-import com.njsh.reelssaver.entity.EntityInstaReel
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import com.njsh.reelssaver.layer.domain.models.ReelModel
+import okhttp3.*
+import java.io.IOException
 import java.net.URI
 
-class FetchInstaReelImpl(
-    private val url: String, val dsUserId: String, val sessionId: String
-) : FetchInstaReel {
-    override fun fetchReelData(callback: (CallResult<EntityInstaReel>) -> Unit) {
+class FetchReelUseCase(
+    private val url: String,
+    private val dsUserId: String,
+    private val sessionId: String
+) {
+    operator fun invoke(onSuccess: (ReelModel) -> Unit, onFailed: (ex: Exception) -> Unit) {
         try {
             val checkedUrl = verifyUrl(url)
-            val data = fetch(checkedUrl)!!
-            val result = CallResult.Success(data)
-            callback(result)
+            fetch(checkedUrl, onSuccess, onFailed)
         } catch (ex: Exception) {
-            callback(CallResult.Failed(ex.message ?: "Something went wrong!"))
+            onFailed(RuntimeException(ex))
         }
     }
 
@@ -35,7 +36,9 @@ class FetchInstaReelImpl(
         return result
     }
 
-    private fun fetch(link: String): EntityInstaReel? {
+    private fun fetch(
+        link: String, onSuccess: (ReelModel) -> Unit, onFailed: (ex: Exception) -> Unit
+    ) {
         val client = OkHttpClient()
         val request = Request.Builder().url(link).header(
             "User-Agent",
@@ -45,36 +48,41 @@ class FetchInstaReelImpl(
         ).build()
 
         val call = client.newCall(request)
-        val response = call.execute()
-        val jsonContent = response.body?.string()
-
-        val gson = GsonBuilder().setLenient().create()
-
-        if(jsonContent != null && jsonContent.contains("graphql")) {
-            try {
-                val data = gson.fromJson(jsonContent, GsonGraphQl::class.java)
-                return fromGraphQl(data)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+        call.enqueue(responseCallback = object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onFailed(e)
             }
-        } else {
-            try {
-                val data = gson.fromJson(jsonContent, GsonReelData::class.java)
-                return fromGsonReelData(data)
-            } catch (ex: Exception) {
-                ex.printStackTrace()
+
+            override fun onResponse(call: Call, response: Response) {
+                val json = response.body?.toString()
+                val gson = GsonBuilder().setLenient().create()
+
+                if (json != null && json.contains("graphql")) {
+                    try {
+                        val dto = gson.fromJson(json, GsonGraphQl::class.java)
+                        onSuccess(fromGraphQl(dto))
+                    } catch (ex: Exception) {
+                        onFailed(ex)
+                    }
+                } else {
+                    try {
+                        val dto = gson.fromJson(json, GsonReelData::class.java)
+                        onSuccess(fromGsonReelData(dto))
+                    } catch (ex: Exception) {
+                        onFailed(ex)
+                    }
+                }
             }
-        }
-        return null
+        })
     }
 
-    private fun fromGsonReelData(data: GsonReelData): EntityInstaReel {
+    private fun fromGsonReelData(data: GsonReelData): ReelModel {
         val uri = URI(data.items[0].video_versions[0].url)
         val ext = uri.path.substring(uri.path.lastIndexOf(".") + 1)
 
         if (App.debug) Log.d(App.TAG, "ext = $ext")
 
-        return EntityInstaReel(
+        return ReelModel(
             title = data.items[0].caption?.text ?: "InstagramReel",
             imageUrl = data.items[0].image_versions2.candidates[0].url,
             width = data.items[0].image_versions2.candidates[0].width,
@@ -85,7 +93,7 @@ class FetchInstaReelImpl(
         )
     }
 
-    private fun fromGraphQl(gsonGraphQl: GsonGraphQl): EntityInstaReel {
+    private fun fromGraphQl(gsonGraphQl: GsonGraphQl): ReelModel {
         val graphql = gsonGraphQl.graphql!!
         val title = graphql.shortcodeMedia?.title ?: ""
         val width = graphql.shortcodeMedia?.dimensions?.width!!
@@ -97,7 +105,7 @@ class FetchInstaReelImpl(
         val uri = URI(url)
         val ext = uri.path.substring(uri.path.lastIndexOf(".") + 1)
 
-        return EntityInstaReel(
+        return ReelModel(
             title, imageUrl, url, "Video/$ext", width, height, duration.toFloat()
         )
     }
