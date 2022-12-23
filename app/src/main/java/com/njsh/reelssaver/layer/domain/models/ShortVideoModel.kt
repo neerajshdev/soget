@@ -7,4 +7,12 @@ data class ShortVideoModel(
     val likes: Long,
     val title: String,
     val thumbnailUrl: String
-)
+) {
+    companion object {
+        fun createFakeModel() = ShortVideoModel(
+            mpdUrl = "", videoUrl = "", likes = 8888, title = "", thumbnailUrl = ""
+        )
+    }
+}
+
+

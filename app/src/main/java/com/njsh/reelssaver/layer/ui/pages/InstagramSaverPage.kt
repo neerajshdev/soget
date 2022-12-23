@@ -1,5 +1,7 @@
 package com.njsh.reelssaver.layer.ui.pages
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -9,56 +11,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.njsh.reelssaver.App
+import com.njsh.reelssaver.layer.domain.models.ReelModel
+import com.njsh.reelssaver.layer.ui.UiState
 import com.njsh.reelssaver.layer.ui.components.Advertisement
+import com.njsh.reelssaver.layer.ui.components.InputUrlTaker
+import com.njsh.reelssaver.layer.ui.components.SavableVideoCard
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+enum class ContentFetchingState {
+    NOTHING, FETCHING, FETCHED
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun InstagramSaverPage(navController: NavController) {
-    var inputString by remember { mutableStateOf("") }
-    var isGetButtonEnabled by remember { mutableStateOf(false) }
-
-
-    val onInputStringChange: (value: String)->Unit = {
-        inputString = it
-        if (inputString.matches(Regex("^(http|https):\\/\\/.+"))) {
-            isGetButtonEnabled = true
-        }
+fun InstagramSaverPage(uiState: UiState) {
+    var contentFetchingState by remember {
+        mutableStateOf(
+            ContentFetchingState.NOTHING
+        )
     }
+    var reelModel by remember { mutableStateOf<ReelModel?>(null) }
 
-    @Composable
-    fun Inputs() {
-        Column {
-            TextField(
-                value = inputString,
-                onValueChange = onInputStringChange,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row {
-                OutlinedButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-                    Text(text = "PASTE")
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                FilledTonalButton(
-                    onClick = { /*TODO*/ },
-                    enabled = isGetButtonEnabled,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = "GET")
-                }
-            }
-        }
-    }
-
-
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 28.dp)
+    ) {
         CenterAlignedTopAppBar(title = {
             Text(
                 text = "Instagram",
@@ -72,8 +52,51 @@ fun InstagramSaverPage(navController: NavController) {
             )
         })
         Spacer(modifier = Modifier.height(14.dp))
-        Inputs()
-        Spacer(modifier = Modifier.weight(1f))
+
+        // Takes input url from user & fetch the content
+        InputUrlTaker(verifyInput = {
+            it.matches(Regex("(http|https):\\/\\/.+"))
+        }, onInput = {
+            contentFetchingState = ContentFetchingState.FETCHING
+            uiState.fetchInstagramReel(it) { result ->
+                if (result.isSuccess) {
+                    reelModel = result.getOrNull()!!
+                    contentFetchingState = ContentFetchingState.FETCHED
+                    println(reelModel)
+                } else {
+                    App.toast("something went wrong!")
+                    contentFetchingState = ContentFetchingState.NOTHING
+                }
+            }
+        })
+
+
+        // while the content is fetching show a progress bar
+        // if the content is fetched then show it else nothing
+        AnimatedContent(
+            targetState = contentFetchingState,
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 12.dp)
+        ) { contentFetchingState ->
+            when (contentFetchingState) {
+                ContentFetchingState.FETCHING -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentSize()
+                    )
+                }
+                ContentFetchingState.FETCHED -> {
+                    SavableVideoCard(thumbnailUrl = reelModel!!.imageUrl, onDownloadClick = {
+                        uiState.download(reelModel!!)
+                    }, modifier = Modifier.fillMaxSize())
+                }
+                else -> {}
+            }
+        }
+
         Advertisement(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,9 +112,7 @@ fun InstagramSaverPage(navController: NavController) {
 private fun PInstagramSaverPage() {
     AppTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                InstagramSaverPage(rememberNavController())
-            }
+            InstagramSaverPage(UiState())
         }
     }
 }

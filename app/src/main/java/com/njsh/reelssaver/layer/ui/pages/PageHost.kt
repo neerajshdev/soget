@@ -34,14 +34,12 @@ fun PageHost(modifier: Modifier = Modifier, uiState: UiState) {
                 Home(navController)
             }
             composable(RouteName.INSTAGRAM) {
-
+                InstagramSaverPage(uiState)
             }
             composable(RouteName.FACEBOOK) {
-
+                FbSaverPager(uiState)
             }
-            composable(RouteName.SHORT_VIDEOS) {
-
-            }
+            composable(RouteName.SHORT_VIDEOS) {}
         }
     }
 }

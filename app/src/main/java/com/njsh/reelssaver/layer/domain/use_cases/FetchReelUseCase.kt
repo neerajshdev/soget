@@ -15,12 +15,12 @@ class FetchReelUseCase(
     private val dsUserId: String,
     private val sessionId: String
 ) {
-    operator fun invoke(onSuccess: (ReelModel) -> Unit, onFailed: (ex: Exception) -> Unit) {
+    operator fun invoke(result: (Result<ReelModel>)-> Unit) {
         try {
             val checkedUrl = verifyUrl(url)
-            fetch(checkedUrl, onSuccess, onFailed)
+            fetch(checkedUrl, result)
         } catch (ex: Exception) {
-            onFailed(RuntimeException(ex))
+            result(Result.failure(RuntimeException(ex)))
         }
     }
 
@@ -37,7 +37,7 @@ class FetchReelUseCase(
     }
 
     private fun fetch(
-        link: String, onSuccess: (ReelModel) -> Unit, onFailed: (ex: Exception) -> Unit
+        link: String, result: (Result<ReelModel>)-> Unit
     ) {
         val client = OkHttpClient()
         val request = Request.Builder().url(link).header(
@@ -50,26 +50,28 @@ class FetchReelUseCase(
         val call = client.newCall(request)
         call.enqueue(responseCallback = object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                onFailed(e)
+                result(Result.failure(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val json = response.body?.toString()
+                val json = response.body?.string()
                 val gson = GsonBuilder().setLenient().create()
 
                 if (json != null && json.contains("graphql")) {
                     try {
                         val dto = gson.fromJson(json, GsonGraphQl::class.java)
-                        onSuccess(fromGraphQl(dto))
+                        val reelModel = fromGraphQl(dto)
+                        result(Result.success(reelModel))
                     } catch (ex: Exception) {
-                        onFailed(ex)
+                        result(Result.failure(ex))
                     }
                 } else {
                     try {
                         val dto = gson.fromJson(json, GsonReelData::class.java)
-                        onSuccess(fromGsonReelData(dto))
+                        val reelModel =  fromGsonReelData(dto)
+                        result(Result.success(reelModel))
                     } catch (ex: Exception) {
-                        onFailed(ex)
+                        result(Result.failure(ex))
                     }
                 }
             }

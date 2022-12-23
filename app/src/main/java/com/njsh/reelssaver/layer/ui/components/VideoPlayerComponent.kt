@@ -1,12 +1,14 @@
-package com.njsh.reelssaver.shorts.views
+package com.njsh.reelssaver.layer.ui.components
 
 import android.view.LayoutInflater
-import android.view.ViewGroup.LayoutParams
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,10 +31,9 @@ import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.StyledPlayerView
-import com.njsh.reelssaver.App
 import com.njsh.reelssaver.R
-import com.njsh.reelssaver.layer.data.room.ShortVideoEntity
-import com.njsh.reelssaver.util.*
+import com.njsh.reelssaver.layer.domain.models.ShortVideoModel
+import com.njsh.reelssaver.util.toPrettyNum
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -41,21 +42,35 @@ private const val TAG = "VideoPlayerView.kt"
 
 @Preview
 @Composable
-fun PreviewOfViewPlayerView() {
-  /*  VideoPlayerView(
-        shortVideo = ShortVideo.getDummy(), modifier = Modifier.fillMaxSize(), isSelected = false
-    )*/
+fun VideoPlayerComponentP() {
+    ShortVideoPlayerComponent(
+        shortVideo = ShortVideoModel.createFakeModel(),
+        modifier = Modifier.fillMaxSize(),
+        isPlaying = false,
+        onDownloadClick = {},
+        onLikeClick = {},
+        onShareClick = {}
+    )
 }
 
 @Composable
-fun VideoPlayerView(
-    modifier: Modifier = Modifier, shortVideo: ShortVideoEntity, isSelected: Boolean
+fun ShortVideoPlayerComponent(
+    modifier: Modifier = Modifier, shortVideo: ShortVideoModel, isPlaying: Boolean,
+    onDownloadClick: (ShortVideoModel) -> Unit,
+    onShareClick: (ShortVideoModel) -> Unit,
+    onLikeClick: (ShortVideoModel) -> Unit,
 ) {
     var progress by remember { mutableStateOf(0f) }
     var isVideoLoading by remember { mutableStateOf(true) }
 
     Box(modifier = modifier.background(Color.Black)) {
-        if (isSelected) {
+        if (!isPlaying || isVideoLoading) AsyncImage(
+            model = shortVideo.thumbnailUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        if (isPlaying) {
             ExoPlayer(url = shortVideo.mpdUrl,
                 bgColor = Color.Black,
                 modifier = Modifier.fillMaxSize(),
@@ -63,20 +78,16 @@ fun VideoPlayerView(
                 isLoadingChange = { isVideoLoading = it })
         }
 
-        if (!isSelected || isVideoLoading) AsyncImage(
-            model = shortVideo.thumbnailUrl,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
 
+        // UI over the video surface
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
                 .align(Alignment.BottomCenter)
         ) {
-            EdgeIconsView(onHeartClick = { /*TODO*/ },
-                onDownloadClick = { handleDownload(shortVideo) },
+            EdgeIconsView(onHeartClick = { onLikeClick(shortVideo) },
+                onDownloadClick = { onDownloadClick(shortVideo) },
                 onShareClick = { onShareClick(shortVideo) },
                 heartIcon = { painterResource(id = R.drawable.ic_filled_heart) },
                 shareIcon = { painterResource(id = R.drawable.ic_filled_share) },
@@ -87,6 +98,7 @@ fun VideoPlayerView(
             ProgressBar(progressProvider = { progress }, modifier = Modifier.fillMaxWidth())
             Text(
                 text = shortVideo.title,
+                style = MaterialTheme.typography.displaySmall,
                 color = Color.White,
                 modifier = Modifier
                     .padding(16.dp)
@@ -121,7 +133,7 @@ private fun ExoPlayer(
         val view = LayoutInflater.from(context)
             .inflate(R.layout.exo_player_view, null) as StyledPlayerView
         view.apply {
-            layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             useController = false
             player = exoPlayer
         }
@@ -155,14 +167,14 @@ private fun ExoPlayer(
         val lifecycleObserver = object : LifecycleEventObserver {
             var wasPlaying = false
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                when(event) {
-                    Lifecycle.Event.ON_PAUSE-> {
+                when (event) {
+                    Lifecycle.Event.ON_PAUSE -> {
                         wasPlaying = exoPlayer.isPlaying
                         if (wasPlaying) {
                             exoPlayer.pause()
                         }
                     }
-                    Lifecycle.Event.ON_RESUME-> {
+                    Lifecycle.Event.ON_RESUME -> {
                         if (wasPlaying) {
                             exoPlayer.play()
                         }
@@ -181,8 +193,7 @@ private fun ExoPlayer(
 
             localLifecycle.lifecycle.removeObserver(lifecycleObserver)
         }
-    }
-    )
+    })
 
     if (isPlaying) {
         LaunchedEffect(key1 = exoPlayer, block = {
@@ -236,7 +247,7 @@ private fun IconButton(
             Icon(painter = painter, contentDescription = null, tint = color)
             Spacer(modifier = Modifier.height(4.dp))
             label?.let {
-                Text(text = label, color = color)
+                Text(text = label, style = MaterialTheme.typography.bodySmall, color = color)
             }
         }
     }
@@ -260,26 +271,5 @@ private fun ProgressBar(modifier: Modifier = Modifier, progressProvider: () -> F
             end = Offset(size.width * progressProvider(), 0f),
             strokeWidth = 6f
         )
-    }
-}
-
-
-private fun onShareClick(shortVideo: ShortVideoEntity) {
-    share(shortVideo.videoUrl, App.instance())
-}
-
-private fun handleDownload(shortVideo: ShortVideoEntity) {
-    if (checkStoragePermission()) {
-        try {
-            download(
-                title = shortVideo.title,
-                url = shortVideo.videoUrl,
-                description = "Short status video"
-            )
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-    } else {
-        storagePermission(App.instance())
     }
 }

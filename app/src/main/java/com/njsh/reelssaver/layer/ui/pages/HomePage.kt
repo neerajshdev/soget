@@ -43,7 +43,7 @@ fun Home(navController: NavController) {
                 text = "Instagram",
                 desText = "Paste link and download instagram short video",
                 modifier = commonModifier,
-                onClick = {}
+                onClick = {navController.navigate(RouteName.INSTAGRAM)}
             )
 
             BigButtonLayer(
@@ -51,7 +51,7 @@ fun Home(navController: NavController) {
                 text = "Facebook",
                 desText = "Paste link and download facebook videos",
                 modifier = commonModifier,
-                onClick = {}
+                onClick = {navController.navigate(RouteName.FACEBOOK)}
             )
 
             BigButtonLayer(
@@ -59,7 +59,7 @@ fun Home(navController: NavController) {
                 text = "Short statuses",
                 desText = "Watch & enjoy! short status videos",
                 modifier = commonModifier,
-                onClick = {}
+                onClick = {navController.navigate(RouteName.SHORT_VIDEOS)}
             )
         }
     }

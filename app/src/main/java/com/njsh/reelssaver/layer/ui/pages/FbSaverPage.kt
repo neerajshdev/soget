@@ -1,5 +1,7 @@
 package com.njsh.reelssaver.layer.ui.pages
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -9,50 +11,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.njsh.reelssaver.App
+import com.njsh.reelssaver.layer.domain.models.FbVideoModel
+import com.njsh.reelssaver.layer.ui.UiState
 import com.njsh.reelssaver.layer.ui.components.Advertisement
+import com.njsh.reelssaver.layer.ui.components.InputUrlTaker
+import com.njsh.reelssaver.layer.ui.components.SavableVideoCard
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun FbSaverPager(navController: NavController) {
-    var inputString by remember { mutableStateOf("") }
-    var isGetButtonEnabled by remember { mutableStateOf(false) }
-
-    @Composable
-    fun Inputs() {
-        Column {
-            TextField(
-                value = inputString,
-                onValueChange = { inputString = it },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row {
-                OutlinedButton(onClick = {  }, modifier = Modifier.weight(1f)) {
-                    Text(text = "PASTE")
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                FilledTonalButton(
-                    onClick = { /*TODO*/ },
-                    enabled = isGetButtonEnabled,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(text = "GET")
-                }
-            }
-        }
+fun FbSaverPager(uiState: UiState) {
+    var contentFetchingState by remember {
+        mutableStateOf(
+            ContentFetchingState.NOTHING
+        )
     }
-    Column(modifier = Modifier.fillMaxSize()) {
+    var fbVideoModel by remember { mutableStateOf<FbVideoModel?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 28.dp)
+    ) {
         CenterAlignedTopAppBar(title = {
             Text(
-                text = "Facebook",
+                text = "Instagram",
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
             )
         }, navigationIcon = {
@@ -63,8 +48,51 @@ fun FbSaverPager(navController: NavController) {
             )
         })
         Spacer(modifier = Modifier.height(14.dp))
-        Inputs()
-        Spacer(modifier = Modifier.weight(1f))
+
+        // Takes input url from user & fetch the content
+        InputUrlTaker(verifyInput = {
+            it.matches(Regex("(http|https):\\/\\/.+"))
+        }, onInput = {
+            contentFetchingState = ContentFetchingState.FETCHING
+            uiState.fetchFacebookVideo(it) { result ->
+                if (result.isSuccess) {
+                    fbVideoModel = result.getOrNull()!!
+                    contentFetchingState = ContentFetchingState.FETCHED
+                    println(fbVideoModel)
+                } else {
+                    App.toast("something went wrong!")
+                    contentFetchingState = ContentFetchingState.NOTHING
+                }
+            }
+        })
+
+
+        // while the content is fetching show a progress bar
+        // if the content is fetched then show it else nothing
+        AnimatedContent(
+            targetState = contentFetchingState,
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 12.dp)
+        ) { contentFetchingState ->
+            when (contentFetchingState) {
+                ContentFetchingState.FETCHING -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.outline,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentSize()
+                    )
+                }
+                ContentFetchingState.FETCHED -> {
+                    SavableVideoCard(thumbnailUrl = fbVideoModel!!.imageUrl, onDownloadClick = {
+                        uiState.download(fbVideoModel!!)
+                    }, modifier = Modifier.fillMaxSize())
+                }
+                else -> {}
+            }
+        }
+
         Advertisement(
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,15 +103,12 @@ fun FbSaverPager(navController: NavController) {
 }
 
 
-
 @Preview
 @Composable
 private fun PFbSaverPage() {
     AppTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                FbSaverPager(rememberNavController())
-            }
+            FbSaverPager(UiState())
         }
     }
 }
