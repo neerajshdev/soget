@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -30,37 +29,37 @@ fun BigButtonLayer(
     text: String,
     desText: String,
     onClick: (() -> Unit)? = null,
-    backgroundColor: Color = MaterialTheme.colorScheme.background,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
-    textColor: Color = MaterialTheme.colorScheme.primary,
-    desTextColor: Color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = modifier
             .clickable(onClick = { onClick?.invoke() })
-            .background(color = backgroundColor)
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(vertical = 8.dp, horizontal = 16.dp)
     ) {
         Icon(
             painter = icon,
             contentDescription = null,
-            tint = iconTint,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
+                .background(color = MaterialTheme.colorScheme.surface)
                 .shadow(elevation = 2.dp, shape = CircleShape)
                 .wrapContentSize()
                 .size(24.dp)
         )
 
-        Spacer(modifier = Modifier.width(14.dp))
-
-        Column {
-            Text(text = text, color = textColor, fontSize = 14.sp)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleSmall
+            )
             Text(
                 text = desText,
-                color = desTextColor,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 11.sp,
                 textAlign = TextAlign.Justify
             )

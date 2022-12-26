@@ -1,16 +1,17 @@
 package com.njsh.reelssaver.layer.ui.theme
 
+import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.WindowCompat
 
 
 private val LightColors = lightColorScheme(
@@ -40,8 +41,7 @@ private val LightColors = lightColorScheme(
     inverseOnSurface = md_theme_light_inverseOnSurface,
     inverseSurface = md_theme_light_inverseSurface,
     inversePrimary = md_theme_light_inversePrimary,
-    surfaceTint = md_theme_light_surfaceTint,
-//    surfaceTintColor = md_theme_light_surfaceTintColor,
+    surfaceTint = md_theme_light_surfaceTint, //    surfaceTintColor = md_theme_light_surfaceTintColor,
 )
 
 
@@ -72,34 +72,39 @@ private val DarkColors = darkColorScheme(
     inverseOnSurface = md_theme_dark_inverseOnSurface,
     inverseSurface = md_theme_dark_inverseSurface,
     inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = md_theme_dark_surfaceTint,
-//    surfaceTintColor = md_theme_dark_surfaceTintColor,
+    surfaceTint = md_theme_dark_surfaceTint, //    surfaceTintColor = md_theme_dark_surfaceTintColor,
 )
 
 @Composable
 fun AppTheme(
-  useDarkTheme: Boolean = isSystemInDarkTheme(),
-  content: @Composable() () -> Unit
+    useDarkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit
 ) {
-  val colors = if (useDarkTheme) {
-      DarkColors
-  } else {
-      LightColors
-  }
+    val colors = if (useDarkTheme) {
+        DarkColors
+    } else {
+        LightColors
+    }
 
-  MaterialTheme(
-    colorScheme = colors,
-    typography = AppTypography,
-    content = content
-  )
+    MaterialTheme(
+        colorScheme = colors, typography = AppTypography, content = content
+    )
+
+    val context = LocalContext.current
+    SideEffect {
+        if (context is Activity) {
+            context.window.statusBarColor = Color.Transparent.toArgb()
+            context.window.navigationBarColor = Color.Transparent.toArgb()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                context.window.isNavigationBarContrastEnforced = false
+            }
+
+            val windowsInsetsController = WindowCompat.getInsetsController(context.window, context.window.decorView)
+
+            windowsInsetsController.isAppearanceLightStatusBars = !useDarkTheme
+            windowsInsetsController.isAppearanceLightNavigationBars = !useDarkTheme
+        }
+    }
 }
 
 
-
-fun Color.lightness(lightness: Float) : Color {
-    val color = toArgb()
-    val outHsl = FloatArray(3)
-    ColorUtils.RGBToHSL(color.red, color.green, color.blue, outHsl)
-    outHsl[2] = lightness
-    return Color(ColorUtils.HSLToColor(outHsl))
-}

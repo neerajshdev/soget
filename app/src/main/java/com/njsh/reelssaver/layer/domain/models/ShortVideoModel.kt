@@ -10,7 +10,7 @@ data class ShortVideoModel(
 ) {
     companion object {
         fun createFakeModel() = ShortVideoModel(
-            mpdUrl = "", videoUrl = "", likes = 8888, title = "", thumbnailUrl = ""
+            mpdUrl = "", videoUrl = "", likes = 8888, title = "super hit status", thumbnailUrl = ""
         )
     }
 }

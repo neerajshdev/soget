@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -43,14 +44,12 @@ private const val TAG = "VideoPlayerView.kt"
 @Preview
 @Composable
 fun VideoPlayerComponentP() {
-    ShortVideoPlayerComponent(
-        shortVideo = ShortVideoModel.createFakeModel(),
+    ShortVideoPlayerComponent(shortVideo = ShortVideoModel.createFakeModel(),
         modifier = Modifier.fillMaxSize(),
         isPlaying = false,
         onDownloadClick = {},
         onLikeClick = {},
-        onShareClick = {}
-    )
+        onShareClick = {})
 }
 
 @Composable
@@ -61,23 +60,24 @@ fun ShortVideoPlayerComponent(
     onLikeClick: (ShortVideoModel) -> Unit,
 ) {
     var progress by remember { mutableStateOf(0f) }
-    var isVideoLoading by remember { mutableStateOf(true) }
+    var isFirstFrameRendered by remember { mutableStateOf(false) }
 
     Box(modifier = modifier.background(Color.Black)) {
-        if (!isPlaying || isVideoLoading) AsyncImage(
-            model = shortVideo.thumbnailUrl,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-
         if (isPlaying) {
             ExoPlayer(url = shortVideo.mpdUrl,
                 bgColor = Color.Black,
                 modifier = Modifier.fillMaxSize(),
                 onProgressUpdate = { progress = it },
-                isLoadingChange = { isVideoLoading = it })
+                onRenderFirstFrame = {
+                    isFirstFrameRendered = true
+                })
         }
 
+        if (!isPlaying || !isFirstFrameRendered) AsyncImage(
+            model = shortVideo.thumbnailUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize()
+        )
 
         // UI over the video surface
         Column(
@@ -98,7 +98,7 @@ fun ShortVideoPlayerComponent(
             ProgressBar(progressProvider = { progress }, modifier = Modifier.fillMaxWidth())
             Text(
                 text = shortVideo.title,
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.titleMedium,
                 color = Color.White,
                 modifier = Modifier
                     .padding(16.dp)
@@ -112,9 +112,10 @@ fun ShortVideoPlayerComponent(
 private fun ExoPlayer(
     modifier: Modifier = Modifier,
     url: String,
-    onProgressUpdate: (Float) -> Unit,
-    isLoadingChange: (Boolean) -> Unit,
     bgColor: Color = Color.Black,
+    onProgressUpdate: ((Float) -> Unit)? = null,
+    isLoadingChange: ((Boolean) -> Unit)? = null,
+    onRenderFirstFrame: (() -> Unit)? = null
 ) {
     val localLifecycle = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -129,9 +130,8 @@ private fun ExoPlayer(
         else exoPlayer.play()
     }
 
-    AndroidView(factory = { context ->
-        val view = LayoutInflater.from(context)
-            .inflate(R.layout.exo_player_view, null) as StyledPlayerView
+    AndroidView(factory = { ctx ->
+        val view = LayoutInflater.from(ctx).inflate(R.layout.exo_player_view, null) as StyledPlayerView
         view.apply {
             layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             useController = false
@@ -139,7 +139,11 @@ private fun ExoPlayer(
         }
     }, modifier = modifier
         .background(color = bgColor)
-        .clickable { togglePlay() })
+        .pointerInput(Unit) {
+            detectTapGestures(onTap = {
+                togglePlay()
+            })
+        })
 
     DisposableEffect(key1 = exoPlayer, effect = {
         val listener = object : Player.Listener {
@@ -148,9 +152,13 @@ private fun ExoPlayer(
             }
 
             override fun onIsLoadingChanged(isLoading: Boolean) {
-                if (!isLoading) {
+                if (isLoadingChange != null) {
                     isLoadingChange(isLoading)
                 }
+            }
+
+            override fun onRenderedFirstFrame() {
+                onRenderFirstFrame?.invoke()
             }
         }
         try {
@@ -200,7 +208,9 @@ private fun ExoPlayer(
             while (isActive) {
                 if (exoPlayer.duration != C.TIME_UNSET) {
                     val newValue = (exoPlayer.currentPosition / exoPlayer.duration.toFloat())
-                    onProgressUpdate(newValue)
+                    if (onProgressUpdate != null) {
+                        onProgressUpdate(newValue)
+                    }
                 }
                 delay(100)
             }

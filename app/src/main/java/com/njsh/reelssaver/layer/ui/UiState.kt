@@ -13,14 +13,19 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.AppPref
 import com.njsh.reelssaver.FirebaseKeys
+import com.njsh.reelssaver.layer.data.ShortVideoRepositoryImpl
+import com.njsh.reelssaver.layer.domain.data.ShortVideoRepository
 import com.njsh.reelssaver.layer.domain.models.FbVideoModel
 import com.njsh.reelssaver.layer.domain.models.ReelModel
 import com.njsh.reelssaver.layer.domain.models.ShortVideoModel
 import com.njsh.reelssaver.layer.domain.use_cases.FetchFBVideoUseCase
 import com.njsh.reelssaver.layer.domain.use_cases.FetchReelUseCase
+import com.njsh.reelssaver.util.download
 import com.njsh.reelssaver.util.fetchAndActivate
 import com.njsh.reelssaver.util.isOnline
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 class UiState {
     var isOnline by mutableStateOf(false)
@@ -94,8 +99,18 @@ class UiState {
     fun getClipBoardText() = App.clipBoardData()
 
     class ShortVideoState internal constructor() {
+        private val repository: ShortVideoRepository = ShortVideoRepositoryImpl()
+
         fun download(shortVideo: ShortVideoModel) {
-            TODO()
+            download(
+                shortVideo.title, shortVideo.videoUrl, "short video status"
+            )
+        }
+
+        suspend fun loadVideos(offset: Long, limit: Int) = withContext(Dispatchers.IO) {
+            repository.get(offset, limit).also {
+                println("loaded from repo: ${it.size}")
+            }
         }
     }
 }

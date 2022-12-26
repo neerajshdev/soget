@@ -23,11 +23,12 @@ class ShortVideoRepositoryImpl: ShortVideoRepository {
     }
 
     override suspend fun get(offset: Long, limit: Int): List<ShortVideoModel> {
-        val lastRow = shortVideoDao.count() - 1
-        val lastIx = offset * limit + limit - 1
-        while (lastIx > lastRow) {
-            val result = requestShortVideos((lastIx - lastRow).toInt())
+        var lastRowIndex = shortVideoDao.count() - 1
+        val lastIx = offset + limit - 1
+        while (lastIx > lastRowIndex) {
+            val result = requestShortVideos((lastIx - lastRowIndex).toInt())
             result.forEach { shortVideoDao.insertOrIgnore(it.toRoomEntity()) }
+            lastRowIndex = shortVideoDao.count() - 1
         }
         return shortVideoDao.get(offset, limit).map { it.toDomainModel() }
     }

@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 
-class InfiniteListState {
+class VerticleListState {
     private lateinit var _scope: CoroutineScope
     val scope: CoroutineScope by lazy { _scope }
     var scroll by mutableStateOf(0f)
@@ -83,7 +83,7 @@ class InfiniteListState {
 }
 
 @Composable
-fun rememberInfiniteListState(): InfiniteListState {
-    return remember { InfiniteListState() }
+fun rememberInfiniteListState(): VerticleListState {
+    return remember { VerticleListState() }
 }
 

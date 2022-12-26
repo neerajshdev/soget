@@ -1,6 +1,5 @@
 package com.njsh.infinitelist
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,7 @@ private const val TAG = "InfiniteList"
 fun <T> VerticalList(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues = PaddingValues(),
-    state: InfiniteListState = rememberInfiniteListState(),
+    state: VerticleListState = rememberInfiniteListState(),
     block: ListScope<T>.() -> Unit
 ) {
     val exceptionHandler = remember {

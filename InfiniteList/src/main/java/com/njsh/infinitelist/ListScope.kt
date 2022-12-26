@@ -22,8 +22,6 @@ class ListScope<T>(
         lateinit var composer: @Composable LayoutScope.(T) -> Unit
     }
 
-    private var isLoading = false
-
     fun items(items: List<T>, block: @Composable LayoutScope.(T) -> Unit) {
         config.from = LinkedList.fromList(items)
         println("linked list => ${config.from.format()}, reverse: ${config.from.formatReverse()}")
@@ -36,12 +34,8 @@ class ListScope<T>(
 
 
     fun endFrame() {
-        if (!isLoading) {
-            scope.launch(exceptionHandler) {
-                isLoading  = true
-                config.onEndOfFrame?.let { it(EndScope(config.from, config.to)) }
-                isLoading = false
-            }
+        scope.launch(exceptionHandler) {
+            config.onEndOfFrame?.let { it(EndScope(config.from, config.to)) }
         }
     }
 }
