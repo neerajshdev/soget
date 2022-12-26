@@ -14,10 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.njsh.reelssaver.R
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
 
@@ -46,7 +44,7 @@ fun BigButtonLayer(
                 .size(56.dp)
                 .clip(CircleShape)
                 .background(color = MaterialTheme.colorScheme.surface)
-                .shadow(elevation = 2.dp, shape = CircleShape)
+                .shadow(elevation = 1.dp, shape = CircleShape)
                 .wrapContentSize()
                 .size(24.dp)
         )
@@ -60,8 +58,7 @@ fun BigButtonLayer(
             Text(
                 text = desText,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 11.sp,
-                textAlign = TextAlign.Justify
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
