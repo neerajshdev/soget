@@ -72,7 +72,7 @@ fun InstagramSaverPage(uiState: UiState) {
 
 
         // while the content is fetching show a progress bar
-        // if the content is fetched then show it else nothing
+        // if the content is fetched then show it otherwise nothing
         AnimatedContent(
             targetState = contentFetchingState,
             modifier = Modifier
