@@ -40,6 +40,8 @@ fun Splash(modifier: Modifier = Modifier, uiState: UiState, onSplashEnd: () -> U
         )
 
         LaunchedEffect(key1 = Unit) {
+            uiState.waitUntilOnline()
+            uiState.syncFirebase()
             onSplashEnd()
         }
     }

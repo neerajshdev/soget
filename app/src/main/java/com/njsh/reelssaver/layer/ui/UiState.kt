@@ -8,8 +8,6 @@ import android.net.NetworkRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.reelssaver.App
@@ -22,36 +20,17 @@ import com.njsh.reelssaver.layer.domain.models.ReelModel
 import com.njsh.reelssaver.layer.domain.models.ShortVideoModel
 import com.njsh.reelssaver.layer.domain.use_cases.FetchFBVideoUseCase
 import com.njsh.reelssaver.layer.domain.use_cases.FetchReelUseCase
-import kotlinx.coroutines.*
-import com.njsh.reelssaver.util.*
+import com.njsh.reelssaver.util.download
+import com.njsh.reelssaver.util.fetchAndActivate
+import com.njsh.reelssaver.util.isOnline
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
-class UiState : ViewModel() {
+class UiState {
     var isOnline by mutableStateOf(false)
     private lateinit var mNetworkCallback: ConnectivityManager.NetworkCallback
     val shortVideoState by lazy { ShortVideoState() }
-
-    class ShortVideoState internal constructor() {
-        private val repository: ShortVideoRepository = ShortVideoRepositoryImpl()
-
-        fun download(shortVideo: ShortVideoModel) {
-            download(
-                shortVideo.title, shortVideo.videoUrl, "short video status"
-            )
-        }
-
-        fun share(shortVideo: ShortVideoModel, context: Context) {
-            share(
-                url = shortVideo.videoUrl,
-                context = context
-            )
-        }
-
-        suspend fun loadVideos(offset: Long, limit: Int) = withContext(Dispatchers.IO) {
-            repository.get(offset, limit).also {
-                println("loaded from repo: ${it.size}")
-            }
-        }
-    }
 
     fun initState() {
         isOnline = isOnline(App.instance())
@@ -83,15 +62,11 @@ class UiState : ViewModel() {
         connectivityManager.unregisterNetworkCallback(mNetworkCallback)
     }
 
-    fun syncFirebase(onFetchComplete: ()-> Unit) {
-        viewModelScope.launch {
-            waitUntilOnline()
-            Firebase.fetchAndActivate()
-            onFetchComplete()
-        }
+    suspend fun syncFirebase() {
+        Firebase.fetchAndActivate()
     }
 
-    private suspend fun waitUntilOnline() {
+    suspend fun waitUntilOnline() {
         while (!isOnline) {
             delay(1000)
         }
@@ -114,20 +89,28 @@ class UiState : ViewModel() {
     })
 
     fun download(reelModel: ReelModel) {
-        download(
-            title = reelModel.title,
-            url = reelModel.url,
-            description = "reel video"
-        )
+        TODO()
     }
 
     fun download(fbVideoModel: FbVideoModel) {
-        download(
-            title = "facebook video",
-            url = fbVideoModel.videoUrl,
-            description = "reel video"
-        )
+        TODO()
     }
 
     fun getClipBoardText() = App.clipBoardData()
+
+    class ShortVideoState internal constructor() {
+        private val repository: ShortVideoRepository = ShortVideoRepositoryImpl()
+
+        fun download(shortVideo: ShortVideoModel) {
+            download(
+                shortVideo.title, shortVideo.videoUrl, "short video status"
+            )
+        }
+
+        suspend fun loadVideos(offset: Long, limit: Int) = withContext(Dispatchers.IO) {
+            repository.get(offset, limit).also {
+                println("loaded from repo: ${it.size}")
+            }
+        }
+    }
 }
