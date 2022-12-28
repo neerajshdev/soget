@@ -1,5 +1,6 @@
 package com.njsh.reelssaver.layer.ui.pages
 
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
@@ -7,8 +8,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.njsh.reelssaver.App
@@ -18,6 +19,8 @@ import com.njsh.reelssaver.layer.ui.components.Advertisement
 import com.njsh.reelssaver.layer.ui.components.InputUrlTaker
 import com.njsh.reelssaver.layer.ui.components.SavableVideoCard
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
+import com.njsh.reelssaver.util.checkStoragePermission
+import com.njsh.reelssaver.util.storagePermission
 
 
 enum class ContentFetchingState {
@@ -27,6 +30,7 @@ enum class ContentFetchingState {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun InstagramSaverPage(uiState: UiState) {
+    val context = LocalContext.current
     var contentFetchingState by remember {
         mutableStateOf(
             ContentFetchingState.NOTHING
@@ -76,7 +80,7 @@ fun InstagramSaverPage(uiState: UiState) {
         AnimatedContent(
             targetState = contentFetchingState,
             modifier = Modifier
-                .weight(1f)
+                .height(240.dp)
                 .padding(vertical = 12.dp)
         ) { contentFetchingState ->
             when (contentFetchingState) {
@@ -89,20 +93,15 @@ fun InstagramSaverPage(uiState: UiState) {
                     )
                 }
                 ContentFetchingState.FETCHED -> {
-                    SavableVideoCard(thumbnailUrl = reelModel!!.imageUrl, onDownloadClick = {
-                        uiState.download(reelModel!!)
-                    }, modifier = Modifier.fillMaxSize())
+                    SavableVideoCard(thumbnailUrl = reelModel!!.imageUrl,
+                        modifier = Modifier.fillMaxSize(),
+                        onDownloadClick = { onDownloadClick(reelModel!!, uiState, context) })
                 }
                 else -> {}
             }
         }
 
-        Advertisement(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.End)
-                .wrapContentSize()
-        )
+        Advertisement()
     }
 }
 
@@ -117,3 +116,10 @@ private fun PInstagramSaverPage() {
     }
 }
 
+private fun onDownloadClick(reelModel: ReelModel, uiState: UiState, context: Context) {
+    if (checkStoragePermission()) {
+        uiState.download(reelModel)
+    } else {
+        storagePermission(context)
+    }
+}

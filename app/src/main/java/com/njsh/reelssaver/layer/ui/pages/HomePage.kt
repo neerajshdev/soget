@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -56,25 +57,23 @@ fun Home(navController: NavController) {
     Column(
         modifier = Modifier
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         val onBackground = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
 
-        TopAppBar(title = {
+        CenterAlignedTopAppBar(title = {
             Text(
-                text = "Instagram", color = onBackground, modifier = Modifier.padding(start = 16.dp)
+                text = "Instagram", color = onBackground
             )
         }, navigationIcon = {
             Icon(Icons.Default.Menu, contentDescription = null, tint = onBackground)
         })
+
         OptionButtons(
-            modifier = Modifier
-                .weight(1f)
-                .wrapContentSize()
+            modifier = Modifier.wrapContentSize(Alignment.TopStart)
         )
-        Advertisement(
-            modifier = Modifier.padding(top = 8.dp)
-        )
+
+        Advertisement()
     }
 }
 

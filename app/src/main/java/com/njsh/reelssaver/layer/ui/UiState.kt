@@ -15,6 +15,7 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.AppPref
 import com.njsh.reelssaver.FirebaseKeys
+import com.njsh.reelssaver.ads.NativeAdLoader
 import com.njsh.reelssaver.layer.data.ShortVideoRepositoryImpl
 import com.njsh.reelssaver.layer.domain.data.ShortVideoRepository
 import com.njsh.reelssaver.layer.domain.models.FbVideoModel
@@ -87,6 +88,7 @@ class UiState : ViewModel() {
         viewModelScope.launch {
             waitUntilOnline()
             Firebase.fetchAndActivate()
+            NativeAdLoader.load()
             onFetchComplete()
         }
     }

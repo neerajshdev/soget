@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
   <com.google.android.gms.ads.nativead.NativeAdView
-      android:layout_height="350dp"
+      android:layout_height="wrap_content"
       android:layout_width="match_parent"
       android:id="@+id/native_ad_view"
       android:background="@drawable/gnt_outline_shape"
