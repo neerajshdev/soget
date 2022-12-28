@@ -1,13 +1,9 @@
 package com.njsh.reelssaver.layer.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,21 +39,20 @@ fun SavableVideoCard(
                 .fillMaxHeight()
                 .clip(shape = MaterialTheme.shapes.medium)
         )
-        IconButton(
+
+        FilledIconButton(
             onClick = onDownloadClick,
-            modifier = Modifier
+            modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .wrapContentSize()
         ) {
-            Icon(painterResource(
-                id = R.drawable.ic_outlined_download),
+            Icon(
+                painterResource(
+                    id = R.drawable.ic_outlined_download
+                ),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.tertiaryContainer,
-                    shape = CircleShape
-                ).padding(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }
