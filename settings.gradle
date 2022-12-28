@@ -15,7 +15,7 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "myapp"
+rootProject.name = "ReelSaver"
 include ':app'
-include ':downloader'
 include ':nativetemplates'
+include ':InfiniteList'

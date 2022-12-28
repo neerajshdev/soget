@@ -1,11 +1,13 @@
 package com.njsh.reelssaver.util
 
 import android.Manifest
+import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
+import android.net.*
 import android.os.Build
+import android.os.Environment
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -20,6 +22,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.AppPref
+import com.njsh.reelssaver.BuildConfig
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
 
@@ -41,7 +44,7 @@ fun visitDocumentTree(root: DocumentFile, visitor: (DocumentFile) -> Int) {
             } else if (ans == 1) { // go in and don't break
                 visitDocumentTree(child, visitor)
             } else { // skip
-                //                console(TAG, "skipping dir ${child.name}")
+                //                console(com.njsh.reelssaver.TAG, "skipping dir ${child.name}")
             }
         }
     }
@@ -64,7 +67,7 @@ fun visitFileTree(root: File, visitor: (File) -> Int) {
             } else if (ans == 1) { // go in and don't break
                 visitFileTree(child, visitor)
             } else { // skip
-                //                    console(TAG, "skipping dir ${child.name}")
+                //                    console(com.njsh.reelssaver.TAG, "skipping dir ${child.name}")
             }
         }
     }
@@ -84,7 +87,6 @@ fun storagePermission(context: Context) {
         ) {
             TODO("Not yet implemented")
         }
-
     }).check()
 }
 
@@ -125,7 +127,6 @@ fun isOnline(context: Context): Boolean {
     } ?: false
 }
 
-
 suspend fun Firebase.fetchAndActivate() {
     val deferred = CompletableDeferred<Task<Boolean>>()
     remoteConfig.fetchAndActivate().addOnCompleteListener { deferred.complete(it) }
@@ -156,6 +157,55 @@ fun getUserCountry(context: Context): String? {
     } catch (e: Exception) {
     }
     return null
+}
+
+
+fun download(title: String, url: String, description: String) {
+    val downloadManager =
+        App.instance().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val uri = Uri.parse(url)
+
+    val req = DownloadManager.Request(uri)
+
+    req.apply {
+        setTitle(title)
+        setDescription(description)
+        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title)
+        setAllowedOverMetered(true)
+        setAllowedOverRoaming(true)
+        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        setMimeType(App.instance().contentResolver.getType(uri))
+    }
+    downloadManager.enqueue(req)
+}
+
+fun Long.toPrettyNum(): String {
+    return when {
+        this > 1000_000 -> {
+            String.format("%0.1fm", this/1000_000f).replace(Regex("\\.0"), "")
+        }
+        this > 1000 -> {
+            String.format("%.1fk", this/1000f).replace(Regex("\\.0"), "")
+        }
+        else -> {
+            toString()
+        }
+    }
+}
+
+
+/**
+ * Share a link
+ */
+fun share(url: String, context: Context) {
+    val myIntent = Intent(Intent.ACTION_SEND)
+    myIntent.type = "text/plain"
+    val appLink = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+    val sub: String = "All Video downloader"
+    val body: String = "$url \n\n Hey! This app can download any instagram and facebook video. \n Download Now its free! \n $appLink \n"
+    myIntent.putExtra(Intent.EXTRA_SUBJECT, sub)
+    myIntent.putExtra(Intent.EXTRA_TEXT, body)
+    context.startActivity(Intent.createChooser(myIntent, "Share Using"))
 }
 
 

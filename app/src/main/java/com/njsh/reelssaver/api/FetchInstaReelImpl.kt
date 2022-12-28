@@ -3,7 +3,7 @@ package com.njsh.reelssaver.api
 import android.util.Log
 import com.google.gson.GsonBuilder
 import com.njsh.reelssaver.App
-import com.njsh.reelssaver.api.format.instagram.ExampleJson2KtKotlin
+import com.njsh.reelssaver.api.format.instagram.GsonGraphQl
 import com.njsh.reelssaver.entity.EntityInstaReel
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,19 +15,17 @@ class FetchInstaReelImpl(
     override fun fetchReelData(callback: (CallResult<EntityInstaReel>) -> Unit) {
         try {
             val checkedUrl = verifyUrl(url)
-            if (checkedUrl != null) {
-                val data = fetch(checkedUrl)!!
-                val result = CallResult.Success(data)
-                callback(result)
-            }
+            val data = fetch(checkedUrl)!!
+            val result = CallResult.Success(data)
+            callback(result)
         } catch (ex: Exception) {
             callback(CallResult.Failed(ex.message ?: "Something went wrong!"))
         }
     }
 
 
-    private fun verifyUrl(url: String): String? {
-        var result: String?
+    private fun verifyUrl(url: String): String {
+        val result: String?
         val uri = URI(url)
         if (uri.host == "www.instagram.com") {
             result = "${uri.scheme}://${uri.authority}/${uri.path}?__a=1&__d=dis"
@@ -54,7 +52,7 @@ class FetchInstaReelImpl(
 
         if(jsonContent != null && jsonContent.contains("graphql")) {
             try {
-                val data = gson.fromJson(jsonContent, ExampleJson2KtKotlin::class.java)
+                val data = gson.fromJson(jsonContent, GsonGraphQl::class.java)
                 return fromGraphQl(data)
             } catch (ex: Exception) {
                 ex.printStackTrace()
@@ -87,7 +85,7 @@ class FetchInstaReelImpl(
         )
     }
 
-    private fun fromGraphQl(gsonGraphQl: ExampleJson2KtKotlin): EntityInstaReel {
+    private fun fromGraphQl(gsonGraphQl: GsonGraphQl): EntityInstaReel {
         val graphql = gsonGraphQl.graphql!!
         val title = graphql.shortcodeMedia?.title ?: ""
         val width = graphql.shortcodeMedia?.dimensions?.width!!
