@@ -25,6 +25,7 @@ class App : android.app.Application() {
         val debug = BuildConfig.DEBUG
 
         var onMoveToForeground: () -> Unit = {}
+        var onMoveToBackground: () -> Unit = {}
 
         @SuppressLint("StaticFieldLeak")
         private lateinit var instance: App
@@ -54,12 +55,13 @@ class App : android.app.Application() {
         MobileAds.initialize(this)
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : LifecycleEventObserver {
-            var isLaunch = true
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
                 when (event) {
                     Lifecycle.Event.ON_START -> {
-                        if (debug) println("APPLICATION RUNNING IN FOREGROUND")
-                        if (!isLaunch) onMoveToForeground() else isLaunch = false
+                        onMoveToForeground()
+                    }
+                    Lifecycle.Event.ON_STOP -> {
+                        onMoveToBackground()
                     }
                     else -> {}
                 }

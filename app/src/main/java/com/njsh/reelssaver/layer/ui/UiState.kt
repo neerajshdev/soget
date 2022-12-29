@@ -8,8 +8,7 @@ import android.net.NetworkRequest
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.njsh.reelssaver.App
@@ -23,13 +22,21 @@ import com.njsh.reelssaver.layer.domain.models.ReelModel
 import com.njsh.reelssaver.layer.domain.models.ShortVideoModel
 import com.njsh.reelssaver.layer.domain.use_cases.FetchFBVideoUseCase
 import com.njsh.reelssaver.layer.domain.use_cases.FetchReelUseCase
-import kotlinx.coroutines.*
-import com.njsh.reelssaver.util.*
+import com.njsh.reelssaver.util.download
+import com.njsh.reelssaver.util.fetchAndActivate
+import com.njsh.reelssaver.util.isOnline
+import com.njsh.reelssaver.util.share
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class UiState : ViewModel() {
-    var isOnline by mutableStateOf(false)
     private lateinit var mNetworkCallback: ConnectivityManager.NetworkCallback
+    private lateinit var mLifecycleObserver: LifecycleObserver
+
     val shortVideoState by lazy { ShortVideoState() }
+    var isOnline by mutableStateOf(false)
 
     class ShortVideoState internal constructor() {
         private val repository: ShortVideoRepository = ShortVideoRepositoryImpl()
@@ -42,8 +49,7 @@ class UiState : ViewModel() {
 
         fun share(shortVideo: ShortVideoModel, context: Context) {
             share(
-                url = shortVideo.videoUrl,
-                context = context
+                url = shortVideo.videoUrl, context = context
             )
         }
 
@@ -63,8 +69,6 @@ class UiState : ViewModel() {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build()
-
-
         mNetworkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 isOnline = true
@@ -74,8 +78,9 @@ class UiState : ViewModel() {
                 isOnline = false
             }
         }
-
         connectivityManager.registerNetworkCallback(netReq, mNetworkCallback)
+
+
     }
 
     fun clearState() {
@@ -84,7 +89,7 @@ class UiState : ViewModel() {
         connectivityManager.unregisterNetworkCallback(mNetworkCallback)
     }
 
-    fun syncFirebase(onFetchComplete: ()-> Unit) {
+    fun syncFirebase(onFetchComplete: () -> Unit) {
         viewModelScope.launch {
             waitUntilOnline()
             Firebase.fetchAndActivate()
@@ -117,17 +122,13 @@ class UiState : ViewModel() {
 
     fun download(reelModel: ReelModel) {
         download(
-            title = reelModel.title,
-            url = reelModel.url,
-            description = "reel video"
+            title = reelModel.title, url = reelModel.url, description = "reel video"
         )
     }
 
     fun download(fbVideoModel: FbVideoModel) {
         download(
-            title = "facebook video",
-            url = fbVideoModel.videoUrl,
-            description = "reel video"
+            title = "facebook video", url = fbVideoModel.videoUrl, description = "reel video"
         )
     }
 
