@@ -37,14 +37,8 @@ fun FbSaverPager(uiState: UiState) {
     ) {
         CenterAlignedTopAppBar(title = {
             Text(
-                text = "Instagram",
+                text = "Facebook",
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
-            )
-        }, navigationIcon = {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
             )
         })
         Spacer(modifier = Modifier.height(14.dp))
@@ -68,11 +62,11 @@ fun FbSaverPager(uiState: UiState) {
 
 
         // while the content is fetching show a progress bar
-        // if the content is fetched then show it else nothing
+        // if the content is fetched then show it otherwise nothing
         AnimatedContent(
             targetState = contentFetchingState,
             modifier = Modifier
-                .weight(1f)
+                .height(240.dp)
                 .padding(vertical = 12.dp)
         ) { contentFetchingState ->
             when (contentFetchingState) {

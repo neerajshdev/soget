@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -47,12 +45,6 @@ fun InstagramSaverPage(uiState: UiState) {
             Text(
                 text = "Instagram",
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
-            )
-        }, navigationIcon = {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.60f)
             )
         })
         Spacer(modifier = Modifier.height(14.dp))

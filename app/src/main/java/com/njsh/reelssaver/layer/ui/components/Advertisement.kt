@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
@@ -49,6 +50,7 @@ fun MediumNativeAd() {
     if (nativeAd != null) println("native ad is available to show")
     AnimatedVisibility(
         visible = nativeAd != null,
+        enter = fadeIn()
     ) {
         AndroidView(factory = {
             (LayoutInflater.from(it)
@@ -81,6 +83,7 @@ fun SmallNativeAd() {
 
     AnimatedVisibility(
         visible = nativeAd != null,
+        enter = fadeIn()
     ) {
         AndroidView(factory = {
             (LayoutInflater.from(it).inflate(R.layout.native_ad_view, null) as TemplateView).apply {

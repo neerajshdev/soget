@@ -10,7 +10,7 @@ import java.net.URI
 class FetchFBVideoUseCase(
     private val url: String
 ) {
-    private val apiUrl = "https://api.instavideosave.com/fb"
+    private val apiUrl = "https://fb.instavideosave.com/"
 
     operator fun invoke(
         onSuccess: (FbVideoModel) -> Unit, onFailure: (Exception) -> Unit
@@ -51,7 +51,7 @@ class FetchFBVideoUseCase(
     }
 
     private fun verify(url: URI) {
-        if (url.host != "fb.watch" || url.host != "www.facebook.com") {
+        if (!(url.host == "fb.watch" || url.host == "www.facebook.com")) {
             throw IllegalArgumentException("uri is not a valid facebook video link")
         }
     }

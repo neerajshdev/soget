@@ -2,6 +2,8 @@ package com.njsh.reelssaver
 
 import com.njsh.reelssaver.api.CallResult
 import com.njsh.reelssaver.api.FetchFacebookVideoImpl
+import com.njsh.reelssaver.layer.domain.use_cases.FetchFBVideoUseCase
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -28,10 +30,23 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun myTestCode() {
-        val usecase = FetchShortVideosUseCase(10, "http://64.227.136.93:80/status/random")
+    fun facebookFetchUsecase() {
+
+        val videoUrl = "https://www.facebook.com/100014705387870/videos/5876328675761327/"
+
         runBlocking {
-            usecase()
+            val deferred = CompletableDeferred<Unit>()
+            FetchFBVideoUseCase(videoUrl).invoke(
+                onSuccess = {result->
+                    println("fetch succeed with result: $result")
+                    deferred.complete(Unit)
+                },
+                onFailure = {
+                    it.printStackTrace()
+                    deferred.complete(Unit)
+                }
+            )
+            deferred.await()
         }
     }
 }

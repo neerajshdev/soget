@@ -40,8 +40,6 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.*
 
 -keep class * extends androidx.room.RoomDatabase
--dontwarn androidx.room.paging.**
 
--keep public class com.njsh.reelssaver.shorts.room.ShortVideo
 -keep public class com.njsh.reelssaver.layer.data.room.ShortVideoDao
 -keep public class com.njsh.reelssaver.layer.data.room.ShortVideoDatabase
