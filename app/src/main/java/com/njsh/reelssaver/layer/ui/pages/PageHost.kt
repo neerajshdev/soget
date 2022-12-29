@@ -8,11 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.njsh.reelssaver.ads.loadAppOpenAd
 import com.njsh.reelssaver.layer.ui.UiState
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
+import kotlinx.coroutines.launch
 
 object RouteName {
     val HOME = "HOME"
@@ -24,7 +29,29 @@ object RouteName {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PageHost(modifier: Modifier = Modifier, uiState: UiState) {
+    val scope = rememberCoroutineScope()
     val navController = rememberAnimatedNavController()
+    val context = LocalContext.current
+
+    DisposableEffect(uiState) {
+        val observer = LifecycleEventObserver { source, event ->
+            when(event) {
+                Lifecycle.Event.ON_START -> {
+//                    println("On_start event! compose side")
+                    scope.launch {
+//                        println("loading app open ad")
+                        loadAppOpenAd(context as Activity) {}
+                    }
+                }
+                else -> {}
+            }
+        }
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(observer)
+        onDispose {
+            ProcessLifecycleOwner.get().lifecycle.removeObserver(observer)
+        }
+    }
 
     AppTheme {
         AnimatedNavHost(
@@ -58,7 +85,6 @@ fun PageHost(modifier: Modifier = Modifier, uiState: UiState) {
             composable(RouteName.SHORT_VIDEOS,
                 enterTransition = { slideInHorizontally { it } },
                 popExitTransition = { slideOutHorizontally { it } }) {
-                val context = LocalContext.current
                 ShortVideoPage(shortVideoState = uiState.shortVideoState)
 
                 if (context is Activity) {
