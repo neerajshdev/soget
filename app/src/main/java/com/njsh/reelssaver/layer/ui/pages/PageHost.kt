@@ -1,16 +1,16 @@
 package com.njsh.reelssaver.layer.ui.pages
 
 import android.app.Activity
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.njsh.reelssaver.layer.ui.UiState
 import com.njsh.reelssaver.layer.ui.theme.AppTheme
 
@@ -21,16 +21,13 @@ object RouteName {
     val SHORT_VIDEOS = "SHORT VIDEOS"
 }
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PageHost(modifier: Modifier = Modifier, uiState: UiState) {
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
 
     AppTheme {
-        AnimatedNavHost(
-            navController = navController,
-            startDestination = RouteName.HOME,
-            modifier = modifier
+        NavHost(
+            navController = navController, startDestination = RouteName.HOME, modifier = modifier
         ) {
             composable(RouteName.HOME, enterTransition = {
                 slideInHorizontally(initialOffsetX = { -it })
@@ -72,8 +69,7 @@ fun PageHost(modifier: Modifier = Modifier, uiState: UiState) {
                         onDispose {
                             WindowCompat.setDecorFitsSystemWindows(context.window, true)
                             WindowCompat.getInsetsController(
-                                context.window,
-                                context.window.decorView
+                                context.window, context.window.decorView
                             ).apply {
                                 isAppearanceLightNavigationBars = true
                                 isAppearanceLightStatusBars = true

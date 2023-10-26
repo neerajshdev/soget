@@ -40,7 +40,9 @@ class VerticleListState {
     }
 
     val inputModifier = Modifier.pointerInput(this) {
+        // tracks the velocity of the pointer input
         val velocityTracker = VelocityTracker()
+
         val exceptionHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
             throwable.printStackTrace()
         }
@@ -56,16 +58,19 @@ class VerticleListState {
                 val threshold = 200f
                 var target = scroll
 
-                when  {
+                when {
                     v > threshold -> {
                         target = itemDimension + 1f
                     }
+
                     v < -threshold -> {
                         target -= target
                     }
+
                     target > itemDimension / 2f -> {
                         target = itemDimension + 0.1f
                     }
+
                     target < itemDimension -> {
                         target = 0f
                     }

@@ -19,3 +19,5 @@ rootProject.name = "ReelSaver"
 include ':app'
 include ':nativetemplates'
 include ':InfiniteList'
+
+includeBuild("../android-libraries/onestate")

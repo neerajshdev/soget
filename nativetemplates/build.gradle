@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 34
 
     defaultConfig {
+        namespace "com.google.android.ads.nativetemplates"
         minSdkVersion 21
-        targetSdkVersion 32
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {

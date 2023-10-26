@@ -6,9 +6,9 @@ android {
     compileSdk 32
 
     defaultConfig {
+        namespace "com.njsh.downloader"
         minSdk 21
-        targetSdk 32
-
+//        targetSdk 32
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }

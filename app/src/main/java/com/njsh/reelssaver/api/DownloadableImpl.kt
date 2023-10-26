@@ -6,10 +6,8 @@ import android.net.Uri
 import android.os.Environment
 import com.njsh.reelssaver.App
 
-class DownloadableImpl(val url: String, val title: String, val type: String) : Downloadable
-{
-    override fun download()
-    {
+class DownloadableImpl(val url: String, val title: String, val type: String) : Downloadable {
+    override fun download() {
         val downloadManager =
             App.instance().getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 

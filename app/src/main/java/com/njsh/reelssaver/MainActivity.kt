@@ -10,9 +10,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.njsh.reelssaver.layer.ui.UiState
 import com.njsh.reelssaver.layer.ui.pages.PageHost
 
-private const val TAG = "MainActivity.kt"
-
 class MainActivity : ComponentActivity() {
+    companion object {
+        val TAG = MainActivity::class.simpleName
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val uiState = UiState()

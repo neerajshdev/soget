@@ -9,8 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.LocalView
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
+//import androidx.lifecycle.ViewTreeLifecycleOwner
+//import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import java.util.*
 
 
@@ -54,8 +54,8 @@ private class FullScreenLayout(
 
     init {
         id = android.R.id.content
-        ViewTreeLifecycleOwner.set(this, ViewTreeLifecycleOwner.get(composeView))
-        ViewTreeViewModelStoreOwner.set(this, ViewTreeViewModelStoreOwner.get(composeView))
+//        ViewTreeLifecycleOwner.set(this, ViewTreeLifecycleOwner.get(composeView))
+//        ViewTreeViewModelStoreOwner.set(this, ViewTreeViewModelStoreOwner.get(composeView))
 //        ViewTreeSavedStateRegistryOwner.set(this, ViewTreeSavedStateRegistryOwner.get(composeView))
 
         setTag(androidx.compose.ui.R.id.compose_view_saveable_id_tag, "CustomLayout:$uniqueId")
@@ -91,7 +91,7 @@ private class FullScreenLayout(
 
     fun dismiss() {
         disposeComposition()
-        ViewTreeLifecycleOwner.set(this, null)
+//        ViewTreeLifecycleOwner.set(this, null)
         windowManager.removeViewImmediate(this)
     }
 }
