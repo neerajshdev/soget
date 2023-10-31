@@ -9,7 +9,7 @@ class ListScope<T>(
     private val config: Configuration<T>,
     private val scope: CoroutineScope
 ) {
-    private val exceptionHandler = CoroutineExceptionHandler {coroutineContext, throwable ->
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 

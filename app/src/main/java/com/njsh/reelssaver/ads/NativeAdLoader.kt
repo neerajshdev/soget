@@ -46,7 +46,6 @@ object NativeAdLoader {
             loadedAds.add(it)
             println("$TAG loaded ads: ${loadedAds.size}")
         }
-
     }
 
     private suspend fun take(): NativeAd? {

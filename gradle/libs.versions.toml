@@ -1,10 +1,13 @@
 [versions]
 
+accompanistPermissions = "0.33.2-alpha"
+compose = "1.0.0-beta01"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.0.3"
 exoplayerCore = "2.19.1"
 exoplayerDash = "2.19.1"
 exoplayerUi = "2.19.1"
+glide = "4.14.2"
 jsoup = "1.15.3"
 kotlinCompilerExtensionVersion = "1.5.3"
 
@@ -24,6 +27,7 @@ kotlinxSerializationJson = "1.5.1"
 ktx = "1.12.0"
 ktor_version = "2.3.5"
 constraintlayout_compose = "1.1.0-alpha13"
+materialIconsExtended = "1.5.4"
 navigationCompose = "2.7.4"
 
 [plugins]
@@ -35,6 +39,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 
 
 [libraries]
+accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-composeActivity = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -43,6 +48,7 @@ androidx-lifecyle = { group = "androidx.lifecycle", name = "lifecycle-runtime-kt
 androidx-composeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-composeUi = { module = "androidx.compose.ui:ui" }
 androidx-composeFoundation = { module = "androidx.compose.foundation:foundation" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "androidx_material3" }
 androidx-composeUiToolingPreview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
@@ -51,10 +57,12 @@ androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayo
 
 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayerCore" }
 exoplayer-dash = { module = "com.google.android.exoplayer:exoplayer-dash", version.ref = "exoplayerDash" }
 exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayerUi" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit-test = "junit:junit:4.13.2"
 androidx-junit-test = "androidx.test.ext:junit:1.1.5"

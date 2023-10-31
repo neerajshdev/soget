@@ -15,11 +15,6 @@ import androidx.documentfile.provider.DocumentFile
 import com.google.android.gms.tasks.Task
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import com.njsh.reelssaver.App
 import com.njsh.reelssaver.AppPref
 import com.njsh.reelssaver.BuildConfig
@@ -73,22 +68,6 @@ fun visitFileTree(root: File, visitor: (File) -> Int) {
     }
 }
 
-
-fun storagePermission(context: Context) {
-    Dexter.withContext(context).withPermissions(
-        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ).withListener(object : MultiplePermissionsListener {
-        override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
-            Log.d(TAG, "onPermissionsChecked: ${p0?.grantedPermissionResponses}")
-        }
-
-        override fun onPermissionRationaleShouldBeShown(
-            p0: MutableList<PermissionRequest>?, p1: PermissionToken?
-        ) {
-            TODO("Not yet implemented")
-        }
-    }).check()
-}
 
 
 fun checkStoragePermission(): Boolean {
