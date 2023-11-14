@@ -14,6 +14,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
@@ -34,12 +36,19 @@ class MyJavaScriptInterface {
 }
 
 
+class WebViewState(url: String) {
+    private val _url = mutableStateOf(url)
+    private val _webView = mutableStateOf<WebView?>(null)
+    val url by _url
+    val webView by _webView
+}
+
 @Composable
-fun ComposeWebView(modifier: Modifier = Modifier, url: String) {
+fun ComposeWebView(modifier: Modifier = Modifier, webViewState: WebViewState) {
     var webView: WebView? = null
 
-    LaunchedEffect(key1 = url) {
-        webView?.loadUrl(url)
+    LaunchedEffect(key1 = webViewState.url) {
+        webView?.loadUrl(webViewState.url)
         Log.d(TAG, "userAgentString: ${webView?.settings?.userAgentString}")
     }
 
@@ -85,7 +94,7 @@ fun ComposeWebView(modifier: Modifier = Modifier, url: String) {
                 }
             }
         }, update = {
-            webView = it
+            webViewState = it
         })
 
         Button(

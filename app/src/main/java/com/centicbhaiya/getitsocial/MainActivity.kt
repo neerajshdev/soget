@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -16,6 +17,8 @@ import com.centicbhaiya.getitsocial.ui.components.BottomNavigationBar
 import com.centicbhaiya.getitsocial.ui.components.NavBarItem
 import com.centicbhaiya.getitsocial.ui.screens.TabsScreen
 import com.centicbhaiya.getitsocial.ui.state.FbVideoDataState
+import com.centicbhaiya.getitsocial.ui.state.Tab
+import com.centicbhaiya.getitsocial.ui.state.TabsScreenState
 import com.centicbhaiya.getitsocial.ui.theme.AppTheme
 import online.desidev.onestate.stateManager
 
@@ -30,7 +33,15 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         stateManager.configure {
-            stateFactory(FbVideoDataState::class) { FbVideoDataState(emptyList()) }
+            stateFactory(FbVideoDataState::class) {
+                FbVideoDataState(emptyList())
+            }
+
+            stateFactory(TabsScreenState::class) {
+                TabsScreenState(
+                    tabs = listOf(Tab("homepage")),
+                )
+            }
         }
 
         setContent {
@@ -41,16 +52,18 @@ class MainActivity : ComponentActivity() {
                         NavBarItem(
                             name = "Tab",
                             iconRes = R.drawable.ic_tabs,
-                            onItemSelect = { navController.navigate("tabs")}
+                            onItemSelect = { navController.navigate("tabs") }
                         ),
 
                         NavBarItem(
                             name = "Progress",
                             iconRes = R.drawable.round_download_24,
-                            onItemSelect = { navController.navigate("progress"); Log.d(
+                            onItemSelect = {
+                                navController.navigate("progress"); Log.d(
                                 TAG,
                                 "navgate to progress"
-                            ) }
+                            )
+                            }
                         ),
 
                         NavBarItem(
@@ -60,9 +73,13 @@ class MainActivity : ComponentActivity() {
                         )
                     )
                 }) { innerPaddings ->
-                    NavHost(navController = navController, "tabs", modifier = Modifier.padding(innerPaddings)) {
+                    NavHost(
+                        navController = navController,
+                        "tabs",
+                        modifier = Modifier.padding(innerPaddings)
+                    ) {
                         composable("tabs") {
-                            TabsScreen()
+                            TabsScreen(modifier = Modifier.fillMaxSize())
                         }
 
                         composable("progress") {

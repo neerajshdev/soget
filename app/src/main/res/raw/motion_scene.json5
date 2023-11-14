@@ -25,12 +25,6 @@
           12
         ],
       },
-
-      bottom_drawer_handle: {
-        centerHorizontally: 'parent',
-        top: ['parent', 'bottom', 0],
-        bottom: ['parent', 'bottom', 0],
-      }
     },
 
     end: {
@@ -48,12 +42,6 @@
         centerHorizontally: 'parent',
         top: ['ad_place_holder', 'bottom', 12],
       },
-
-      bottom_drawer_handle: {
-        centerHorizontally: 'parent',
-        top: ['parent', 'bottom', 0],
-        bottom: ['parent', 'bottom', 0],
-      }
     }
   },
 
