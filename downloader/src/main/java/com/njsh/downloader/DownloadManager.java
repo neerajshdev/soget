@@ -1,4 +1,4 @@
-package com.njsh.downloader;
+package com.centicbhaiya.downloader;
 
 import java.net.MalformedURLException;
 import java.net.URL;

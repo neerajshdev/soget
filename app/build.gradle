@@ -5,19 +5,18 @@ plugins {
 
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
-    id 'kotlin-kapt'
-//    id 'kotlin-android'
 }
 
 android {
     compileSdk 34
 
     defaultConfig {
-        namespace "com.njsh.reelssaver"
-        applicationId "com.njsh.reelssaver"
+        namespace "com.centicbhaiya.getitsocial"
+        applicationId "com.centicbhaiya.getitsocial"
+        targetSdk 34
         minSdk 24
-        versionCode 6
-        versionName "2.4"
+        versionCode 3
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -27,7 +26,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -54,12 +53,7 @@ android {
 }
 
 dependencies {
-//    implementation("online.desidev.onestate:lib")
-
     implementation("io.coil-kt:coil-compose:2.2.2")
-    implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
 
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.5.0'
     implementation 'com.google.firebase:firebase-config-ktx:21.5.0'
@@ -68,42 +62,41 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:22.4.0'
     implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 
+    implementation project(path: ':nativetemplates')
+    implementation 'online.desidev.onestate:lib'
+
+    implementation(libs.androidx.material.icons.extended)
     implementation libs.androidx.navigation.compose
 
 
-    implementation project(path: ':nativetemplates')
-
-    implementation(libs.androidx.material.icons.extended)
-
-
-    implementation(libs.compose)
-    implementation(libs.glide)
     implementation libs.androidx.lifecycle.process
     implementation libs.androidx.core.splashscreen
-    implementation(libs.kotlinx.serialization.json)
-
-
     implementation(libs.androidx.ktx)
     implementation(libs.androidx.lifecyle)
     implementation(libs.androidx.composeActivity)
-
-    implementation(platform(libs.androidx.composeBom))
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.composeUi)
-    debugImplementation(libs.androidx.composeUiTooling)
     implementation(libs.androidx.composeUiToolingPreview)
     implementation(libs.androidx.compose.uiGraphics)
     implementation(libs.androidx.constraintlayout)
+    debugImplementation(libs.androidx.composeUiTooling)
+    implementation(platform(libs.androidx.composeBom))
+
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.composeUi)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.contentNegotiation)
-    implementation libs.ktor.serialization.gson
+    implementation(libs.ktor.serialization.kotlinx.json)
 
-    testImplementation(libs.junit.test)
+//    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.gson)
+
+
     androidTestImplementation(libs.androidx.junit.test)
+    testImplementation(libs.junit.test)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     androidTestImplementation(platform(libs.androidx.composeBom))
     debugImplementation(libs.androidx.composeUiTooling)
 }
+

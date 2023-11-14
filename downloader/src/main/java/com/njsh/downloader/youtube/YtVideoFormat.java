@@ -1,4 +1,4 @@
-package com.njsh.downloader.youtube;
+package com.centicbhaiya.downloader.youtube;
 
 public class YtVideoFormat
 {

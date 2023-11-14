@@ -1,6 +1,5 @@
 [versions]
 
-accompanistPermissions = "0.33.2-alpha"
 compose = "1.0.0-beta01"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.0.3"
@@ -8,6 +7,7 @@ exoplayerCore = "2.19.1"
 exoplayerDash = "2.19.1"
 exoplayerUi = "2.19.1"
 glide = "4.14.2"
+gson = "2.10.1"
 jsoup = "1.15.3"
 kotlinCompilerExtensionVersion = "1.5.3"
 
@@ -19,7 +19,7 @@ kotlinGradlePlugin = "1.9.10"
 androidxLifeCycle = "2.6.2"
 activityCompose = "1.7.2"
 composeBom = "2023.03.00"
-androidx_material3 = "1.2.0-alpha08"
+androidx_material3 = "1.2.0-alpha10"
 #junit = "4.13.2"
 #testExtJunit = "1.1.5"
 #espressoCore = "3.5.1"
@@ -39,7 +39,6 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 
 
 [libraries]
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-composeActivity = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "ktx" }
@@ -57,21 +56,19 @@ androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayo
 
 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
-compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayerCore" }
-exoplayer-dash = { module = "com.google.android.exoplayer:exoplayer-dash", version.ref = "exoplayerDash" }
-exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayerUi" }
-glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit-test = "junit:junit:4.13.2"
 androidx-junit-test = "androidx.test.ext:junit:1.1.5"
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor_version" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor_version" }
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor_version" }
-ktor-serialization-gson = { module = "io.ktor:ktor-serialization-gson", version.ref = "ktor_version" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor_version" }
+
 
 
 

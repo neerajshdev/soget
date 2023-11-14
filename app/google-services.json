@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "458128866736",
-    "project_id": "all-downloader-d5ea7",
-    "storage_bucket": "all-downloader-d5ea7.appspot.com"
+    "project_number": "350855811135",
+    "project_id": "getitsocial-d0b22",
+    "storage_bucket": "getitsocial-d0b22.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:458128866736:android:d0603ffc098aaca58e2a75",
+        "mobilesdk_app_id": "1:350855811135:android:06cfaa57c6b57bafcc688a",
         "android_client_info": {
-          "package_name": "com.njsh.reelssaver"
+          "package_name": "com.centicbhaiya.getitsocial"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "458128866736-90hk0lb54s950jil1g8kl6a90mq687j6.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBC6UkNwDKW6YaNHo3zktj8xorNqNcVemM"
+          "current_key": "AIzaSyDJYejpCX_g9p5odr2pmBdU-lXdtBoruO8"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "458128866736-90hk0lb54s950jil1g8kl6a90mq687j6.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
