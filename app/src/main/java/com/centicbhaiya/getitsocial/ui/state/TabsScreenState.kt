@@ -1,18 +1,29 @@
 package com.centicbhaiya.getitsocial.ui.state
 
+import android.webkit.WebView
+
 data class TabsScreenState(
-    val tabs: List<Tab>,
-    val currentTabIndex: Int = 0
+    private val tabs: MutableList<Tab> = mutableListOf(Tab()),
+    private val currentTabIndex: Int = 0
 ) {
-    fun updateUrl(url: String): TabsScreenState {
-        val tabs = tabs.toMutableList()
-        tabs[currentTabIndex] = Tab(url)
-        return TabsScreenState(tabs, currentTabIndex)
+    fun updateCurrentTab(tab: Tab): TabsScreenState {
+        tabs[currentTabIndex] = tab
+        return this
     }
 
-    fun getCurrentTabUrl() = tabs[currentTabIndex]
+    fun getTabCount() = tabs.size
+
+    fun getTabs(): List<Tab> = tabs
+
+    fun getCurrentTab() = tabs[currentTabIndex]
 }
 
 data class Tab(
-    val url: String,
+    val pageType: PageType = PageType.HOMEPAGE,
+    val url: String? = null,
+    val webView: WebView? = null,
 )
+
+enum class PageType {
+    WEBPAGE, HOMEPAGE
+}

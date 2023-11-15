@@ -18,8 +18,17 @@ import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.centicbhaiya.getitsocial.App
 import com.centicbhaiya.getitsocial.AppPref
 import com.centicbhaiya.getitsocial.BuildConfig
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.contentType
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val TAG = "Functions.Kt"
 
@@ -187,4 +196,8 @@ fun share(url: String, context: Context) {
     context.startActivity(Intent.createChooser(myIntent, "Share Using"))
 }
 
+fun createFileName(postFix: String): String {
+    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    return "${timestamp}_$postFix"
+}
 

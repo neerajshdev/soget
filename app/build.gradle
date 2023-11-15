@@ -65,6 +65,10 @@ dependencies {
     implementation project(path: ':nativetemplates')
     implementation 'online.desidev.onestate:lib'
 
+//    implementation 'com.tonyodev.fetch2:fetch2:3.0.12'
+    implementation 'androidx.tonyodev.fetch2:xfetch2:3.1.6'
+    implementation 'androidx.tonyodev.fetch2okhttp:xfetch2okhttp:3.1.6'
+
     implementation(libs.androidx.material.icons.extended)
     implementation libs.androidx.navigation.compose
 
