@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowForward
@@ -60,7 +61,7 @@ fun InputUrlFieldCard(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit = {},
     onContentPaste: (String) -> Unit = {},
-    onGoActionClick: () -> Unit = {}, 
+    onGoActionClick: () -> Unit = {},
     onKeyBoardAction: () -> Unit = {}
 ) {
     val clipboardManager = LocalClipboardManager.current
@@ -151,12 +152,12 @@ fun EditableUrlText(
         onValueChange = onValueChange,
         singleLine = true,
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Go),
+        keyboardActions = KeyboardActions(onGo = { onKeyBoardAction() }),
         decorationBox = { innerTextField ->
             Box(contentAlignment = Alignment.CenterStart) {
                 if (url.isBlank() && isEditing.not()) {
                     placeholderText()
                 }
-
                 innerTextField()
             }
         },

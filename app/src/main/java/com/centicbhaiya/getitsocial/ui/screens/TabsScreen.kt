@@ -1,6 +1,7 @@
 package com.centicbhaiya.getitsocial.ui.screens
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,6 +73,12 @@ import com.centicbhaiya.getitsocial.ui.state.FbVideoDataState
 import com.centicbhaiya.getitsocial.ui.state.PageType
 import com.centicbhaiya.getitsocial.ui.state.Tab
 import com.centicbhaiya.getitsocial.ui.state.TabsScreenState
+import com.centicbhaiya.getitsocial.ui.state.clearAll
+import com.centicbhaiya.getitsocial.ui.state.closeWebPage
+import com.centicbhaiya.getitsocial.ui.state.goto
+import com.centicbhaiya.getitsocial.ui.state.newTab
+import com.centicbhaiya.getitsocial.ui.state.removeTab
+import com.centicbhaiya.getitsocial.ui.state.selectTab
 import com.centicbhaiya.getitsocial.ui.theme.AppTheme
 import com.centicbhaiya.getitsocial.ui.theme.useDarkTheme
 import kotlinx.coroutines.launch
@@ -82,7 +90,7 @@ private const val TAG = "TabsScreen"
 
 @Preview
 @Composable
-fun HomePagePrev() {
+fun TabsScreenPrev() {
     stateManager.configure {
         stateFactory(FbVideoDataState::class) {
             FbVideoDataState(emptyList())
@@ -103,13 +111,12 @@ fun HomePagePrev() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TabsScreen(
-    modifier: Modifier = Modifier,
     tabsScreenState: OneState<TabsScreenState>,
     onDownloadVideo: (FBVideoData) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     val currentTab by tabsScreenState.toState { it.getCurrentTab() }
-    val tabs by tabsScreenState.toState(convert = { it.getTabs() })
+    val tabs by tabsScreenState.toState(convert = { it.tabs })
     val bottomSheetState = rememberModalBottomSheetState()
 
     val fbVideoDataState = stateManager.getState(FbVideoDataState::class)
@@ -118,18 +125,28 @@ fun TabsScreen(
     var showSearchVideos by remember { mutableStateOf(false) }
     var showTabsChooser by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            TopBar(
-                tabsCount = tabs.size,
-                onTabsListOpen = {
-                    showTabsChooser = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
+    Scaffold(topBar = {
+        TopBar(
+            tabsCount = tabs.size, onTabsListOpen = {
+                showTabsChooser = true
+            }, modifier = Modifier.fillMaxWidth()
+        )
+    }, floatingActionButton = {
+        FilledIconButton(onClick = {
+            showSearchVideos = true
+            currentTab.webView?.let {
+                scope.launch {
+                    val list = searchVideoElement(it)
+                    fbVideoDataState.send { FbVideoDataState(list) }
+                }
+            }
+        }) {
+            Icon(
+                imageVector = Icons.Rounded.Download,
+                contentDescription = "Click to Download Videos!"
             )
         }
-    ) { innerPadding ->
+    }) { innerPadding ->
         Box {
             Crossfade(
                 currentTab.pageType,
@@ -142,9 +159,7 @@ fun TabsScreen(
                     PageType.HOMEPAGE -> {
                         HomePage(
                             onUrlEnter = { pageUrl ->
-                                tabsScreenState.send { tabsScreenState ->
-                                    tabsScreenState.updateCurrentTab(Tab(PageType.WEBPAGE, pageUrl))
-                                }
+                                tabsScreenState.goto(pageUrl)
                             },
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -152,6 +167,10 @@ fun TabsScreen(
 
                     PageType.WEBPAGE -> {
                         currentTab.url?.let { pageUrl ->
+                            BackHandler {
+                                tabsScreenState.closeWebPage()
+                            }
+
                             ComposeWebView(
                                 initialUrl = pageUrl,
                                 webView = currentTab.webView,
@@ -162,34 +181,26 @@ fun TabsScreen(
                                         )
                                     }
                                 },
-                                onPageLoad = {
-                                    Log.d(TAG, "TabsScreen: webPage loaded: $it")
-                                },
-                                onExit = {
-                                    tabsScreenState.send {
-                                        it.updateCurrentTab(Tab())
-                                    }
-                                }
+                                onPageLoad = {}
                             )
                         }
                     }
                 }
             }
 
-            BottomSheetHandleIcon(
-                onClick = {
-                    showSearchVideos = true
-                    currentTab.webView?.let {
-                        scope.launch {
-                            val list = searchVideoElement(it)
-                            fbVideoDataState.send { FbVideoDataState(list) }
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = (56 / 2).dp)
-            )
+//            BottomSheetHandleIcon(
+//                onClick = {
+//                    showSearchVideos = true
+//                    currentTab.webView?.let {
+//                        scope.launch {
+//                            val list = searchVideoElement(it)
+//                            fbVideoDataState.send { FbVideoDataState(list) }
+//                        }
+//                    }
+//                }, modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//                    .offset(y = (56 / 2).dp)
+//            )
         }
 
         if (showSearchVideos || showTabsChooser) {
@@ -200,12 +211,35 @@ fun TabsScreen(
             ) {
                 if (showSearchVideos) {
                     ShowSearchedVideos(
-                        videoDataList = videoDataList,
-                        onDownloadVideo = onDownloadVideo
+                        videoDataList = videoDataList, onDownloadVideo = onDownloadVideo
                     )
                 } else {
-                    TabsChooser(tabs = tabs, onRemoveTab = {}, onClearAllTabs = {})
+                    TabsChooser(tabs = tabs,
+                        selectedTab = currentTab,
+                        onRemoveTab = { tabsScreenState.removeTab(it) },
+                        onClearAllTabs = { tabsScreenState.clearAll() },
+                        onForwardClick = {
+                            currentTab.webView?.let {
+                                if (it.canGoForward()) {
+                                    it.goForward()
+                                }
+                            }
+                        },
+                        onBackClick = {
+                            currentTab.webView?.let {
+                                if (it.canGoBack()) {
+                                    it.goBack()
+                                }
+                            }
+                        },
+                        onAddTabClick = { tabsScreenState.newTab() },
+                        onTabSelect = { tab -> tabsScreenState.selectTab(tab) }
+                    )
                 }
+            }
+
+            LaunchedEffect(key1 = bottomSheetState) {
+                bottomSheetState.show()
             }
         }
     }
@@ -235,18 +269,15 @@ fun ShowSearchedVideos(videoDataList: List<FBVideoData>, onDownloadVideo: (FBVid
             )
         }
     } else {
-        val appName = stringResource(id = R.string.app_name)
         videoDataList.forEach {
             Column {
                 key(it) {
-                    FacebookVideoCard(
-                        videoData = it,
+                    FacebookVideoCard(videoData = it,
                         modifier = Modifier.padding(16.dp),
                         onDownloadClick = {
                             onDownloadVideo(it)
 //                                        fetchDownloader.downloadFile(it.videoUrl, createFileName("$appName.mp4"))
-                        }
-                    )
+                        })
                 }
             }
         }
@@ -265,24 +296,18 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
     Log.d(TAG, "iskeyboardVisible: $isKeyboardOpen")
 
     val progress by animateFloatAsState(
-        targetValue = if (isKeyboardOpen) 1f else 0f,
-        label = "progress"
+        targetValue = if (isKeyboardOpen) 1f else 0f, label = "progress"
     )
 
     val motionSceneContent = remember {
-        context.resources.openRawResource(R.raw.motion_scene)
-            .readBytes()
-            .decodeToString()
+        context.resources.openRawResource(R.raw.motion_scene).readBytes().decodeToString()
     }
 
-    LaunchedEffect(
-        key1 = isKeyboardOpen,
-        block = {
-            if (!isKeyboardOpen) {
-                focusManager.clearFocus()
-            }
+    LaunchedEffect(key1 = isKeyboardOpen, block = {
+        if (!isKeyboardOpen) {
+            focusManager.clearFocus()
         }
-    )
+    })
 
     Column(modifier = modifier) {
         MotionLayout(
@@ -300,7 +325,7 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
                     .layoutId("ad_place_holder")
                     .padding(horizontal = 16.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .height(350.dp)
+                    .height(200.dp)
             )
 
             InputUrlFieldCard(
@@ -316,6 +341,8 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
             )
 
             SocialMediaSiteCard(
+                onGotoFb = { onUrlEnter("https://www.facebook.com/") },
+                onGotoInstagram = { onUrlEnter("https://www.instagram.com/") },
                 modifier = Modifier
                     .layoutId("social_media_card")
                     .fillMaxWidth()
@@ -372,8 +399,7 @@ fun TopBar(
 @Composable
 fun BottomSheetHandleIcon(modifier: Modifier = Modifier, onClick: () -> Unit) {
     FilledIconButton(
-        onClick = onClick,
-        modifier = modifier.size(56.dp)
+        onClick = onClick, modifier = modifier.size(56.dp)
     ) {
         Icon(
             imageVector = Icons.Rounded.KeyboardArrowUp,
@@ -389,11 +415,12 @@ fun BottomSheetHandleIcon(modifier: Modifier = Modifier, onClick: () -> Unit) {
 fun PageCountIcon(count: Int) {
     Box(
         modifier = Modifier
-            .size(24.dp)
+            .padding(2.dp)
+            .size(20.dp)
             .border(
                 width = 1.dp,
                 color = MaterialTheme.colorScheme.onSurface,
-                shape = RoundedCornerShape(6.dp)
+                shape = RoundedCornerShape(4.dp)
             ), contentAlignment = Alignment.Center
     ) {
         Text(text = count.toString(), style = MaterialTheme.typography.titleSmall)
@@ -402,7 +429,11 @@ fun PageCountIcon(count: Int) {
 
 
 @Composable
-fun SocialMediaSiteCard(modifier: Modifier = Modifier) {
+fun SocialMediaSiteCard(
+    modifier: Modifier = Modifier,
+    onGotoFb: () -> Unit,
+    onGotoInstagram: () -> Unit
+) {
     Card(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -411,8 +442,8 @@ fun SocialMediaSiteCard(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Facebook(onClick = {})
-            Instagram(onClick = {})
+            Facebook(onClick = onGotoFb)
+            Instagram(onClick = onGotoInstagram)
         }
     }
 }
@@ -424,9 +455,7 @@ fun Facebook(onClick: () -> Unit, iconSize: Dp = 56.dp) {
         name = "Facebook",
         icon = {
             IconButton(
-                onClick = onClick,
-                modifier = Modifier
-                    .size(iconSize)
+                onClick = onClick, modifier = Modifier.size(iconSize)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.facebook),
@@ -448,8 +477,7 @@ fun Instagram(onClick: () -> Unit, iconSize: Dp = 56.dp) {
         name = "Instagram",
         icon = {
             IconButton(
-                onClick = onClick, modifier = Modifier
-                    .size(iconSize)
+                onClick = onClick, modifier = Modifier.size(iconSize)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.instagram),
@@ -467,8 +495,7 @@ fun Instagram(onClick: () -> Unit, iconSize: Dp = 56.dp) {
 @Composable
 fun SocialSite(name: String, icon: @Composable () -> Unit) {
     Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         icon()
         Text(

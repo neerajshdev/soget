@@ -12,7 +12,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.centicbhaiya.getitsocial.model.FBVideoData
@@ -41,8 +44,9 @@ fun ComposeWebView(
     webView: WebView? = null,
     onCreate: (WebView) -> Unit,
     onPageLoad: (url: String) -> Unit,
-    onExit: () -> Unit
 ) {
+    var backEnabled by remember { mutableStateOf(false) }
+
     Box {
         AndroidView(modifier = modifier, factory = {
             webView ?: WebView(it).apply {
@@ -76,6 +80,9 @@ fun ComposeWebView(
                         onPageLoad(url)
 
                         Log.d(TAG, "onPageFinished: $url")
+
+                        backEnabled = view.canGoBack()
+                        Log.d(TAG, "back enabled: $backEnabled")
                     }
 
                     override fun shouldOverrideUrlLoading(
@@ -92,10 +99,10 @@ fun ComposeWebView(
         }, update = {}
         )
     }
-    BackHandler {
-        if (webView?.canGoBack()!!) webView.goBack() else {
-            onExit()
-        }
+
+    BackHandler(backEnabled) {
+        webView?.goBack()
+        Log.d(TAG, "ComposeWebView: goBack()")
     }
 }
 
