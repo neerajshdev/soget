@@ -5,21 +5,10 @@ import online.desidev.onestate.OneState
 import java.util.UUID
 
 data class TabsScreenState(
-    val tabs: MutableList<Tab> = mutableListOf(Tab()),
+    val tabs: List<Tab> = listOf(Tab()),
     var currentTabIndex: Int = 0
 ) {
-    fun updateCurrentTab(tab: Tab): TabsScreenState {
-        tabs[currentTabIndex] = tab
-        return this
-    }
-
     fun getCurrentTab() = tabs[currentTabIndex]
-
-    fun addTab(tab: Tab) {
-        tabs.add(tab)
-        currentTabIndex = tabs.indexOf(tab)
-    }
-
 }
 
 data class Tab(
@@ -42,65 +31,76 @@ fun OneState<TabsScreenState>.selectTab(tab: Tab) {
     }
 }
 
+fun OneState<TabsScreenState>.updateCurrentTab(
+    newTab: Tab
+) {
+    send {
+        val currTab = it.getCurrentTab()
+        val tabs = it.tabs.map { tab: Tab ->
+            if (tab == currTab) {
+                newTab
+            } else tab
+        }
+        val index = it.currentTabIndex
+        TabsScreenState(tabs, index)
+    }
+}
+
 fun OneState<TabsScreenState>.goto(url: String) {
     send {
-        it.apply {
-            tabs[currentTabIndex] =
-                tabs[currentTabIndex].copy(pageType = PageType.WEBPAGE, url = url).apply {
-                    webView?.loadUrl(url)
-                }
+        val tabs = it.tabs.toMutableList()
+        val updatedTab = it.getCurrentTab().copy(pageType = PageType.WEBPAGE, url = url).apply {
+            webView?.loadUrl(url)
         }
+        tabs[it.currentTabIndex] = updatedTab
+        it.copy(tabs = tabs)
     }
 }
 
 fun OneState<TabsScreenState>.updateTabUrl(url: String) {
     send {
-        it.apply {
-            tabs[currentTabIndex] = tabs[currentTabIndex].copy(url = url)
-        }
+        val tabs = it.tabs.toMutableList()
+        tabs[it.currentTabIndex] = it.getCurrentTab().copy(url = url)
+        it.copy(tabs = tabs)
     }
 }
 
 fun OneState<TabsScreenState>.closeWebPage() {
     send {
-        it.apply {
-            it.tabs[currentTabIndex] = it.tabs[currentTabIndex].copy(
-                pageType = PageType.HOMEPAGE,
-                url = null,
-                webView = null
-            )
-        }
+        val tabs = it.tabs.toMutableList()
+        tabs[it.currentTabIndex] = Tab()
+        it.copy(tabs = tabs)
     }
 }
 
 fun OneState<TabsScreenState>.newTab(url: String? = null) {
     // add a new tab starts from homepage
     val tab = url?.let { Tab(url = it, pageType = PageType.WEBPAGE) } ?: Tab()
-    send { it.apply { addTab(tab) } }
+    send {
+        val tabs = it.tabs.toMutableList()
+        tabs.add(tab)
+        TabsScreenState(tabs, tabs.lastIndex)
+    }
 }
 
 fun OneState<TabsScreenState>.removeTab(tab: Tab) {
-    send {
-        it.apply {
-            if (tabs[currentTabIndex] == tab) {
-                currentTabIndex = 0
-            }
-            tabs.remove(tab)
-            if (tabs.isEmpty()) {
-                addTab(Tab())
-            }
+    send { state ->
+        val tabs = state.tabs.toMutableList()
+        val currTab =  state.getCurrentTab()
+        tabs.remove(tab)
+        var tabIndex = tabs.indexOf(currTab).coerceAtLeast(0)
+
+        if (tabs.isEmpty()) {
+            tabs.add(Tab())
+            tabIndex = 0
         }
+
+        TabsScreenState(tabs, tabIndex)
     }
 }
 
 fun OneState<TabsScreenState>.clearAll() {
-    send {
-        it.apply {
-            tabs.clear()
-            currentTabIndex = 0
-            tabs.add(Tab())
-        }
-    }
+    send { TabsScreenState() }
 }
 
 

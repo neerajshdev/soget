@@ -34,6 +34,9 @@ class MainActivity : ComponentActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        Thread.UncaughtExceptionHandler { t, e ->
+            e.printStackTrace()
+        }
 
         stateManager.configure {
             stateFactory(FbVideoDataState::class) {
@@ -43,9 +46,8 @@ class MainActivity : ComponentActivity() {
             stateFactory(TabsScreenState::class) { TabsScreenState() }
             stateFactory(DownloadState::class) { DownloadState() }
         }
-        
+
         val extraTextUrl = intent.extras?.getString(Intent.EXTRA_TEXT)
-        Log.d(TAG, "onCreate: intent extra text: $extraTextUrl")
 
 
         setContent {
@@ -54,9 +56,10 @@ class MainActivity : ComponentActivity() {
                     val tabsScreenState = stateManager.rememberOneState(TabsScreenState::class)
                     val appname = stringResource(id = R.string.app_name)
 
-
                     SideEffect {
-                        tabsScreenState.newTab(extraTextUrl)
+                        extraTextUrl?.let {
+                            tabsScreenState.newTab(it)
+                        }
                     }
 
                     TabsScreen(tabsScreenState = tabsScreenState, onDownloadVideo = { video ->

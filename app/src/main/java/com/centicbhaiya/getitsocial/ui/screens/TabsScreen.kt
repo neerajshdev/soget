@@ -77,6 +77,7 @@ import com.centicbhaiya.getitsocial.ui.state.goto
 import com.centicbhaiya.getitsocial.ui.state.newTab
 import com.centicbhaiya.getitsocial.ui.state.removeTab
 import com.centicbhaiya.getitsocial.ui.state.selectTab
+import com.centicbhaiya.getitsocial.ui.state.updateCurrentTab
 import com.centicbhaiya.getitsocial.ui.state.updateTabUrl
 import com.centicbhaiya.getitsocial.ui.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -192,13 +193,9 @@ fun TabsScreen(
                                 initialUrl = pageUrl,
                                 webView = currentTab.webView,
                                 onCreate = { webView ->
-                                    tabsScreenState.send {
-                                        it.updateCurrentTab(
-                                            it.getCurrentTab().copy(webView = webView)
-                                        )
-                                    }
+                                    tabsScreenState.updateCurrentTab(currentTab.copy(webView = webView))
                                 },
-                                onPageLoad = {newUrl ->
+                                onPageLoad = { newUrl ->
                                     tabsScreenState.updateTabUrl(newUrl)
                                 }
                             )

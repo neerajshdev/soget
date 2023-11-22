@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -101,23 +102,25 @@ fun TabsChooser(
                 .heightIn(max = 400.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            for (tab in tabs.reversed()) {
+            for (tab in tabs) {
                 val containerColor =
                     if (tab == selectedTab) colorScheme.surfaceContainerLow else colorScheme.surfaceContainerLowest
                 Surface(color = containerColor) {
-                    TabItem(
-                        tab = tab,
-                        onRemoveTab = { onRemoveTab(tab) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable(interactionSource = remember {
-                                MutableInteractionSource()
-                            }, indication = null, onClick = {
-                                onTabSelect(tab)
-                            })
-                            .padding(horizontal = 8.dp)
-                            .padding(vertical = 12.dp)
-                    )
+                    key(tab.id){
+                        TabItem(
+                            tab = tab,
+                            onRemoveTab = { onRemoveTab(tab) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(interactionSource = remember {
+                                    MutableInteractionSource()
+                                }, indication = null, onClick = {
+                                    onTabSelect(tab)
+                                })
+                                .padding(horizontal = 8.dp)
+                                .padding(vertical = 12.dp)
+                        )
+                    }
                 }
             }
         }
