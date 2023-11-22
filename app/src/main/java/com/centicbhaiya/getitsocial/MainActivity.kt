@@ -1,11 +1,13 @@
 package com.centicbhaiya.getitsocial
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
@@ -15,6 +17,7 @@ import com.centicbhaiya.getitsocial.ui.screens.TabsScreen
 import com.centicbhaiya.getitsocial.ui.state.DownloadState
 import com.centicbhaiya.getitsocial.ui.state.FbVideoDataState
 import com.centicbhaiya.getitsocial.ui.state.TabsScreenState
+import com.centicbhaiya.getitsocial.ui.state.newTab
 import com.centicbhaiya.getitsocial.ui.theme.AppTheme
 import com.centicbhaiya.getitsocial.util.createFileName
 import com.centicbhaiya.getitsocial.util.download
@@ -40,6 +43,9 @@ class MainActivity : ComponentActivity() {
             stateFactory(TabsScreenState::class) { TabsScreenState() }
             stateFactory(DownloadState::class) { DownloadState() }
         }
+        
+        val extraTextUrl = intent.extras?.getString(Intent.EXTRA_TEXT)
+        Log.d(TAG, "onCreate: intent extra text: $extraTextUrl")
 
 
         setContent {
@@ -47,6 +53,12 @@ class MainActivity : ComponentActivity() {
                 Column {
                     val tabsScreenState = stateManager.rememberOneState(TabsScreenState::class)
                     val appname = stringResource(id = R.string.app_name)
+
+
+                    SideEffect {
+                        tabsScreenState.newTab(extraTextUrl)
+                    }
+
                     TabsScreen(tabsScreenState = tabsScreenState, onDownloadVideo = { video ->
                         download(
                             createFileName(appname),

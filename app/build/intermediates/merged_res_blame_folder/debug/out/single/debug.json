@@ -260,6 +260,10 @@
         "source": "com.centicbhaiya.getitsocial.app-main-86:/mipmap-hdpi/logo_launcher_foreground.webp"
     },
     {
+        "merged": "com.centicbhaiya.getitsocial.app-merged_res-84:/drawable_google.xml.flat",
+        "source": "com.centicbhaiya.getitsocial.app-main-86:/drawable/google.xml"
+    },
+    {
         "merged": "com.centicbhaiya.getitsocial.app-merged_res-84:/mipmap-xhdpi_logo_launcher_round.webp.flat",
         "source": "com.centicbhaiya.getitsocial.app-main-86:/mipmap-xhdpi/logo_launcher_round.webp"
     }

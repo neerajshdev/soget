@@ -19,7 +19,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +48,7 @@ private fun PageInputUrlPreview() {
             onValueChange = { url = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
         )
     }
 }
@@ -70,12 +69,12 @@ fun InputUrlFieldCard(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier.padding(12.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
             Icon(
                 imageVector = Icons.Rounded.Link,
                 contentDescription = "Link input field",
-                tint = MaterialTheme.colorScheme.outline
+                tint = colorScheme.outline
             )
 
             EditableUrlText(

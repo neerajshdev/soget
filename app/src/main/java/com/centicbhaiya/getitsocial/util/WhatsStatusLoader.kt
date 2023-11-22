@@ -26,7 +26,11 @@ abstract class WhatsStatusLoader {
                             } else {
                                 if (file.parentFile?.name == statusDirName) {
                                     try {
-                                        val whatsStatus = EntityWhatsStatus(file.absolutePath, false, whatsStatusType(file.name))
+                                        val whatsStatus = EntityWhatsStatus(
+                                            file.absolutePath,
+                                            false,
+                                            whatsStatusType(file.name)
+                                        )
                                         whatsStatusList.add(whatsStatus)
                                     } catch (ex: IllegalArgumentException) {
                                         ex.printStackTrace() // Todo: remove it from here
@@ -56,7 +60,11 @@ abstract class WhatsStatusLoader {
                             } else {
                                 if (doc.parentFile?.name == statusDirName) {
                                     try {
-                                        val whatsStatus = EntityWhatsStatus(documentFile.uri.toString(), true, whatsStatusType(documentFile.name!!))
+                                        val whatsStatus = EntityWhatsStatus(
+                                            documentFile.uri.toString(),
+                                            true,
+                                            whatsStatusType(documentFile.name!!)
+                                        )
                                         mediaList.add(whatsStatus)
                                     } catch (ex: IllegalArgumentException) {
                                         ex.printStackTrace()
@@ -77,7 +85,7 @@ abstract class WhatsStatusLoader {
          * Use case for loading the saved whatsapp media from
          * the given dir.
          */
-        fun savedMedia(dir: String) : WhatsStatusLoader {
+        fun savedMedia(dir: String): WhatsStatusLoader {
             return object : WhatsStatusLoader() {
                 override fun exec(): List<EntityWhatsStatus> {
                     val list = mutableListOf<EntityWhatsStatus>()
@@ -96,13 +104,10 @@ abstract class WhatsStatusLoader {
             }
         }
 
-        private fun whatsStatusType(name: String): EntityWhatsStatus.Type
-        {
-            if (name.endsWith(".mp4"))
-            {
+        private fun whatsStatusType(name: String): EntityWhatsStatus.Type {
+            if (name.endsWith(".mp4")) {
                 return EntityWhatsStatus.Type.VIDEO
-            } else if(name.endsWith(".png") || name.endsWith(".jpg"))
-            {
+            } else if (name.endsWith(".png") || name.endsWith(".jpg")) {
                 return EntityWhatsStatus.Type.IMAGE
             }
             throw java.lang.IllegalArgumentException("invalid input: name = $name")

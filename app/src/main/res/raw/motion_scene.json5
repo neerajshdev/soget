@@ -14,7 +14,7 @@
         top: [
           'ad_place_holder',
           'bottom',
-          12
+          16
         ],
       },
       social_media_card: {
@@ -22,7 +22,7 @@
         top: [
           'url_edit_text',
           'bottom',
-          12
+          16
         ],
       },
     },
@@ -35,12 +35,12 @@
 
       ad_place_holder: {
         centerHorizontally: 'parent',
-        top: ['url_edit_text', 'bottom', 12]
+        top: ['url_edit_text', 'bottom', 16]
       },
 
       social_media_card: {
         centerHorizontally: 'parent',
-        top: ['ad_place_holder', 'bottom', 12],
+        top: ['ad_place_holder', 'bottom', 16],
       },
     }
   },

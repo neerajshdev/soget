@@ -19,11 +19,11 @@ import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -36,8 +36,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,22 +54,22 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import com.centicbhaiya.getitsocial.R
-import com.centicbhaiya.getitsocial.model.FBVideoData
+import com.centicbhaiya.getitsocial.model.VideoData
+import com.centicbhaiya.getitsocial.ui.components.BrowserTopBar
 import com.centicbhaiya.getitsocial.ui.components.ComposeWebView
-import com.centicbhaiya.getitsocial.ui.components.FacebookVideoCard
 import com.centicbhaiya.getitsocial.ui.components.InputUrlFieldCard
+import com.centicbhaiya.getitsocial.ui.components.SearchVideoCard
 import com.centicbhaiya.getitsocial.ui.components.TabsChooser
+import com.centicbhaiya.getitsocial.ui.components.HomeTopBar
 import com.centicbhaiya.getitsocial.ui.components.searchVideoElement
 import com.centicbhaiya.getitsocial.ui.state.FbVideoDataState
 import com.centicbhaiya.getitsocial.ui.state.PageType
-import com.centicbhaiya.getitsocial.ui.state.Tab
 import com.centicbhaiya.getitsocial.ui.state.TabsScreenState
 import com.centicbhaiya.getitsocial.ui.state.clearAll
 import com.centicbhaiya.getitsocial.ui.state.closeWebPage
@@ -79,12 +77,14 @@ import com.centicbhaiya.getitsocial.ui.state.goto
 import com.centicbhaiya.getitsocial.ui.state.newTab
 import com.centicbhaiya.getitsocial.ui.state.removeTab
 import com.centicbhaiya.getitsocial.ui.state.selectTab
+import com.centicbhaiya.getitsocial.ui.state.updateTabUrl
 import com.centicbhaiya.getitsocial.ui.theme.AppTheme
-import com.centicbhaiya.getitsocial.ui.theme.useDarkTheme
 import kotlinx.coroutines.launch
+import okhttp3.internal.filterList
 import online.desidev.onestate.OneState
 import online.desidev.onestate.stateManager
 import online.desidev.onestate.toState
+import java.net.URL
 
 private const val TAG = "TabsScreen"
 
@@ -112,7 +112,7 @@ fun TabsScreenPrev() {
 @Composable
 fun TabsScreen(
     tabsScreenState: OneState<TabsScreenState>,
-    onDownloadVideo: (FBVideoData) -> Unit = {}
+    onDownloadVideo: (VideoData) -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     val currentTab by tabsScreenState.toState { it.getCurrentTab() }
@@ -126,17 +126,34 @@ fun TabsScreen(
     var showTabsChooser by remember { mutableStateOf(false) }
 
     Scaffold(topBar = {
-        TopBar(
-            tabsCount = tabs.size, onTabsListOpen = {
-                showTabsChooser = true
-            }, modifier = Modifier.fillMaxWidth()
-        )
+        if (currentTab.pageType == PageType.HOMEPAGE) {
+            HomeTopBar(
+                tabsCount = tabs.size,
+                onOpenTabs = {
+                    showTabsChooser = true
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Surface {
+                BrowserTopBar(
+                    currentUrl = currentTab.url ?: "",
+                    onLoadNewPage = { loadNewPage(tabsScreenState, it) },
+                    tabCount = tabs.size,
+                    onOpenTabs = { showTabsChooser = true },
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = 16.dp)
+                        .padding(vertical = 8.dp)
+                )
+            }
+        }
     }, floatingActionButton = {
         FilledIconButton(onClick = {
             showSearchVideos = true
             currentTab.webView?.let {
                 scope.launch {
-                    val list = searchVideoElement(it)
+                    val list = searchVideoElement(it).filterList { videoUrl.startsWith("http") }
                     fbVideoDataState.send { FbVideoDataState(list) }
                 }
             }
@@ -159,7 +176,7 @@ fun TabsScreen(
                     PageType.HOMEPAGE -> {
                         HomePage(
                             onUrlEnter = { pageUrl ->
-                                tabsScreenState.goto(pageUrl)
+                                loadNewPage(tabsScreenState, pageUrl)
                             },
                             modifier = Modifier.fillMaxSize(),
                         )
@@ -181,26 +198,14 @@ fun TabsScreen(
                                         )
                                     }
                                 },
-                                onPageLoad = {}
+                                onPageLoad = {newUrl ->
+                                    tabsScreenState.updateTabUrl(newUrl)
+                                }
                             )
                         }
                     }
                 }
             }
-
-//            BottomSheetHandleIcon(
-//                onClick = {
-//                    showSearchVideos = true
-//                    currentTab.webView?.let {
-//                        scope.launch {
-//                            val list = searchVideoElement(it)
-//                            fbVideoDataState.send { FbVideoDataState(list) }
-//                        }
-//                    }
-//                }, modifier = Modifier
-//                    .align(Alignment.BottomCenter)
-//                    .offset(y = (56 / 2).dp)
-//            )
         }
 
         if (showSearchVideos || showTabsChooser) {
@@ -247,7 +252,7 @@ fun TabsScreen(
 
 
 @Composable
-fun ShowSearchedVideos(videoDataList: List<FBVideoData>, onDownloadVideo: (FBVideoData) -> Unit) {
+fun ShowSearchedVideos(videoDataList: List<VideoData>, onDownloadVideo: (VideoData) -> Unit) {
     Text(
         text = "Videos on this page",
         style = MaterialTheme.typography.titleLarge,
@@ -272,7 +277,7 @@ fun ShowSearchedVideos(videoDataList: List<FBVideoData>, onDownloadVideo: (FBVid
         videoDataList.forEach {
             Column {
                 key(it) {
-                    FacebookVideoCard(videoData = it,
+                    SearchVideoCard(videoData = it,
                         modifier = Modifier.padding(16.dp),
                         onDownloadClick = {
                             onDownloadVideo(it)
@@ -341,8 +346,7 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
             )
 
             SocialMediaSiteCard(
-                onGotoFb = { onUrlEnter("https://www.facebook.com/") },
-                onGotoInstagram = { onUrlEnter("https://www.instagram.com/") },
+                onSiteOpen = onUrlEnter,
                 modifier = Modifier
                     .layoutId("social_media_card")
                     .fillMaxWidth()
@@ -350,49 +354,6 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
             )
         }
     }
-
-
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(
-    modifier: Modifier,
-    tabsCount: Int,
-    onTabsListOpen: () -> Unit = {},
-) {
-    val scope = rememberCoroutineScope()
-    TopAppBar(
-        modifier = modifier,
-        title = { Text(stringResource(id = R.string.app_name)) },
-        actions = {
-            IconButton(onClick = onTabsListOpen) {
-                PageCountIcon(count = tabsCount)
-            }
-
-            IconButton(onClick = {}) {
-                Icon(imageVector = Icons.Default.Info, contentDescription = "How to use")
-            }
-
-            IconButton(onClick = {
-                scope.launch {
-                    useDarkTheme = useDarkTheme.not()
-                }
-            }) {
-                Icon(
-                    painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
-                    contentDescription = "Change Theme",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        },
-
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface
-        )
-    )
 }
 
 
@@ -431,8 +392,7 @@ fun PageCountIcon(count: Int) {
 @Composable
 fun SocialMediaSiteCard(
     modifier: Modifier = Modifier,
-    onGotoFb: () -> Unit,
-    onGotoInstagram: () -> Unit
+    onSiteOpen: (String) -> Unit
 ) {
     Card(modifier = modifier) {
         Row(
@@ -440,10 +400,11 @@ fun SocialMediaSiteCard(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Facebook(onClick = onGotoFb)
-            Instagram(onClick = onGotoInstagram)
+            Facebook(onClick = { onSiteOpen("https://www.facebook.com/") })
+            Instagram(onClick = { onSiteOpen("https://www.instagram.com/") })
+            Google(onClick = { onSiteOpen("https://www.google.com/") })
         }
     }
 }
@@ -493,6 +454,27 @@ fun Instagram(onClick: () -> Unit, iconSize: Dp = 56.dp) {
 }
 
 @Composable
+fun Google(onClick: () -> Unit, iconSize: Dp = 56.dp) {
+    SocialSite(
+        name = "Google",
+        icon = {
+            IconButton(
+                onClick = onClick, modifier = Modifier.size(iconSize)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google search",
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .size(iconSize)
+                        .padding(4.dp)
+                )
+            }
+        },
+    )
+}
+
+@Composable
 fun SocialSite(name: String, icon: @Composable () -> Unit) {
     Column(
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
@@ -504,4 +486,14 @@ fun SocialSite(name: String, icon: @Composable () -> Unit) {
             color = MaterialTheme.colorScheme.onSurface
         )
     }
+}
+
+
+private fun loadNewPage(tabsScreenState: OneState<TabsScreenState>, str: String) {
+    val url = try {
+        URL(str)
+    } catch (ex: Exception) {
+        URL("https://www.google.com/search?q=$str")
+    }
+    tabsScreenState.goto(url.toString())
 }

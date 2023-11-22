@@ -5,6 +5,8 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.*
 import android.os.Build
 import android.os.Environment
@@ -201,3 +203,21 @@ fun createFileName(postFix: String): String {
     return "${timestamp}_$postFix"
 }
 
+
+fun getVideoThumbnail(videoUrl: String): Bitmap? {
+    val retriever =  MediaMetadataRetriever()
+    var thumbnail : Bitmap? = null
+    try {
+        // Set video URL
+        retriever.setDataSource(videoUrl, HashMap < String, String > ())
+        // Get frame at the 1st second as the thumbnail
+        thumbnail = retriever.getFrameAtTime (1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+        // Use this thumbnail Bitmap as needed
+    } catch (e: Exception) {
+        e.printStackTrace();
+        // Handle exceptions
+    } finally {
+        retriever.release()
+    }
+    return thumbnail
+}

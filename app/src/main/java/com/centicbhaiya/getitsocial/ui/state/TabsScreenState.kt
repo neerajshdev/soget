@@ -53,6 +53,14 @@ fun OneState<TabsScreenState>.goto(url: String) {
     }
 }
 
+fun OneState<TabsScreenState>.updateTabUrl(url: String) {
+    send {
+        it.apply {
+            tabs[currentTabIndex] = tabs[currentTabIndex].copy(url = url)
+        }
+    }
+}
+
 fun OneState<TabsScreenState>.closeWebPage() {
     send {
         it.apply {
@@ -65,9 +73,10 @@ fun OneState<TabsScreenState>.closeWebPage() {
     }
 }
 
-fun OneState<TabsScreenState>.newTab() {
+fun OneState<TabsScreenState>.newTab(url: String? = null) {
     // add a new tab starts from homepage
-    send { it.apply { addTab(Tab()) } }
+    val tab = url?.let { Tab(url = it, pageType = PageType.WEBPAGE) } ?: Tab()
+    send { it.apply { addTab(tab) } }
 }
 
 fun OneState<TabsScreenState>.removeTab(tab: Tab) {

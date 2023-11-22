@@ -42,3 +42,33 @@ function getAllVisibleFbVideo() {
         return JSON.stringify({error: error.message});
     }
 }
+
+
+
+function getAllVisibleIGVideo() {
+    const videos = document.querySelectorAll('video');
+    const visibleVideosData = Array.from(videos).filter(video => {
+        const rect = video.getBoundingClientRect();
+        const isVisible = (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+
+        return isVisible && getComputedStyle(video).display !== 'none';
+    }).map(video => {
+        return {
+            videoUrl: video.currentSrc || video.src,
+            imageUrl: null,
+            dashManifest: null
+            // Add more properties as needed
+        };
+    });
+
+    return JSON.stringify(visibleVideosData);
+}
+
+
+
+

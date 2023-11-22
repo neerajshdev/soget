@@ -1118,6 +1118,7 @@ drawable fetch_notification_resume
 drawable fetch_notification_retry
 drawable gnt_outline_shape
 drawable gnt_rounded_corners_shape
+drawable google
 drawable googleg_disabled_color_18
 drawable googleg_standard_color_18
 drawable ic_100tb

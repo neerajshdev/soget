@@ -1,7 +1,7 @@
 package com.centicbhaiya.getitsocial.ui.state
 
-import com.centicbhaiya.getitsocial.model.FBVideoData
+import com.centicbhaiya.getitsocial.model.VideoData
 
 class FbVideoDataState(
-    val list: List<FBVideoData>
+    val list: List<VideoData>
 )

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="gcm_defaultSenderId" translatable="false">350855811135</string>
-    <string name="google_api_key" translatable="false">AIzaSyDJYejpCX_g9p5odr2pmBdU-lXdtBoruO8</string>
-    <string name="google_app_id" translatable="false">1:350855811135:android:06cfaa57c6b57bafcc688a</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDJYejpCX_g9p5odr2pmBdU-lXdtBoruO8</string>
-    <string name="google_storage_bucket" translatable="false">getitsocial-d0b22.appspot.com</string>
-    <string name="project_id" translatable="false">getitsocial-d0b22</string>
-</resources>

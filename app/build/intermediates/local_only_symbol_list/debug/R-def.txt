@@ -7,6 +7,7 @@ drawable app_logo
 drawable baseline_dark_mode_24
 drawable baseline_light_mode_24
 drawable facebook
+drawable google
 drawable ic_tabs
 drawable instagram
 drawable native_ad_placeholder
