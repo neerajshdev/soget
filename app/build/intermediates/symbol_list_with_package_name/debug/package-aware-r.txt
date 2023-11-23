@@ -1,4 +1,4 @@
-com.centicbhaiya.getitsocial
+com.gd.reelssaver
 anim abc_fade_in
 anim abc_fade_out
 anim abc_grow_fade_in_from_bottom
@@ -1112,10 +1112,6 @@ drawable common_google_signin_btn_text_light_normal_background
 drawable compat_splash_screen
 drawable compat_splash_screen_no_icon_background
 drawable facebook
-drawable fetch_notification_cancel
-drawable fetch_notification_pause
-drawable fetch_notification_resume
-drawable fetch_notification_retry
 drawable gnt_outline_shape
 drawable gnt_rounded_corners_shape
 drawable google
@@ -1133,6 +1129,7 @@ drawable ic_launcher_foreground
 drawable ic_tabs
 drawable icon_background
 drawable instagram
+drawable logo_launcher_playstore
 drawable messenger_bubble_large_blue
 drawable messenger_bubble_large_white
 drawable messenger_bubble_small_blue
@@ -1733,26 +1730,13 @@ string common_signin_button_text_long
 string copy_toast_msg
 string default_error_message
 string default_popup_window_title
+string default_web_client_id
 string dropdown_menu
 string facebook_app_id
 string facebook_client_token
 string fallback_menu_item_copy_link
 string fallback_menu_item_open_in_browser
 string fallback_menu_item_share_link
-string fetch_notification_default_channel_id
-string fetch_notification_default_channel_name
-string fetch_notification_download_cancel
-string fetch_notification_download_complete
-string fetch_notification_download_downloading
-string fetch_notification_download_eta_hrs
-string fetch_notification_download_eta_min
-string fetch_notification_download_eta_sec
-string fetch_notification_download_failed
-string fetch_notification_download_pause
-string fetch_notification_download_paused
-string fetch_notification_download_resume
-string fetch_notification_download_retry
-string fetch_notification_download_starting
 string gcm_defaultSenderId
 string google_api_key
 string google_app_id
@@ -2358,5 +2342,6 @@ styleable com_facebook_profile_picture_view com_facebook_is_cropped com_facebook
 styleable include constraintSet
 xml backup_rules
 xml data_extraction_rules
+xml ga_ad_services_config
 xml gma_ad_services_config
 xml image_share_filepaths

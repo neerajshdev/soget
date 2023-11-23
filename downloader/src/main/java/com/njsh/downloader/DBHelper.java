@@ -1,4 +1,4 @@
-package com.centicbhaiya.downloader;
+package com.gd.downloader;
 
 import android.content.ContentValues;
 import android.content.Context;

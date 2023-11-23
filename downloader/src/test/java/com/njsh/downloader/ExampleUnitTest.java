@@ -1,4 +1,4 @@
-package com.centicbhaiya.downloader;
+package com.gd.downloader;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

@@ -1,4 +1,4 @@
-package com.centicbhaiya.downloader;
+package com.gd.downloader;
 
 public class UpdateListener {
     public void onUpdateSpeed(int bytesPerSec) {}

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.centicbhaiya.getitsocial.app-mergeDebugResources-82:/values-v27/values-v27.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-80:/values-v27/values-v27.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\47e91ebb90eca58c71fe184f7e9ae83a\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-v27\\values-v27.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\9ec015119cfe02a330f115afc44aa744\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-v27\\values-v27.xml",
                     "from": {
                         "startLines": "2,3,4,7",
                         "startColumns": "4,4,4,4",

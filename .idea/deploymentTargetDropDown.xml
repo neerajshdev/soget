@@ -5,10 +5,13 @@
       <entry key="BrowserTopBarPrev">
         <State />
       </entry>
-      <entry key="FacebookVideoCardPrev">
+      <entry key="SplashScreenPreviewLight">
         <State />
       </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="main">
         <State />
       </entry>
     </value>

@@ -2,16 +2,17 @@
 <resources xmlns:ns1="http://schemas.android.com/tools">
     <color name="logo_launcher_background">#FFFFFF</color>
     <color name="white">#FFFFFFFF</color>
-    <string name="app_name">Get It Social</string>
+    <string name="app_name">ReelSaver</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id" ns1:ignore="UnusedResources,TypographyDashes" translatable="false">00000000000000000000000000000000</string>
+    <string name="default_web_client_id" translatable="false">458128866736-90hk0lb54s950jil1g8kl6a90mq687j6.apps.googleusercontent.com</string>
     <string name="facebook_app_id">24279406111673314</string>
     <string name="facebook_client_token">5eea27cab4a04bfe4cd2bf59a0a3c715</string>
-    <string name="gcm_defaultSenderId" translatable="false">350855811135</string>
-    <string name="google_api_key" translatable="false">AIzaSyDJYejpCX_g9p5odr2pmBdU-lXdtBoruO8</string>
-    <string name="google_app_id" translatable="false">1:350855811135:android:06cfaa57c6b57bafcc688a</string>
-    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDJYejpCX_g9p5odr2pmBdU-lXdtBoruO8</string>
-    <string name="google_storage_bucket" translatable="false">getitsocial-d0b22.appspot.com</string>
-    <string name="project_id" translatable="false">getitsocial-d0b22</string>
+    <string name="gcm_defaultSenderId" translatable="false">458128866736</string>
+    <string name="google_api_key" translatable="false">AIzaSyBC6UkNwDKW6YaNHo3zktj8xorNqNcVemM</string>
+    <string name="google_app_id" translatable="false">1:458128866736:android:bf800f4afadff0fe8e2a75</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBC6UkNwDKW6YaNHo3zktj8xorNqNcVemM</string>
+    <string name="google_storage_bucket" translatable="false">all-downloader-d5ea7.appspot.com</string>
+    <string name="project_id" translatable="false">all-downloader-d5ea7</string>
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.Myapp</item>
         <item name="windowSplashScreenAnimationDuration">300</item>

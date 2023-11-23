@@ -4,7 +4,7 @@
     "type": "PACKAGED_MANIFESTS",
     "kind": "Directory"
   },
-  "applicationId": "com.centicbhaiya.getitsocial.test",
+  "applicationId": "com.gd.reelssaver.test",
   "variantName": "debugAndroidTest",
   "elements": [
     {

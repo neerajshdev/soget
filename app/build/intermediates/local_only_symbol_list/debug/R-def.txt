@@ -10,6 +10,7 @@ drawable facebook
 drawable google
 drawable ic_tabs
 drawable instagram
+drawable logo_launcher_playstore
 drawable native_ad_placeholder
 drawable round_download_24
 drawable round_folder_24
@@ -38,6 +39,7 @@ mipmap logo_launcher_round
 raw motion_scene
 string app_name
 string com.google.firebase.crashlytics.mapping_file_id
+string default_web_client_id
 string facebook_app_id
 string facebook_client_token
 string gcm_defaultSenderId

@@ -1,4 +1,4 @@
-package com.centicbhaiya.downloader.youtube;
+package com.gd.downloader.youtube;
 
 public class YtVideo
 {

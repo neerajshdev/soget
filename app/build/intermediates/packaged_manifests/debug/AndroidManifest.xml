@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.centicbhaiya.getitsocial"
+    package="com.gd.reelssaver"
     android:versionCode="3"
     android:versionName="2.0" >
 
@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" />
 
     <queries>
         <package android:name="com.facebook.katana" />
@@ -33,21 +35,18 @@
         </intent>
     </queries>
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" />
-    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" />
-    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" />
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_TOPICS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <permission
-        android:name="com.centicbhaiya.getitsocial.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:name="com.gd.reelssaver.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.centicbhaiya.getitsocial.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+    <uses-permission android:name="com.gd.reelssaver.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
-        android:name="com.centicbhaiya.getitsocial.App"
+        android:name="com.gd.reelssaver.App"
         android:allowBackup="true"
         android:appComponentFactory="androidx.core.app.CoreComponentFactory"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -57,10 +56,9 @@
         android:icon="@mipmap/logo_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:testOnly="true"
         android:theme="@style/Theme.Myapp" >
         <activity
-            android:name="com.centicbhaiya.getitsocial.MainActivity"
+            android:name="com.gd.reelssaver.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" >
@@ -146,6 +144,14 @@
                 android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar"
                 android:value="com.google.firebase.components.ComponentRegistrar" />
         </service>
+        <service
+            android:name="com.google.firebase.sessions.SessionLifecycleService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/ga_ad_services_config" />
 
         <activity
             android:name="com.facebook.FacebookActivity"
@@ -162,7 +168,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="cct.com.centicbhaiya.getitsocial"
+                    android:host="cct.com.gd.reelssaver"
                     android:scheme="fbconnect" />
             </intent-filter>
         </activity>
@@ -197,7 +203,7 @@
         -->
         <provider
             android:name="com.facebook.internal.FacebookInitProvider"
-            android:authorities="com.centicbhaiya.getitsocial.FacebookInitProvider"
+            android:authorities="com.gd.reelssaver.FacebookInitProvider"
             android:exported="false" />
 
         <receiver
@@ -217,7 +223,7 @@
 
         <provider
             android:name="com.google.firebase.provider.FirebaseInitProvider"
-            android:authorities="com.centicbhaiya.getitsocial.firebaseinitprovider"
+            android:authorities="com.gd.reelssaver.firebaseinitprovider"
             android:directBootAware="true"
             android:exported="false"
             android:initOrder="100" /> <!-- Include the AdActivity and InAppPurchaseActivity configChanges and themes. -->
@@ -229,7 +235,7 @@
 
         <provider
             android:name="com.google.android.gms.ads.MobileAdsInitProvider"
-            android:authorities="com.centicbhaiya.getitsocial.mobileadsinitprovider"
+            android:authorities="com.gd.reelssaver.mobileadsinitprovider"
             android:exported="false"
             android:initOrder="100" />
 
@@ -265,7 +271,7 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.centicbhaiya.getitsocial.androidx-startup"
+            android:authorities="com.gd.reelssaver.androidx-startup"
             android:exported="false" >
             <meta-data
                 android:name="androidx.work.WorkManagerInitializer"
