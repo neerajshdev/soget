@@ -1610,6 +1610,7 @@ layout gnt_medium_template_view
 layout gnt_small_template_view
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
+layout medium_size_native_ad_view
 layout messenger_button_send_blue_large
 layout messenger_button_send_blue_round
 layout messenger_button_send_blue_small

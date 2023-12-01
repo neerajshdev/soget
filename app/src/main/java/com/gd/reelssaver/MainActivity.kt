@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
@@ -24,12 +25,20 @@ import com.gd.reelssaver.ui.state.newTab
 import com.gd.reelssaver.ui.theme.AppTheme
 import com.gd.reelssaver.util.createFileName
 import com.gd.reelssaver.util.download
+import kotlinx.coroutines.flow.MutableStateFlow
 import online.desidev.onestate.rememberOneState
 import online.desidev.onestate.stateManager
 
 class MainActivity : ComponentActivity() {
     companion object {
         val TAG = MainActivity::class.simpleName
+    }
+
+    val extraUrl: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        extraUrl.value = intent?.extras?.getString(Intent.EXTRA_TEXT)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +66,14 @@ class MainActivity : ComponentActivity() {
                     val tabsScreenState = stateManager.rememberOneState(TabsScreenState::class)
                     val appname = stringResource(id = R.string.app_name)
                     val navController = rememberNavController()
+
+                    LaunchedEffect(Unit) {
+                        extraUrl.collect {url ->
+                            if (url != null) {
+                                tabsScreenState.newTab(url)
+                            }
+                        }
+                    }
 
                     NavHost(navController = navController, startDestination = "splash" ) {
                         composable("splash"){

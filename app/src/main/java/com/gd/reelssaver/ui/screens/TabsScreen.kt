@@ -67,6 +67,7 @@ import com.gd.reelssaver.ui.components.InputUrlFieldCard
 import com.gd.reelssaver.ui.components.SearchVideoCard
 import com.gd.reelssaver.ui.components.TabsChooser
 import com.gd.reelssaver.ui.components.HomeTopBar
+import com.gd.reelssaver.ui.components.MediumSizeNativeAd
 import com.gd.reelssaver.ui.components.searchVideoElement
 import com.gd.reelssaver.ui.state.FbVideoDataState
 import com.gd.reelssaver.ui.state.PageType
@@ -319,16 +320,21 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.native_ad_placeholder),
-                contentDescription = "ad_placeholder",
-                contentScale = ContentScale.Crop,
+            MediumSizeNativeAd(
+                refreshTimeSec = 60,
                 modifier = Modifier
                     .layoutId("ad_place_holder")
                     .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .height(200.dp)
-            )
+            ) { // ad_place_holder
+                Image(
+                    painter = painterResource(id = R.drawable.native_ad_placeholder),
+                    contentDescription = "ad_placeholder",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .fillMaxSize()
+                )
+            }
 
             InputUrlFieldCard(
                 url = url,

@@ -28,6 +28,7 @@ font opensans_medium
 font opensans_medium_italic
 font opensans_regular
 font opensans_semibold_italic
+layout medium_size_native_ad_view
 layout small_native_ad_view
 mipmap ic_launcher
 mipmap ic_launcher_background
