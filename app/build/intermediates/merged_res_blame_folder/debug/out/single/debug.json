@@ -80,6 +80,10 @@
         "source": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-main-84:\\mipmap-mdpi\\logo_launcher_round.webp"
     },
     {
+        "merged": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-merged_res-82:\\layout_medium_size_native_ad_view.xml.flat",
+        "source": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-main-84:\\layout\\medium_size_native_ad_view.xml"
+    },
+    {
         "merged": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-merged_res-82:\\font_opensans_extra_bold.ttf.flat",
         "source": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-main-84:\\font\\opensans_extra_bold.ttf"
     },
@@ -98,10 +102,6 @@
     {
         "merged": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-merged_res-82:\\mipmap-xxxhdpi_logo_launcher_foreground.webp.flat",
         "source": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-main-84:\\mipmap-xxxhdpi\\logo_launcher_foreground.webp"
-    },
-    {
-        "merged": "com.gd.reelssaver.app-merged_res-82:/layout_medium_size_native_ad_view.xml.flat",
-        "source": "com.gd.reelssaver.app-main-84:/layout/medium_size_native_ad_view.xml"
     },
     {
         "merged": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-merged_res-82:\\mipmap-anydpi-v26_logo_launcher_round.xml.flat",
@@ -274,5 +274,9 @@
     {
         "merged": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-merged_res-82:\\mipmap-xxxhdpi_ic_launcher_monochrome.png.flat",
         "source": "C:\\Users\\nsxyl\\.gradle\\daemon\\8.2\\com.gd.reelssaver.app-main-84:\\mipmap-xxxhdpi\\ic_launcher_monochrome.png"
+    },
+    {
+        "merged": "com.gd.reelssaver.app-merged_res-82:/drawable_ad_placeholder.png.flat",
+        "source": "com.gd.reelssaver.app-main-84:/drawable/ad_placeholder.png"
     }
 ]

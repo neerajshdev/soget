@@ -15,7 +15,7 @@ android {
         applicationId "com.gd.reelssaver"
         targetSdk 34
         minSdk 24
-        versionCode 4
+        versionCode 3
         versionName "2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

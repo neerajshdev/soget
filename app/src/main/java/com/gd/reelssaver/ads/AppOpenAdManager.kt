@@ -35,7 +35,7 @@ class AppOpenAdManager(activity: Activity) : Application.ActivityLifecycleCallba
     private var appOpenAd: AppOpenAd? = null
     private var isLoadingAd = false
     private val isShowingAd = AtomicBoolean(false)
-    private val adUnit by lazy {  Firebase.remoteConfig.getString(FirebaseKeys.APP_OPEN_AD_UNIT_ID) }
+    private val adUnit by lazy {  Firebase.remoteConfig.getString(FirebaseKeys.APP_OPEN_AD_UNIT_ID).trim() }
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
         if (event == Lifecycle.Event.ON_RESUME) {

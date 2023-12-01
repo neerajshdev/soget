@@ -2,7 +2,7 @@ R_DEF: Internal format may change without notice
 local
 color logo_launcher_background
 color white
-drawable ad_image_placeholder
+drawable ad_placeholder
 drawable app_logo
 drawable baseline_dark_mode_24
 drawable baseline_light_mode_24

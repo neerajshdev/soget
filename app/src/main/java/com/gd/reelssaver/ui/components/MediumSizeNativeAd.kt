@@ -43,7 +43,7 @@ fun MediumSizeNativeAdPreview() {
     AppTheme {
         MediumSizeNativeAd {
             Image(
-                painter = painterResource(id = R.drawable.native_ad_placeholder),
+                painter = painterResource(id = R.drawable.ad_placeholder),
                 contentDescription = "ad_placeholder",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

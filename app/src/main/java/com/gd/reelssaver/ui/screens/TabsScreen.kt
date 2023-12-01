@@ -214,7 +214,8 @@ fun TabsScreen(
             ) {
                 if (showSearchVideos) {
                     ShowSearchedVideos(
-                        videoDataList = videoDataList, onDownloadVideo = onDownloadVideo
+                        videoDataList = videoDataList,
+                        onDownloadVideo = onDownloadVideo
                     )
                 } else {
                     TabsChooser(tabs = tabs,
@@ -327,7 +328,7 @@ fun HomePage(modifier: Modifier = Modifier, onUrlEnter: (String) -> Unit) {
                     .padding(horizontal = 16.dp)
             ) { // ad_place_holder
                 Image(
-                    painter = painterResource(id = R.drawable.native_ad_placeholder),
+                    painter = painterResource(id = R.drawable.ad_placeholder),
                     contentDescription = "ad_placeholder",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
