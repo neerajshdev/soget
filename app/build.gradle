@@ -5,6 +5,7 @@ plugins {
 
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -15,8 +16,8 @@ android {
         applicationId "com.gd.reelssaver"
         targetSdk 34
         minSdk 24
-        versionCode 3
-        versionName "2.1"
+        versionCode 4
+        versionName "2.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -73,6 +74,8 @@ dependencies {
     implementation libs.androidx.core.splashscreen
     implementation(libs.androidx.ktx)
     implementation(libs.androidx.lifecyle)
+
+    implementation(libs.androidx.composeFoundation)
     implementation(libs.androidx.composeActivity)
     implementation(libs.androidx.composeUiToolingPreview)
     implementation(libs.androidx.compose.uiGraphics)
@@ -96,5 +99,8 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     androidTestImplementation(platform(libs.androidx.composeBom))
     debugImplementation(libs.androidx.composeUiTooling)
+
+    implementation(libs.decompose)
+    implementation(libs.decompose.jetpack)
 }
 

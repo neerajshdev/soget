@@ -1,5 +1,5 @@
-com.gd.reelssaver.test.app-jetified-annotation-experimental-1.3.0-0 C:\Users\nsxyl\.gradle\caches\transforms-3\8e0305e134287190bb691ccaaf5187fb\transformed\jetified-annotation-experimental-1.3.0\res
-com.gd.reelssaver.test.app-jetified-core-1.5.0-1 C:\Users\nsxyl\.gradle\caches\transforms-3\def10cf4ac000b18815b995fd9eee3d3\transformed\jetified-core-1.5.0\res
+com.gd.reelssaver.test.app-jetified-core-1.5.0-0 C:\Users\nsxyl\.gradle\caches\transforms-3\ad911a889883dc02d25eb351a25e7059\transformed\jetified-core-1.5.0\res
+com.gd.reelssaver.test.app-jetified-annotation-experimental-1.3.0-1 C:\Users\nsxyl\.gradle\caches\transforms-3\dc4a4d2f24092e7d945151fc7cd046ec\transformed\jetified-annotation-experimental-1.3.0\res
 com.gd.reelssaver.test.app-androidTest-2 C:\Users\nsxyl\AndroidStudioProjects\ReelSaver\app\build\generated\res\resValues\androidTest\debug
 com.gd.reelssaver.test.app-mergeDebugAndroidTestResources-3 C:\Users\nsxyl\AndroidStudioProjects\ReelSaver\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
 com.gd.reelssaver.test.app-mergeDebugAndroidTestResources-4 C:\Users\nsxyl\AndroidStudioProjects\ReelSaver\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir

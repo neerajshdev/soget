@@ -4,7 +4,7 @@
             "outputFile": "com.gd.reelssaver.app-mergeDebugResources-80:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\27a3a444d6cfbf4f2114bcd0a56af6c7\\transformed\\appcompat-1.4.2\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\2cdedfeead601678871bd734e042e17e\\transformed\\appcompat-1.4.2\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\b9f7ad9afb1e5bca391cfc92d6b16e71\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\08bda80de65ddc96d695f9b382c0d811\\transformed\\cardview-1.0.0\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -42,7 +42,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\3eea4b5694a2761c0760f1ab0ead6c40\\transformed\\work-runtime-2.7.0\\res\\values-v23\\values-v23.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\9897ed15a09ca58447c7d7158057be4d\\transformed\\work-runtime-2.7.0\\res\\values-v23\\values-v23.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

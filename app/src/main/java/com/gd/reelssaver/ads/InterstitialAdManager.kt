@@ -103,7 +103,7 @@ object InterstitialAdManager {
 
         if (!isAdAvailable()) {
             interstitialAd = loadNextAd()
-            return@launch
+//            return@launch
         }
 
         if (isInBackground) return@launch

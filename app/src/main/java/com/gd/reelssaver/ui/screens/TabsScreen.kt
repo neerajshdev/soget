@@ -142,7 +142,7 @@ fun TabsScreen(
                     currentUrl = currentTab.url ?: "",
                     onLoadNewPage = { loadNewPage(tabsScreenState, it) },
                     tabCount = tabs.size,
-                    onOpenTabs = { showTabsChooser = true },
+                    onOpenTabChooser = { showTabsChooser = true },
                     modifier = Modifier
                         .statusBarsPadding()
                         .padding(horizontal = 16.dp)
@@ -394,7 +394,7 @@ fun PageCountIcon(count: Int) {
 
 
 @Composable
-fun SocialMediaSiteCard(
+private fun SocialMediaSiteCard(
     modifier: Modifier = Modifier,
     onSiteOpen: (String) -> Unit
 ) {

@@ -36,6 +36,7 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 appcompat = "1.6.1"
 material = "1.9.0"
+decompose = "2.2.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGraldePlugin" }
@@ -83,6 +84,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
-
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose_jetpack = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
 
 

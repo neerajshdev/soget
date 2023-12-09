@@ -70,7 +70,7 @@ fun BrowserTopBarPrev() {
         ) {
             BrowserTopBar(
                 currentUrl = "https://example.com",
-                onOpenTabs = {},
+                onOpenTabChooser = {},
                 tabCount = 2
             )
         }
@@ -86,7 +86,7 @@ fun BrowserTopBar(
     modifier: Modifier = Modifier,
     currentUrl: String,
     tabCount: Int,
-    onOpenTabs: () -> Unit,
+    onOpenTabChooser: () -> Unit,
     onLoadNewPage: (String) -> Unit = {},
 ) {
     var contentType by remember {
@@ -115,7 +115,7 @@ fun BrowserTopBar(
                         CurrentPageUrlText(
                             currentUrl = currentUrl,
                             tabCount = tabCount,
-                            onOpenTabs = onOpenTabs,
+                            onOpenTabChooser = onOpenTabChooser,
                             modifier = Modifier
                                 .clickable(
                                     enabled = contentType == BrowserTopBarContent.CurrentPage,
@@ -151,7 +151,7 @@ private fun CurrentPageUrlText(
     modifier: Modifier = Modifier,
     currentUrl: String,
     tabCount: Int,
-    onOpenTabs: () -> Unit
+    onOpenTabChooser: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Row(
@@ -172,7 +172,7 @@ private fun CurrentPageUrlText(
             modifier = Modifier.weight(1f)
         )
 
-        IconButton(onClick = onOpenTabs) {
+        IconButton(onClick = onOpenTabChooser) {
             PageCountIcon(count = tabCount)
         }
 
