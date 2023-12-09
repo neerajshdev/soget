@@ -1,36 +1,28 @@
 package com.gd.reelssaver
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
+import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.plus
+import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.scale
+import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
-import com.arkivanov.decompose.router.stack.childStack
-import com.gd.reelssaver.ui.components.BottomNavigationBar
-import com.gd.reelssaver.ui.components.NavBarItem
 import com.gd.reelssaver.ui.navigation.RootComponent
+import com.gd.reelssaver.ui.screens.BottomSheetContent
 import com.gd.reelssaver.ui.screens.HomeScreenContent
 import com.gd.reelssaver.ui.screens.SplashScreenContent
 import com.gd.reelssaver.ui.screens.WebScreenContent
 import com.gd.reelssaver.ui.state.FbVideoDataState
 import com.gd.reelssaver.ui.state.TabsScreenState
-import com.gd.reelssaver.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
-import online.desidev.onestate.rememberOneState
 import online.desidev.onestate.stateManager
 
 class MainActivity : ComponentActivity() {
@@ -157,12 +149,20 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun RootContent(root: RootComponent) {
-    Children(stack = root.child) {
+    Children(
+        stack = root.child,
+        animation = stackAnimation(fade() + scale())
+    ) {
         when (val child = it.instance) {
             is RootComponent.Child.HomeScreenChild -> HomeScreenContent(component = child.component)
             is RootComponent.Child.WebScreenChild -> WebScreenContent(component = child.component)
             is RootComponent.Child.SplashScreen -> SplashScreenContent(component = child.component)
         }
+    }
+
+    val sheet by root.bottomSheet.subscribeAsState()
+    if (sheet.child != null) {
+        BottomSheetContent(component = sheet.child!!.instance)
     }
 }
 

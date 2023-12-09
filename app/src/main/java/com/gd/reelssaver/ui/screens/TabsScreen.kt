@@ -251,7 +251,7 @@ fun TabsScreen(
 
 
 @Composable
-fun ShowSearchedVideos(videoDataList: List<VideoData>, onDownloadVideo: (VideoData) -> Unit) {
+private fun ShowSearchedVideos(videoDataList: List<VideoData>, onDownloadVideo: (VideoData) -> Unit) {
     Text(
         text = "Videos on this page",
         style = MaterialTheme.typography.titleLarge,

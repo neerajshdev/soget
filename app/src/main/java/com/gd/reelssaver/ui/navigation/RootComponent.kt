@@ -1,6 +1,11 @@
 package com.gd.reelssaver.ui.navigation
 
+import android.webkit.WebView
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
+import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.push
@@ -8,9 +13,7 @@ import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.gd.reelssaver.ui.model.Tab
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.parcelize.Parcelize
-import kotlin.jvm.*
 
 internal class Symbol(@JvmField val symbol: String) {
     override fun toString(): String = "<$symbol>"
@@ -22,24 +25,54 @@ internal class Symbol(@JvmField val symbol: String) {
 class RootComponent(componentContext: ComponentContext) : ComponentContext by componentContext {
     private val tabs = MutableValue(emptyList<Tab>())
     private val activeTab = MutableValue(Tab("Unknown"))
-    private val flow = MutableStateFlow<String?>(null)
+    private val views: HashMap<String, WebView> = HashMap()
 
     private val navigation = StackNavigation<Config>()
     val child = childStack<Config, Child>(
         source = navigation,
-        initialConfiguration = Config.HomeScreen,
+        initialConfiguration = Config.SplashScreen,
         handleBackButton = true,
         childFactory = ::childFactory,
     )
+
+    private val sheetNav = SlotNavigation<SheetConfig>()
+
+    val bottomSheet = childSlot(
+        source = sheetNav,
+        handleBackButton = true
+    ) { configuration: SheetConfig, componentContext: ComponentContext ->
+        when (configuration) {
+            SheetConfig.TabChooser -> DefaultBottomSheetComponent(
+                componentContext = componentContext,
+                activeTab = activeTab,
+                tabs = tabs,
+                views = views,
+                onBottomSheetClose = { sheetNav.dismiss() },
+                // Todo: Handle all the Callbacks
+                onAddNewTab = { },
+                onClearAllTab = { },
+                onRemoveTab = { },
+                onSelectTab = { },
+                onBackClick = { },
+                onForwardClick = { }
+            )
+        }
+    }
 
 
     private fun childFactory(config: Config, ctx: ComponentContext): Child {
         return when (config) {
             is Config.HomeScreen -> Child.HomeScreenChild(
-                DefaultHomeScreenComponent(ctx, tabs = tabs, onOpenWebUrl = { webUrl ->
-                    tabs.value += Tab(webUrl.toString()).also { activeTab.value = it }
-                    navigation.push(Config.WebScreen)
-                })
+                DefaultHomeScreenComponent(ctx,
+                    tabs = tabs,
+                    onOpenWebUrl = { webUrl ->
+                        tabs.value += Tab(webUrl.toString()).also { activeTab.value = it }
+                        navigation.push(Config.WebScreen)
+                    },
+                    onOpenTabChooser = {
+                        sheetNav.activate(SheetConfig.TabChooser)
+                    }
+                )
             )
 
             is Config.WebScreen -> Child.WebScreenChild(
@@ -47,9 +80,16 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
                     componentContext = ctx,
                     tabs = tabs,
                     activeTab = activeTab,
+                    views = views,
                     onTabUpdate = { old, new ->
                         tabs.value = tabs.value.map { if (it == old) new else it }
                         activeTab.value = new
+                    },
+                    onWebViewCreated = { key, view ->
+                        views[key] = view
+                    },
+                    onOpenTabChooser = {
+                        sheetNav.activate(SheetConfig.TabChooser)
                     }
                 )
             )
@@ -77,5 +117,11 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
         data class SplashScreen(val component: SplashScreenComponent) : Child()
         data class HomeScreenChild(val component: HomeScreenComponent) : Child()
         data class WebScreenChild(val component: WebScreenComponent) : Child()
+    }
+
+
+    sealed class SheetConfig : Parcelable {
+        @Parcelize
+        data object TabChooser : SheetConfig()
     }
 }

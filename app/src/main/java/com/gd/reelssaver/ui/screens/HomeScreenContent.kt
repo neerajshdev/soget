@@ -3,8 +3,6 @@ package com.gd.reelssaver.ui.screens
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -40,6 +38,7 @@ import com.gd.reelssaver.ui.components.InputUrlFieldCard
 import com.gd.reelssaver.ui.components.MediumSizeNativeAd
 import com.gd.reelssaver.ui.navigation.FakeHomeScreenComponent
 import com.gd.reelssaver.ui.navigation.HomeScreenComponent
+import com.gd.reelssaver.ui.navigation.HomeScreenComponent.Event
 import com.gd.reelssaver.ui.theme.AppTheme
 import java.net.URL
 
@@ -80,14 +79,14 @@ fun HomeScreenContent(
     val openInputText: () -> Unit = {
         try {
             val url = URL(inputText)
-            component.onEvent(HomeScreenComponent.Event.OpenWeb(url))
+            component.onEvent(Event.OpenWeb(url))
         } catch (ex: Exception) {
-            component.onEvent(HomeScreenComponent.Event.SearchWeb(inputText))
+            component.onEvent(Event.SearchWeb(inputText))
         }
     }
 
     val updateInputText: (String) -> Unit = {
-        component.onEvent(HomeScreenComponent.Event.UpdateInputText(it))
+        component.onEvent(Event.UpdateInputText(it))
     }
 
     LaunchedEffect(key1 = isKeyboardOpen, block = {
@@ -98,7 +97,9 @@ fun HomeScreenContent(
 
     Scaffold(
         topBar = {
-            HomeTopBar(tabsCount = tabCount)
+            HomeTopBar(
+                tabsCount = tabCount,
+                onOpenTabs = { component.onEvent(Event.OpenTabChooser) })
         }
     ) {
         MotionLayout(
@@ -138,7 +139,7 @@ fun HomeScreenContent(
 
             SocialMediaSiteCard(
                 onSiteOpen = { siteUrl ->
-                    component.onEvent(HomeScreenComponent.Event.OpenWeb(siteUrl))
+                    component.onEvent(Event.OpenWeb(siteUrl))
                 },
                 modifier = Modifier
                     .layoutId("social_media_card")
