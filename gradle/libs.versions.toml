@@ -36,7 +36,7 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 appcompat = "1.6.1"
 material = "1.9.0"
-decompose = "2.2.0"
+decompose = "2.2.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGraldePlugin" }

@@ -215,3 +215,13 @@ fun getVideoThumbnail(videoUrl: String): Bitmap? {
     }
     return thumbnail
 }
+
+
+/**
+ * Extracts the first url from given string
+ */
+fun findFirstUrl(input: String): String? {
+    val regex = Regex("""\b(?:https?):\/\/\S+\b""")
+    val matchResult = regex.find(input)
+    return matchResult?.value
+}

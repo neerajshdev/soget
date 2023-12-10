@@ -44,6 +44,9 @@ fun SplashScreenContent(component: SplashScreenComponent) {
         if (syncResult == FirebaseSyncResult.SuccessAndUpdate || syncResult == FirebaseSyncResult.Success) {
             InterstitialAdManager.init(localContext as Activity)
             AppOpenAdManager(localContext)
+
+            // show first interstitial ad on app open
+            InterstitialAdManager.showAd().join()
         } else {
             App.toast("Something went wrong!")
             delay(2000)

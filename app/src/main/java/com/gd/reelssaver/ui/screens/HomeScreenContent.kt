@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -58,6 +59,7 @@ fun HomeScreenContent(
     component: HomeScreenComponent,
     modifier: Modifier = Modifier
 ) {
+    val useDarkTheme by component.useDarkTheme.collectAsState()
     val context = LocalContext.current
     val isKeyboardOpen = WindowInsets.isImeVisible
     val focusManager = LocalFocusManager.current
@@ -99,7 +101,10 @@ fun HomeScreenContent(
         topBar = {
             HomeTopBar(
                 tabsCount = tabCount,
-                onOpenTabs = { component.onEvent(Event.OpenTabChooser) })
+                useDarkTheme = useDarkTheme,
+                onOpenTabs = { component.onEvent(Event.OpenTabChooser) },
+                onToggleTheme = { component.onEvent(Event.ToggleTheme) }
+            )
         }
     ) {
         MotionLayout(

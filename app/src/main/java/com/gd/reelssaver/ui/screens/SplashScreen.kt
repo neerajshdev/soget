@@ -23,7 +23,6 @@ import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.AppOpenAdManager
 import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.ui.theme.AppTheme
-import com.gd.reelssaver.ui.theme.useDarkTheme
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.delay
@@ -34,7 +33,6 @@ import kotlin.coroutines.suspendCoroutine
 @Preview
 @Composable
 fun SplashScreenPreviewLight() {
-    useDarkTheme = false
     AppTheme {
         SplashScreen()
     }

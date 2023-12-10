@@ -4,11 +4,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
-import com.gd.reelssaver.ui.model.Tab
+import com.gd.reelssaver.model.Tab
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.net.URL
 
 
 interface HomeScreenComponent {
+    val useDarkTheme: StateFlow<Boolean>
     val inputText: Value<String>
     val tabCount: Value<Int>
     fun onEvent(event: Event)
@@ -19,14 +22,18 @@ interface HomeScreenComponent {
         data class SearchWeb(val query: String) : Event()
 
         data object OpenTabChooser: Event()
+
+        data object ToggleTheme: Event()
     }
 }
 
 class DefaultHomeScreenComponent(
     componentContext: ComponentContext,
     tabs: Value<List<Tab>>,
+    override val useDarkTheme: StateFlow<Boolean>,
     private val onOpenWebUrl: (URL) -> Unit,
     private val onOpenTabChooser: () -> Unit,
+    private val onToggleTheme: () -> Unit
 ) : HomeScreenComponent, ComponentContext by componentContext {
 
 
@@ -50,12 +57,14 @@ class DefaultHomeScreenComponent(
             }
 
             HomeScreenComponent.Event.OpenTabChooser -> onOpenTabChooser()
+            HomeScreenComponent.Event.ToggleTheme -> onToggleTheme()
         }
     }
 }
 
 
 class FakeHomeScreenComponent : HomeScreenComponent {
+    override val useDarkTheme: StateFlow<Boolean> = MutableStateFlow(false)
 
     override val inputText: Value<String> = MutableValue("")
     override val tabCount: Value<Int> = MutableValue(4)

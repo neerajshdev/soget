@@ -1,5 +1,6 @@
 package com.gd.reelssaver.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,69 +19,89 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
+import com.gd.reelssaver.R
 import com.gd.reelssaver.model.VideoData
 import com.gd.reelssaver.ui.components.BrowserTopBar
 import com.gd.reelssaver.ui.components.ComposeWebView
 import com.gd.reelssaver.ui.components.SearchVideoCard
 import com.gd.reelssaver.ui.navigation.WebScreenComponent
 import com.gd.reelssaver.ui.navigation.WebScreenComponent.Event
-import com.gd.reelssaver.R
+import com.gd.reelssaver.ui.util.ComposeDebug
+import com.gd.reelssaver.ui.util.storagePermission
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebScreenContent(component: WebScreenComponent) {
-    val activeTab by component.activeTab.subscribeAsState()
+    val activeTab by component.activeTab.collectAsState()
+    val view by rememberUpdatedState(newValue = component.views[activeTab?.id])
     val tabs by component.tabs.subscribeAsState()
     val videoOnPage by component.videosOnPage.subscribeAsState()
     var showFoundVideos by remember { mutableStateOf(false) }
 
+    var shouldAskPermission by remember { mutableStateOf(false) }
+    val storagePermission = storagePermission(shouldAskPermission)
+
     Scaffold(
         topBar = {
-            BrowserTopBar(
-                currentUrl = activeTab.url,
-                tabCount = tabs.size,
-                onOpenTabChooser = { component.onEvent(Event.OpenTabChooser) },
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp)
-                    .padding(vertical = 8.dp)
-            )
+            activeTab?.let {
+                BrowserTopBar(
+                    useDarkTheme = component.useDarkTheme.collectAsState().value,
+                    currentUrl = it.url,
+                    tabCount = tabs.size,
+                    onLoadNewPage = {str -> component.onEvent(Event.LoadUrl(str))},
+                    onToggleTheme = { component.onEvent(Event.ToggleTheme)},
+                    onOpenTabChooser = { component.onEvent(Event.OpenTabChooser) },
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(vertical = 8.dp)
+                )
+            }
         },
         floatingActionButton = {
-            FilledIconButton(onClick = { component.onEvent(Event.GetVideosOnPage) }) {
+            FilledIconButton(onClick = {
+                component.onEvent(Event.GetVideosOnPage)
+                showFoundVideos = true
+            }) {
                 Icon(
                     imageVector = Icons.Rounded.Download,
                     contentDescription = "Click to Download Videos!"
                 )
             }
         }
-    ) { it ->
-        ComposeWebView(
-            modifier = Modifier.padding(it),
-            initialUrl = activeTab.url,
-            webView = component.views[activeTab.id],
-            onCreate = { webView ->
-                component.onEvent(
-                    Event.WebViewCreated(
-                        webView
-                    )
+    ) {padding ->
+        activeTab?.let {
+            key(it.id) {
+                ComposeDebug(dbgStr = "Show WebView for $it view: ${component.views[it.id]}")
+                ComposeWebView(
+                    modifier = Modifier.padding(padding),
+                    initialUrl = it.url,
+                    webView = view,
+                    onCreate = { webView ->
+                        component.onEvent(
+                            Event.WebViewCreated(
+                                webView
+                            )
+                        )
+                    },
+                    onPageLoad = { newUrl ->
+                        component.onEvent(Event.UpdateUrl(newUrl))
+                    }
                 )
-            },
-            onPageLoad = { newUrl ->
-                component.onEvent(Event.UpdateUrl(newUrl))
             }
-        )
+        }
 
         val appname = stringResource(id = R.string.app_name)
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -92,13 +113,16 @@ fun WebScreenContent(component: WebScreenComponent) {
                 ShowSearchedVideos(
                     videoDataList = videoOnPage,
                     onDownloadVideo = { videoData ->
-                        // Todo: Storage Permission is required to write
-                        component.onEvent(
-                            Event.DownloadVideo(
-                                videoData,
-                                appname
+                        if (storagePermission) {
+                            component.onEvent(
+                                Event.DownloadVideo(
+                                    videoData,
+                                    appname
+                                )
                             )
-                        )
+                        } else {
+                            shouldAskPermission = true
+                        }
                     }
                 )
             }
@@ -107,7 +131,10 @@ fun WebScreenContent(component: WebScreenComponent) {
                 sheetState.show()
             }
         }
+    }
 
+    BackHandler {
+        component.onEvent(Event.GoBackToHome)
     }
 }
 
@@ -144,7 +171,7 @@ private fun ShowSearchedVideos(
                         modifier = Modifier.padding(16.dp),
                         onDownloadClick = {
                             onDownloadVideo(it)
-//                                        fetchDownloader.downloadFile(it.videoUrl, createFileName("$appName.mp4"))
+//                          fetchDownloader.downloadFile(it.videoUrl, createFileName("$appName.mp4"))
                         })
                 }
             }

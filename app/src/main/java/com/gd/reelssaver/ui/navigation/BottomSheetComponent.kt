@@ -3,12 +3,13 @@ package com.gd.reelssaver.ui.navigation
 import android.webkit.WebView
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.Value
-import com.gd.reelssaver.ui.model.Tab
+import com.gd.reelssaver.model.Tab
+import kotlinx.coroutines.flow.StateFlow
 
 
 interface BottomSheetComponent {
     val tabs: Value<List<Tab>>
-    val activeTab: Value<Tab>
+    val activeTab: StateFlow<Tab?>
     val views: Map<String, WebView>
     fun onEvent(event: Event)
 
@@ -25,7 +26,7 @@ interface BottomSheetComponent {
 
 class DefaultBottomSheetComponent(
     componentContext: ComponentContext,
-    override val activeTab: Value<Tab>,
+    override val activeTab: StateFlow<Tab?>,
     override val tabs: Value<List<Tab>>,
     override val views: Map<String, WebView>,
     private val onBottomSheetClose: () -> Unit,

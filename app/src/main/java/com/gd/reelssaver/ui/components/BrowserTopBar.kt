@@ -52,8 +52,6 @@ import androidx.compose.ui.unit.dp
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ui.screens.PageCountIcon
 import com.gd.reelssaver.ui.theme.AppTheme
-import com.gd.reelssaver.ui.theme.useDarkTheme
-import kotlinx.coroutines.launch
 
 @Composable
 private fun rememberTextStyle() = typography.bodyLarge
@@ -86,7 +84,9 @@ fun BrowserTopBar(
     modifier: Modifier = Modifier,
     currentUrl: String,
     tabCount: Int,
-    onOpenTabChooser: () -> Unit,
+    useDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {},
+    onOpenTabChooser: () -> Unit= {},
     onLoadNewPage: (String) -> Unit = {},
 ) {
     var contentType by remember {
@@ -116,6 +116,8 @@ fun BrowserTopBar(
                             currentUrl = currentUrl,
                             tabCount = tabCount,
                             onOpenTabChooser = onOpenTabChooser,
+                            useDarkTheme = useDarkTheme,
+                            onToggleTheme = onToggleTheme,
                             modifier = Modifier
                                 .clickable(
                                     enabled = contentType == BrowserTopBarContent.CurrentPage,
@@ -151,9 +153,10 @@ private fun CurrentPageUrlText(
     modifier: Modifier = Modifier,
     currentUrl: String,
     tabCount: Int,
+    useDarkTheme: Boolean,
+    onToggleTheme: () -> Unit,
     onOpenTabChooser: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -176,11 +179,7 @@ private fun CurrentPageUrlText(
             PageCountIcon(count = tabCount)
         }
 
-        IconButton(onClick = {
-            scope.launch {
-                useDarkTheme = useDarkTheme.not()
-            }
-        }) {
+        IconButton(onClick = onToggleTheme) {
             Icon(
                 painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
                 contentDescription = "Change Theme",
@@ -232,7 +231,7 @@ private fun EditableUrlText(
             value = editableText,
             onValueChange = { editableText = it },
             textStyle = rememberTextStyle(),
-            maxLines = 1,
+            singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(onGo = {
                 if (editableText.isNotBlank()) onLoadNewPage(

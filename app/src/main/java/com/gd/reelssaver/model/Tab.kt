@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.model
+package com.gd.reelssaver.model
 
 import java.util.UUID
 

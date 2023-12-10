@@ -16,8 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ui.screens.PageCountIcon
 import com.gd.reelssaver.ui.theme.AppTheme
-import com.gd.reelssaver.ui.theme.useDarkTheme
-import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -32,7 +30,9 @@ fun HomeTopBarPrev() {
 fun HomeTopBar(
     modifier: Modifier = Modifier,
     tabsCount: Int,
+    useDarkTheme: Boolean = false,
     onOpenTabs: () -> Unit = {},
+    onToggleTheme: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     TopAppBar(
@@ -47,11 +47,7 @@ fun HomeTopBar(
 //                Icon(imageVector = Icons.Default.Info, contentDescription = "How to use")
 //            }
 
-            IconButton(onClick = {
-                scope.launch {
-                    useDarkTheme = useDarkTheme.not()
-                }
-            }) {
+            IconButton(onClick = onToggleTheme) {
                 Icon(
                     painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
                     contentDescription = "Change Theme",

@@ -1,6 +1,7 @@
 package com.gd.reelssaver.ui.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -79,12 +80,10 @@ private val DarkColorScheme = darkColorScheme(
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
 )
 
-
-var useDarkTheme by mutableStateOf(false)
-
 @Composable
 fun AppTheme(
-    content: @Composable() () -> Unit
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
 ) {
     val colorScheme = when {/* dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
