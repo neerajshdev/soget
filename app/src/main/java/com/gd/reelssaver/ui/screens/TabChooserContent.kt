@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,17 +18,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -40,86 +35,74 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.ui.components.TabControl
-import com.gd.reelssaver.ui.navigation.BottomSheetComponent
-import com.gd.reelssaver.ui.navigation.BottomSheetComponent.Event
+import com.gd.reelssaver.ui.navigation.TabChooserComponent
+import com.gd.reelssaver.ui.navigation.TabChooserComponent.Event
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetContent(component: BottomSheetComponent) {
+fun TabChooserContent(component: TabChooserComponent) {
     val currentTab by component.activeTab.collectAsState()
     val tabs by component.tabs.subscribeAsState()
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    ModalBottomSheet(
-        onDismissRequest = { component.onEvent(Event.DismissBottomSheet) },
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-        sheetState = bottomSheetState
-    ) {
-        Column {
-            Box(
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp)
+        ) {
+            Text(
+                text = "${tabs.size} Tabs",
+                style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp)
-            ) {
-                Text(
-                    text = "${tabs.size} Tabs",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier
-                        .align(
-                            Alignment.CenterStart
-                        )
-                        .padding(start = 12.dp)
-                )
+                    .align(
+                        Alignment.CenterStart
+                    )
+                    .padding(start = 12.dp)
+            )
 
-                TextButton(
-                    onClick = { component.onEvent(Event.ClearAllTabs) },
-                    modifier = Modifier.align(Alignment.TopEnd)
-                ) {
-                    Text(text = "Clear all")
-                }
+            TextButton(
+                onClick = { component.onEvent(Event.ClearAllTabs) },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Text(text = "Clear all")
             }
+        }
 
-            Column(
-                modifier = Modifier
-                    .heightIn(max = 400.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                for (tab in tabs) {
-                    val containerColor =
-                        if (tab == currentTab) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surfaceContainerLowest
-                    Surface(color = containerColor) {
-                        key(tab.id) {
-                            TabItem(
-                                title = component.views[tab.id]?.title ?: "Unknown",
-                                url = tab.url,
-                                onRemoveTab = { component.onEvent(Event.RemoveTab(tab)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(interactionSource = remember {
-                                        MutableInteractionSource()
-                                    }, indication = null, onClick = {
-                                        component.onEvent(Event.SelectTab(tab))
-                                    })
-                                    .padding(horizontal = 8.dp)
-                                    .padding(vertical = 12.dp)
-                            )
-                        }
+        Column(
+            modifier = Modifier
+                .heightIn(max = 400.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            for (tab in tabs) {
+                val containerColor =
+                    if (tab == currentTab) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surfaceContainerLowest
+                Surface(color = containerColor) {
+                    key(tab.id) {
+                        TabItem(
+                            title = component.views[tab.id]?.title ?: "Unknown",
+                            url = tab.url,
+                            onRemoveTab = { component.onEvent(Event.RemoveTab(tab)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(interactionSource = remember {
+                                    MutableInteractionSource()
+                                }, indication = null, onClick = {
+                                    component.onEvent(Event.SelectTab(tab))
+                                })
+                                .padding(horizontal = 8.dp)
+                                .padding(vertical = 12.dp)
+                        )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TabControl(
-                onBackClick = { component.onEvent(Event.BackClick) },
-                onForwardClick = { component.onEvent(Event.ForwardClick) },
-                onAddTabClick = { component.onEvent(Event.AddNewTab) },
-            )
         }
-    }
 
-    LaunchedEffect(key1 = bottomSheetState) {
-        bottomSheetState.show()
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TabControl(
+            onBackClick = { component.onEvent(Event.BackClick) },
+            onForwardClick = { component.onEvent(Event.ForwardClick) },
+            onAddTabClick = { component.onEvent(Event.AddNewTab) },
+        )
     }
 }
 

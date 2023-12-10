@@ -4,7 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,8 +24,11 @@ import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackA
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
 import com.arkivanov.essenty.lifecycle.doOnResume
+import com.gd.reelssaver.ui.navigation.ExitPromptComponent
 import com.gd.reelssaver.ui.navigation.RootComponent
-import com.gd.reelssaver.ui.screens.BottomSheetContent
+import com.gd.reelssaver.ui.navigation.TabChooserComponent
+import com.gd.reelssaver.ui.screens.TabChooserContent
+import com.gd.reelssaver.ui.screens.ExitPromptContent
 import com.gd.reelssaver.ui.screens.HomeScreenContent
 import com.gd.reelssaver.ui.screens.SplashScreenContent
 import com.gd.reelssaver.ui.screens.WebScreenContent
@@ -28,8 +36,6 @@ import com.gd.reelssaver.ui.state.FbVideoDataState
 import com.gd.reelssaver.ui.state.TabsScreenState
 import com.gd.reelssaver.ui.theme.AppTheme
 import com.gd.reelssaver.util.findFirstUrl
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import online.desidev.onestate.stateManager
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +43,6 @@ class MainActivity : ComponentActivity() {
         val TAG = MainActivity::class.simpleName
     }
 
-    
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -61,7 +66,11 @@ class MainActivity : ComponentActivity() {
             }
             stateFactory(TabsScreenState::class) { TabsScreenState() }
         }
-        val root = retainedComponent { RootComponent(it) }
+        val root = retainedComponent {
+            RootComponent(it, onAppClose = {
+                finish()
+            })
+        }
 
         root.lifecycle.doOnResume {
             root.extraUrl.value = intent?.extras?.getString(Intent.EXTRA_TEXT)
@@ -75,6 +84,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootContent(root: RootComponent) {
     val extraUrl by root.extraUrl.collectAsState()
@@ -100,8 +110,29 @@ fun RootContent(root: RootComponent) {
         }
 
         val sheet by root.bottomSheet.subscribeAsState()
-        if (sheet.child != null) {
-            BottomSheetContent(component = sheet.child!!.instance)
+        val childComp = sheet.child?.instance
+
+        if (childComp != null) {
+            val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+            ModalBottomSheet(
+                onDismissRequest = { root.onEvent(RootComponent.Event.DismissBottomSheet) },
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                sheetState = bottomSheetState
+            ) {
+                when (childComp) {
+                    is TabChooserComponent -> TabChooserContent(component = childComp)
+                    is ExitPromptComponent -> ExitPromptContent(component = childComp)
+                }
+            }
+
+            LaunchedEffect(key1 = bottomSheetState) {
+                bottomSheetState.show()
+            }
+        }
+
+        BackHandler {
+            root.onEvent(RootComponent.Event.ShowExitPrompt)
         }
     }
 }

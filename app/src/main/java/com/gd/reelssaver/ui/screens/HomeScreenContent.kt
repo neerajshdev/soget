@@ -34,6 +34,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
+import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.ui.components.HomeTopBar
 import com.gd.reelssaver.ui.components.InputUrlFieldCard
 import com.gd.reelssaver.ui.components.MediumSizeNativeAd
@@ -115,7 +116,7 @@ fun HomeScreenContent(
                 .verticalScroll(rememberScrollState())
         ) {
             MediumSizeNativeAd(
-                refreshTimeSec = 60,
+                refreshTimeSec = 80,
                 modifier = Modifier
                     .layoutId("ad_place_holder")
                     .padding(horizontal = 16.dp)
@@ -145,6 +146,7 @@ fun HomeScreenContent(
             SocialMediaSiteCard(
                 onSiteOpen = { siteUrl ->
                     component.onEvent(Event.OpenWeb(siteUrl))
+                    InterstitialAdManager.tryAd()
                 },
                 modifier = Modifier
                     .layoutId("social_media_card")

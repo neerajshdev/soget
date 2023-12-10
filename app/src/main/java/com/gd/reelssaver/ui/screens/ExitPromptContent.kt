@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.components
+package com.gd.reelssaver.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,25 +15,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.gd.reelssaver.ui.theme.AppTheme
-
-
-@Preview
-@Composable
-private fun ExitPromptPreview() {
-    AppTheme {
-        ExitPrompt()
-    }
-}
-
+import com.gd.reelssaver.ui.components.MediumSizeNativeAd
+import com.gd.reelssaver.ui.navigation.ExitPromptComponent
+import com.gd.reelssaver.ui.navigation.ExitPromptComponent.Event
 
 @Composable
-fun ExitPrompt(
-    onExitConfirm: () -> Unit = {},
-    onExitCancel: () -> Unit = {}
-) {
+fun ExitPromptContent(component: ExitPromptComponent) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,11 +36,11 @@ fun ExitPrompt(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth(0.7f)
             ) {
-                TextButton(onClick = onExitCancel) {
+                TextButton(onClick = { component.onEvent(Event.CancelExit) }) {
                     Text(text = "No")
                 }
 
-                Button(onClick = onExitConfirm) {
+                Button(onClick = { component.onEvent(Event.ConfirmExit) }) {
                     Text(text = "Yes")
                 }
             }

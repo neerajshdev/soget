@@ -85,6 +85,12 @@ object InterstitialAdManager {
     }
 
 
+    fun tryAd() {
+        if(willShowAd()) {
+            showAd()
+        }
+    }
+
     fun willShowAd(): Boolean {
         adCount += 1
         return if (isAdAvailable()) {

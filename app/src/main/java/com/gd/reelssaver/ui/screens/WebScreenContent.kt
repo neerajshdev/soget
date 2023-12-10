@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
+import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.model.VideoData
 import com.gd.reelssaver.ui.components.BrowserTopBar
 import com.gd.reelssaver.ui.components.ComposeWebView
@@ -61,8 +62,8 @@ fun WebScreenContent(component: WebScreenComponent) {
                     useDarkTheme = component.useDarkTheme.collectAsState().value,
                     currentUrl = it.url,
                     tabCount = tabs.size,
-                    onLoadNewPage = {str -> component.onEvent(Event.LoadUrl(str))},
-                    onToggleTheme = { component.onEvent(Event.ToggleTheme)},
+                    onLoadNewPage = { str -> component.onEvent(Event.LoadUrl(str)) },
+                    onToggleTheme = { component.onEvent(Event.ToggleTheme) },
                     onOpenTabChooser = { component.onEvent(Event.OpenTabChooser) },
                     modifier = Modifier
                         .statusBarsPadding()
@@ -74,6 +75,7 @@ fun WebScreenContent(component: WebScreenComponent) {
             FilledIconButton(onClick = {
                 component.onEvent(Event.GetVideosOnPage)
                 showFoundVideos = true
+                InterstitialAdManager.tryAd()
             }) {
                 Icon(
                     imageVector = Icons.Rounded.Download,
@@ -81,7 +83,7 @@ fun WebScreenContent(component: WebScreenComponent) {
                 )
             }
         }
-    ) {padding ->
+    ) { padding ->
         activeTab?.let {
             key(it.id) {
                 ComposeDebug(dbgStr = "Show WebView for $it view: ${component.views[it.id]}")
@@ -123,6 +125,7 @@ fun WebScreenContent(component: WebScreenComponent) {
                         } else {
                             shouldAskPermission = true
                         }
+                        InterstitialAdManager.tryAd()
                     }
                 )
             }

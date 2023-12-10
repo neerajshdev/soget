@@ -19,7 +19,7 @@ class DefaultSplashScreenComponent(
 }
 
 
-class FakeSplashScreenComponent(): SplashScreenComponent {
+class FakeSplashScreenComponent : SplashScreenComponent {
     override fun finishSplash() {
 
     }

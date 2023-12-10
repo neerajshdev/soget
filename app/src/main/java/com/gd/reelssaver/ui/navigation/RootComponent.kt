@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 
-class RootComponent(componentContext: ComponentContext) : ComponentContext by componentContext {
+class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Unit) : ComponentContext by componentContext {
     private val tabs = MutableValue(emptyList<Tab>())
     private val activeTab = MutableStateFlow<Tab?>(null)
     private val views: HashMap<String, WebView> = HashMap()
@@ -47,68 +47,6 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
         activeTab.value = null
     }
 
-    @OptIn(ExperimentalDecomposeApi::class)
-    val bottomSheet = childSlot(
-        source = sheetNav,
-        handleBackButton = true
-    ) { configuration: SheetConfig, componentContext: ComponentContext ->
-        when (configuration) {
-            SheetConfig.TabChooser -> DefaultBottomSheetComponent(
-                componentContext = componentContext,
-                activeTab = activeTab,
-                tabs = tabs,
-                views = views,
-                onBottomSheetClose = { sheetNav.dismiss() },
-                onAddNewTab = {
-                    val newTab = Tab(url = "www.google.com")
-                    tabs.value += newTab
-                    activeTab.value = newTab
-
-                    if (child.value.active.configuration == Config.HomeScreen) {
-                        navigation.pushNew(Config.WebScreen)
-                    }
-                },
-                onClearAllTab = {
-                    if (child.value.active.configuration is Config.WebScreen) {
-                        navigation.pop { clearAllTab() }
-                    } else {
-                        clearAllTab()
-                    }
-                },
-                onRemoveTab = {
-                    tabs.value -= it
-                    views.remove(it.id)
-                    if (it == activeTab.value) {
-                        activeTab.value = null
-                        if (child.value.active.configuration is Config.WebScreen) {
-                            navigation.pop()
-                        }
-                    }
-                },
-                onSelectTab = {
-                    activeTab.value = it
-                    if (child.active.configuration is Config.HomeScreen) {
-                        navigation.pushNew(Config.WebScreen)
-                    }
-                },
-                onBackClick = {
-                    views[activeTab.value?.id]?.run {
-                        if (canGoBack()) {
-                            goBack()
-                        }
-                    }
-                },
-                onForwardClick = {
-                    views[activeTab.value?.id]?.run {
-                        if (canGoForward()) {
-                            goForward()
-                        }
-                    }
-                }
-            )
-        }
-    }
-
 
     @OptIn(ExperimentalDecomposeApi::class)
     private fun childFactory(config: Config, ctx: ComponentContext): Child {
@@ -125,6 +63,7 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
                     }
                 })
             )
+
             is Config.HomeScreen -> Child.HomeScreenChild(
                 DefaultHomeScreenComponent(ctx,
                     tabs = tabs,
@@ -183,18 +122,96 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
 
     @OptIn(ExperimentalDecomposeApi::class)
     fun onEvent(event: Event) {
-        when(event) {
+        when (event) {
             is Event.OpenNewTabWithExtraText -> {
                 tabs.value += Tab(event.extraText).also { activeTab.value = it }
                 if (child.value.active.configuration is Config.HomeScreen) {
                     navigation.pushNew(Config.WebScreen)
                 }
             }
+
+            Event.DismissBottomSheet -> sheetNav.dismiss()
+            Event.ShowExitPrompt -> sheetNav.activate(SheetConfig.ExitPrompt)
         }
     }
 
     sealed class Event {
-        data class OpenNewTabWithExtraText(val extraText: String): Event()
+        data class OpenNewTabWithExtraText(val extraText: String) : Event()
+        data object DismissBottomSheet : Event()
+        object ShowExitPrompt : Event()
+    }
+
+
+    @OptIn(ExperimentalDecomposeApi::class)
+    val bottomSheet = childSlot(
+        source = sheetNav,
+        handleBackButton = true
+    ) { configuration: SheetConfig, componentContext: ComponentContext ->
+        when (configuration) {
+            SheetConfig.TabChooser -> DefaultTabChooserComponent(
+                componentContext = componentContext,
+                activeTab = activeTab,
+                tabs = tabs,
+                views = views,
+                onAddNewTab = {
+                    val newTab = Tab(url = "www.google.com")
+                    tabs.value += newTab
+                    activeTab.value = newTab
+
+                    if (child.value.active.configuration == Config.HomeScreen) {
+                        navigation.pushNew(Config.WebScreen)
+                    }
+                },
+                onClearAllTab = {
+                    if (child.value.active.configuration is Config.WebScreen) {
+                        navigation.pop { clearAllTab() }
+                    } else {
+                        clearAllTab()
+                    }
+                },
+                onRemoveTab = {
+                    tabs.value -= it
+                    views.remove(it.id)
+                    if (it == activeTab.value) {
+                        activeTab.value = null
+                        if (child.value.active.configuration is Config.WebScreen) {
+                            navigation.pop()
+                        }
+                    }
+                },
+                onSelectTab = {
+                    activeTab.value = it
+                    if (child.active.configuration is Config.HomeScreen) {
+                        navigation.pushNew(Config.WebScreen)
+                    }
+                },
+                onBackClick = {
+                    views[activeTab.value?.id]?.run {
+                        if (canGoBack()) {
+                            goBack()
+                        }
+                    }
+                },
+                onForwardClick = {
+                    views[activeTab.value?.id]?.run {
+                        if (canGoForward()) {
+                            goForward()
+                        }
+                    }
+                }
+            )
+
+            SheetConfig.ExitPrompt -> DefaultExitPromptComponent(
+                componentContext,
+                onExitCancel = {
+                    sheetNav.dismiss()
+                },
+                onExitConfirm = {
+                    onAppClose()
+                    sheetNav.dismiss()
+                }
+            )
+        }
     }
 
     sealed class Config : Parcelable {
@@ -218,5 +235,8 @@ class RootComponent(componentContext: ComponentContext) : ComponentContext by co
     sealed class SheetConfig : Parcelable {
         @Parcelize
         data object TabChooser : SheetConfig()
+
+        @Parcelize
+        data object ExitPrompt : SheetConfig()
     }
 }

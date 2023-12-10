@@ -7,14 +7,13 @@ import com.gd.reelssaver.model.Tab
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface BottomSheetComponent {
+interface TabChooserComponent {
     val tabs: Value<List<Tab>>
     val activeTab: StateFlow<Tab?>
     val views: Map<String, WebView>
     fun onEvent(event: Event)
 
     sealed class Event {
-        data object DismissBottomSheet : Event()
         data object ClearAllTabs : Event()
         data object AddNewTab : Event()
         data class RemoveTab(val tab: Tab) : Event()
@@ -24,28 +23,26 @@ interface BottomSheetComponent {
     }
 }
 
-class DefaultBottomSheetComponent(
+class DefaultTabChooserComponent(
     componentContext: ComponentContext,
     override val activeTab: StateFlow<Tab?>,
     override val tabs: Value<List<Tab>>,
     override val views: Map<String, WebView>,
-    private val onBottomSheetClose: () -> Unit,
     private val onAddNewTab: () -> Unit,
     private val onClearAllTab: () -> Unit,
     private val onRemoveTab: (Tab) -> Unit,
     private val onSelectTab: (Tab) -> Unit,
     private val onBackClick: () -> Unit,
     private val onForwardClick: () -> Unit
-) : BottomSheetComponent, ComponentContext by componentContext {
-    override fun onEvent(event: BottomSheetComponent.Event) {
+) : TabChooserComponent, ComponentContext by componentContext {
+    override fun onEvent(event: TabChooserComponent.Event) {
         when (event) {
-            is BottomSheetComponent.Event.DismissBottomSheet -> onBottomSheetClose()
-            BottomSheetComponent.Event.AddNewTab -> onAddNewTab()
-            BottomSheetComponent.Event.ClearAllTabs -> onClearAllTab()
-            is BottomSheetComponent.Event.RemoveTab -> onRemoveTab(event.tab)
-            BottomSheetComponent.Event.BackClick -> onBackClick()
-            BottomSheetComponent.Event.ForwardClick -> onForwardClick()
-            is BottomSheetComponent.Event.SelectTab -> onSelectTab(event.tab)
+            TabChooserComponent.Event.AddNewTab -> onAddNewTab()
+            TabChooserComponent.Event.ClearAllTabs -> onClearAllTab()
+            is TabChooserComponent.Event.RemoveTab -> onRemoveTab(event.tab)
+            TabChooserComponent.Event.BackClick -> onBackClick()
+            TabChooserComponent.Event.ForwardClick -> onForwardClick()
+            is TabChooserComponent.Event.SelectTab -> onSelectTab(event.tab)
         }
     }
 }
