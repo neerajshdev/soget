@@ -9,7 +9,7 @@ import com.arkivanov.essenty.lifecycle.LifecycleOwner
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.gd.reelssaver.App
 import com.gd.reelssaver.model.VideoData
-import com.gd.reelssaver.ui.components.searchVideoElement
+import com.gd.reelssaver.ui.composables.searchVideoElement
 import com.gd.reelssaver.model.Tab
 import com.gd.reelssaver.util.createFileName
 import com.gd.reelssaver.util.download

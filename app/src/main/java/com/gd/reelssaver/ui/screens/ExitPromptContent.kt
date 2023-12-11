@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.gd.reelssaver.ui.components.MediumSizeNativeAd
+import com.gd.reelssaver.ui.composables.MediumSizeNativeAd
 import com.gd.reelssaver.ui.navigation.ExitPromptComponent
 import com.gd.reelssaver.ui.navigation.ExitPromptComponent.Event
 

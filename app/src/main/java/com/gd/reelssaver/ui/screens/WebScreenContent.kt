@@ -34,9 +34,9 @@ import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.model.VideoData
-import com.gd.reelssaver.ui.components.BrowserTopBar
-import com.gd.reelssaver.ui.components.ComposeWebView
-import com.gd.reelssaver.ui.components.SearchVideoCard
+import com.gd.reelssaver.ui.composables.BrowserTopBar
+import com.gd.reelssaver.ui.composables.ComposeWebView
+import com.gd.reelssaver.ui.composables.SearchVideoCard
 import com.gd.reelssaver.ui.navigation.WebScreenComponent
 import com.gd.reelssaver.ui.navigation.WebScreenComponent.Event
 import com.gd.reelssaver.ui.util.ComposeDebug

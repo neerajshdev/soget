@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.components
+package com.gd.reelssaver.ui.composables
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon

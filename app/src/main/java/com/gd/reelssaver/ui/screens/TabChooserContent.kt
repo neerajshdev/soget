@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
-import com.gd.reelssaver.ui.components.TabControl
+import com.gd.reelssaver.ui.composables.TabControl
 import com.gd.reelssaver.ui.navigation.TabChooserComponent
 import com.gd.reelssaver.ui.navigation.TabChooserComponent.Event
 

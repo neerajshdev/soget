@@ -35,9 +35,9 @@ import androidx.constraintlayout.compose.MotionScene
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.InterstitialAdManager
-import com.gd.reelssaver.ui.components.HomeTopBar
-import com.gd.reelssaver.ui.components.InputUrlFieldCard
-import com.gd.reelssaver.ui.components.MediumSizeNativeAd
+import com.gd.reelssaver.ui.composables.HomeTopBar
+import com.gd.reelssaver.ui.composables.InputUrlFieldCard
+import com.gd.reelssaver.ui.composables.MediumSizeNativeAd
 import com.gd.reelssaver.ui.navigation.FakeHomeScreenComponent
 import com.gd.reelssaver.ui.navigation.HomeScreenComponent
 import com.gd.reelssaver.ui.navigation.HomeScreenComponent.Event

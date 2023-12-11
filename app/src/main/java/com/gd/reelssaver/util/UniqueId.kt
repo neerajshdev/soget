@@ -22,7 +22,7 @@ class UniqueId
 
         fun saveState()
         {
-            com.gd.reelssaver.App.instance().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
+            App.instance().getSharedPreferences("counter-state", Context.MODE_PRIVATE)
                 .edit().putLong("state-value", uniqueId.stateValue)
                 .apply()
         }
@@ -31,7 +31,7 @@ class UniqueId
 
     init
     {
-        val ctx = com.gd.reelssaver.App.instance()
+        val ctx = App.instance()
         stateValue = ctx.getSharedPreferences("counter-state", Context.MODE_PRIVATE).getLong("state-value", 0)
     }
 

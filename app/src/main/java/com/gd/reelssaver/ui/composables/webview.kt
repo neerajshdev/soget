@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.components
+package com.gd.reelssaver.ui.composables
 
 import android.content.Context
 import android.util.Log

@@ -35,7 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.gd.reelssaver.ui.components.BannerSmallNativeAd
+import com.gd.reelssaver.ui.composables.BannerSmallNativeAd
 import com.gd.reelssaver.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.components
+package com.gd.reelssaver.ui.composables
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
