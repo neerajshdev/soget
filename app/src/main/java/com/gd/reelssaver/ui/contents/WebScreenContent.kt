@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
@@ -37,8 +37,8 @@ import com.gd.reelssaver.model.VideoData
 import com.gd.reelssaver.ui.composables.BrowserTopBar
 import com.gd.reelssaver.ui.composables.ComposeWebView
 import com.gd.reelssaver.ui.composables.SearchVideoCard
-import com.gd.reelssaver.ui.navigation.WebScreenComponent
-import com.gd.reelssaver.ui.navigation.WebScreenComponent.Event
+import com.gd.reelssaver.ui.blocs.WebScreenComponent
+import com.gd.reelssaver.ui.blocs.WebScreenComponent.Event
 import com.gd.reelssaver.ui.util.ComposeDebug
 import com.gd.reelssaver.ui.util.storagePermission
 

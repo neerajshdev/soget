@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import android.app.Activity
 import androidx.compose.foundation.Image
@@ -21,8 +21,8 @@ import com.gd.reelssaver.App
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.AppOpenAdManager
 import com.gd.reelssaver.ads.InterstitialAdManager
-import com.gd.reelssaver.ui.navigation.FakeSplashScreenComponent
-import com.gd.reelssaver.ui.navigation.SplashScreenComponent
+import com.gd.reelssaver.ui.blocs.FakeSplashScreenComponent
+import com.gd.reelssaver.ui.blocs.SplashScreenComponent
 import com.gd.reelssaver.ui.theme.AppTheme
 import kotlinx.coroutines.delay
 

@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,8 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.ui.composables.TabControl
-import com.gd.reelssaver.ui.navigation.TabChooserComponent
-import com.gd.reelssaver.ui.navigation.TabChooserComponent.Event
+import com.gd.reelssaver.ui.blocs.TabChooserComponent
+import com.gd.reelssaver.ui.blocs.TabChooserComponent.Event
 
 @Composable
 fun TabChooserContent(component: TabChooserComponent) {

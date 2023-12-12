@@ -49,7 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gd.reelssaver.R
-import com.gd.reelssaver.ui.screens.PageCountIcon
+import com.gd.reelssaver.ui.contents.PageCountIcon
 import com.gd.reelssaver.ui.theme.AppTheme
 
 @Composable

@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 
 import android.app.Activity

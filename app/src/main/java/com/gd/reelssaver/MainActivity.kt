@@ -24,19 +24,16 @@ import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackA
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
 import com.arkivanov.essenty.lifecycle.doOnResume
-import com.gd.reelssaver.ui.navigation.ExitPromptComponent
-import com.gd.reelssaver.ui.navigation.RootComponent
-import com.gd.reelssaver.ui.navigation.TabChooserComponent
-import com.gd.reelssaver.ui.screens.TabChooserContent
-import com.gd.reelssaver.ui.screens.ExitPromptContent
-import com.gd.reelssaver.ui.screens.HomeScreenContent
-import com.gd.reelssaver.ui.screens.SplashScreenContent
-import com.gd.reelssaver.ui.screens.WebScreenContent
-import com.gd.reelssaver.ui.state.FbVideoDataState
-import com.gd.reelssaver.ui.state.TabsScreenState
+import com.gd.reelssaver.ui.blocs.ExitPromptComponent
+import com.gd.reelssaver.ui.blocs.RootComponent
+import com.gd.reelssaver.ui.blocs.TabChooserComponent
+import com.gd.reelssaver.ui.contents.TabChooserContent
+import com.gd.reelssaver.ui.contents.ExitPromptContent
+import com.gd.reelssaver.ui.contents.HomeScreenContent
+import com.gd.reelssaver.ui.contents.SplashScreenContent
+import com.gd.reelssaver.ui.contents.WebScreenContent
 import com.gd.reelssaver.ui.theme.AppTheme
 import com.gd.reelssaver.util.findFirstUrl
-import online.desidev.onestate.stateManager
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -60,12 +57,6 @@ class MainActivity : ComponentActivity() {
             e.printStackTrace()
         }
 
-        stateManager.configure {
-            stateFactory(FbVideoDataState::class) {
-                FbVideoDataState(emptyList())
-            }
-            stateFactory(TabsScreenState::class) { TabsScreenState() }
-        }
         val root = retainedComponent {
             RootComponent(it, onAppClose = {
                 finish()

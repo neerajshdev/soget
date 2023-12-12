@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -38,9 +38,9 @@ import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.ui.composables.HomeTopBar
 import com.gd.reelssaver.ui.composables.InputUrlFieldCard
 import com.gd.reelssaver.ui.composables.MediumSizeNativeAd
-import com.gd.reelssaver.ui.navigation.FakeHomeScreenComponent
-import com.gd.reelssaver.ui.navigation.HomeScreenComponent
-import com.gd.reelssaver.ui.navigation.HomeScreenComponent.Event
+import com.gd.reelssaver.ui.blocs.FakeHomeScreenComponent
+import com.gd.reelssaver.ui.blocs.HomeScreenComponent
+import com.gd.reelssaver.ui.blocs.HomeScreenComponent.Event
 import com.gd.reelssaver.ui.theme.AppTheme
 import java.net.URL
 

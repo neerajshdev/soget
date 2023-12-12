@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -74,7 +74,6 @@ import com.gd.reelssaver.ui.state.PageType
 import com.gd.reelssaver.ui.state.TabsScreenState
 import com.gd.reelssaver.ui.state.clearAll
 import com.gd.reelssaver.ui.state.closeWebPage
-import com.gd.reelssaver.ui.state.goto
 import com.gd.reelssaver.ui.state.newTab
 import com.gd.reelssaver.ui.state.removeTab
 import com.gd.reelssaver.ui.state.selectTab
@@ -86,7 +85,6 @@ import okhttp3.internal.filterList
 import online.desidev.onestate.OneState
 import online.desidev.onestate.stateManager
 import online.desidev.onestate.toState
-import java.net.URL
 
 private const val TAG = "TabsScreen"
 
@@ -140,7 +138,7 @@ fun TabsScreen(
             Surface {
                 BrowserTopBar(
                     currentUrl = currentTab.url ?: "",
-                    onLoadNewPage = { loadNewPage(tabsScreenState, it) },
+                    onLoadNewPage = { },
                     tabCount = tabs.size,
                     onOpenTabChooser = { showTabsChooser = true },
                     modifier = Modifier
@@ -490,14 +488,4 @@ fun SocialSite(name: String, icon: @Composable () -> Unit) {
             color = MaterialTheme.colorScheme.onSurface
         )
     }
-}
-
-
-private fun loadNewPage(tabsScreenState: OneState<TabsScreenState>, str: String) {
-    val url = try {
-        URL(str)
-    } catch (ex: Exception) {
-        URL("https://www.google.com/search?q=$str")
-    }
-    tabsScreenState.goto(url.toString())
 }

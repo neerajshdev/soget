@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.navigation
+package com.gd.reelssaver.ui.blocs
 
 import android.webkit.WebView
 import com.arkivanov.decompose.ComponentContext

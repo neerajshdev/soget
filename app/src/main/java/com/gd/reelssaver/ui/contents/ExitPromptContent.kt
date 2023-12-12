@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,8 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gd.reelssaver.ui.composables.MediumSizeNativeAd
-import com.gd.reelssaver.ui.navigation.ExitPromptComponent
-import com.gd.reelssaver.ui.navigation.ExitPromptComponent.Event
+import com.gd.reelssaver.ui.blocs.ExitPromptComponent
+import com.gd.reelssaver.ui.blocs.ExitPromptComponent.Event
 
 @Composable
 fun ExitPromptContent(component: ExitPromptComponent) {

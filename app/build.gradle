@@ -63,7 +63,6 @@ dependencies {
     implementation libs.facebook.android.sdk
 
     implementation project(path: ':nativetemplates')
-    implementation 'online.desidev.onestate:lib'
 
 
     implementation(libs.androidx.material.icons.extended)

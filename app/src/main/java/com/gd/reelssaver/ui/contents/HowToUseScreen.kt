@@ -1,4 +1,4 @@
-package com.gd.reelssaver.ui.screens
+package com.gd.reelssaver.ui.contents
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

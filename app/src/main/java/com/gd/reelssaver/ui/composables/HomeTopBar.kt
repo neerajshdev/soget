@@ -8,13 +8,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.gd.reelssaver.R
-import com.gd.reelssaver.ui.screens.PageCountIcon
+import com.gd.reelssaver.ui.contents.PageCountIcon
 import com.gd.reelssaver.ui.theme.AppTheme
 
 @Preview
@@ -34,7 +33,6 @@ fun HomeTopBar(
     onOpenTabs: () -> Unit = {},
     onToggleTheme: () -> Unit = {}
 ) {
-    val scope = rememberCoroutineScope()
     TopAppBar(
         modifier = modifier,
         title = { Text(stringResource(id = R.string.app_name)) },
@@ -42,10 +40,6 @@ fun HomeTopBar(
             IconButton(onClick = onOpenTabs) {
                 PageCountIcon(count = tabsCount)
             }
-
-//            IconButton(onClick = {}) {
-//                Icon(imageVector = Icons.Default.Info, contentDescription = "How to use")
-//            }
 
             IconButton(onClick = onToggleTheme) {
                 Icon(
