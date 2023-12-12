@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-80:/values-bn/values-bn.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-79:/values-bn/values-bn.xml",
             "map": [
                 {
                     "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\c8b36f308bf37c7f65b08f69ec841192\\transformed\\jetified-play-services-base-18.0.0\\res\\values-bn\\values.xml",
@@ -106,7 +106,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\c0f4bbaf2f4c776747ca2449f55edac4\\transformed\\jetified-facebook-login-16.2.0\\res\\values-bn\\values-bn.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\ed3f6c1aa0ba5c7bfa04c445ae285d81\\transformed\\jetified-facebook-login-16.3.0\\res\\values-bn\\values-bn.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

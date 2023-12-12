@@ -3,6 +3,7 @@ package com.gd.reelssaver.ui.contents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,11 +17,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
-import com.gd.reelssaver.ui.composables.TabControl
 import com.gd.reelssaver.ui.blocs.TabChooserComponent
 import com.gd.reelssaver.ui.blocs.TabChooserComponent.Event
 
@@ -158,8 +164,63 @@ fun TabItem(
             Icon(
                 imageVector = Icons.Rounded.Close,
                 contentDescription = "RemoveTab",
-                tint = MaterialTheme.colorScheme.outline
+                tint = colorScheme.outline
             )
+        }
+    }
+}
+
+
+@Composable
+fun TabControl(
+    modifier: Modifier = Modifier,
+    onBackClick: () -> Unit,
+    onForwardClick: () -> Unit,
+    onAddTabClick: () -> Unit
+) {
+
+    val btnColor = colorScheme.surfaceContainerLow
+    val contentColor = colorScheme.onSurface
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+            .padding(bottom = 10.dp)
+    ) {
+        Button(
+            onClick = onBackClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = btnColor,
+                contentColor = contentColor
+            )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                contentDescription = "add new tab"
+            )
+        }
+
+        Button(
+            onClick = onForwardClick, colors = ButtonDefaults.buttonColors(
+                containerColor = btnColor,
+                contentColor = contentColor
+            )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
+                contentDescription = "add new tab"
+            )
+        }
+
+        Button(
+            onClick = onAddTabClick, colors = ButtonDefaults.buttonColors(
+                containerColor = btnColor,
+                contentColor = contentColor
+            )
+        ) {
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = "add new tab")
         }
     }
 }

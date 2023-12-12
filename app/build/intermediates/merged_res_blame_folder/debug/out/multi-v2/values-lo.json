@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-80:/values-lo/values-lo.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-79:/values-lo/values-lo.xml",
             "map": [
                 {
                     "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\aab2219945f78265d20ffa1ebb77ce37\\transformed\\jetified-play-services-basement-18.2.0\\res\\values-lo\\values.xml",

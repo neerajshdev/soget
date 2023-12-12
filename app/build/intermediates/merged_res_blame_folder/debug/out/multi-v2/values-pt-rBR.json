@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-80:/values-pt-rBR/values-pt-rBR.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-79:/values-pt-rBR/values-pt-rBR.xml",
             "map": [
                 {
                     "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\7c58dd253c0e5cbcdc06e8c1b43e232b\\transformed\\jetified-foundation-release\\res\\values-pt-rBR\\values-pt-rBR.xml",

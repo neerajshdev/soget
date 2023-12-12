@@ -3,6 +3,7 @@ package com.gd.reelssaver.ui.contents
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,11 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,12 +29,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
@@ -174,5 +182,85 @@ private fun SocialMediaSiteCard(
             Instagram(onClick = { onSiteOpen(URL("https://www.instagram.com/")) })
             Google(onClick = { onSiteOpen(URL("https://www.google.com/")) })
         }
+    }
+}
+
+
+
+@Composable
+private fun Facebook(onClick: () -> Unit, iconSize: Dp = 56.dp) {
+    SocialSite(
+        name = "Facebook",
+        icon = {
+            IconButton(
+                onClick = onClick, modifier = Modifier.size(iconSize)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.facebook),
+                    contentDescription = "facebook",
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .size(iconSize)
+                        .padding(4.dp)
+                )
+            }
+        },
+    )
+}
+
+
+@Composable
+private fun Instagram(onClick: () -> Unit, iconSize: Dp = 56.dp) {
+    SocialSite(
+        name = "Instagram",
+        icon = {
+            IconButton(
+                onClick = onClick, modifier = Modifier.size(iconSize)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.instagram),
+                    contentDescription = "instagram",
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .size(iconSize)
+                        .padding(4.dp)
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun Google(onClick: () -> Unit, iconSize: Dp = 56.dp) {
+    SocialSite(
+        name = "Google",
+        icon = {
+            IconButton(
+                onClick = onClick, modifier = Modifier.size(iconSize)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.google),
+                    contentDescription = "Google search",
+                    tint = Color.Unspecified,
+                    modifier = Modifier
+                        .size(iconSize)
+                        .padding(4.dp)
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun SocialSite(name: String, icon: @Composable () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        icon()
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

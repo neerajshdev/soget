@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.rounded.Link
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +34,8 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -44,12 +49,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gd.reelssaver.R
-import com.gd.reelssaver.ui.contents.PageCountIcon
 import com.gd.reelssaver.ui.theme.AppTheme
 
 @Composable
@@ -182,7 +187,7 @@ private fun CurrentPageUrlText(
             Icon(
                 painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
                 contentDescription = "Change Theme",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = colorScheme.onSurface
             )
         }
     }
@@ -245,5 +250,63 @@ private fun EditableUrlText(
         IconButton(onClick = { editableText = "" }) {
             Icon(imageVector = Icons.Default.Clear, contentDescription = null)
         }
+    }
+}
+
+
+@Preview
+@Composable
+fun HomeTopBarPrev() {
+    AppTheme {
+        HomeTopBar(tabsCount = 2)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeTopBar(
+    modifier: Modifier = Modifier,
+    tabsCount: Int,
+    useDarkTheme: Boolean = false,
+    onOpenTabs: () -> Unit = {},
+    onToggleTheme: () -> Unit = {}
+) {
+    TopAppBar(
+        modifier = modifier,
+        title = { Text(stringResource(id = R.string.app_name)) },
+        actions = {
+            IconButton(onClick = onOpenTabs) {
+                PageCountIcon(count = tabsCount)
+            }
+
+            IconButton(onClick = onToggleTheme) {
+                Icon(
+                    painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
+                    contentDescription = "Change Theme",
+                    tint = colorScheme.onSurface
+                )
+            }
+        },
+
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = colorScheme.surface,
+            titleContentColor = colorScheme.onSurface
+        )
+    )
+}
+
+@Composable
+private fun PageCountIcon(count: Int) {
+    Box(
+        modifier = Modifier
+            .padding(2.dp)
+            .size(20.dp)
+            .border(
+                width = 1.dp,
+                color = colorScheme.onSurface,
+                shape = RoundedCornerShape(4.dp)
+            ), contentAlignment = Alignment.Center
+    ) {
+        Text(text = count.toString(), style = typography.titleSmall)
     }
 }

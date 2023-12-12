@@ -2,14 +2,20 @@ package com.gd.reelssaver.ui.contents
 
 import android.app.Activity
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
@@ -24,7 +30,11 @@ import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.ui.blocs.FakeSplashScreenComponent
 import com.gd.reelssaver.ui.blocs.SplashScreenComponent
 import com.gd.reelssaver.ui.theme.AppTheme
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
 import kotlinx.coroutines.delay
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 
 @Preview
@@ -81,4 +91,24 @@ private fun Logo(modifier: Modifier) {
             .size(200.dp)
             .clip(CircleShape)
     )
+}
+
+enum class FirebaseSyncResult {
+    Success,
+    Failed,
+    SuccessAndUpdate // success and fetched new values
+}
+
+suspend fun syncFirebase(): FirebaseSyncResult {
+    return suspendCoroutine { cont ->
+        Firebase.remoteConfig
+            .fetchAndActivate()
+            .addOnCompleteListener() { task ->
+                when {
+                    task.isSuccessful && task.result -> cont.resume(FirebaseSyncResult.SuccessAndUpdate)
+                    task.isSuccessful -> cont.resume(FirebaseSyncResult.Success)
+                    else -> cont.resume(FirebaseSyncResult.Failed)
+                }
+            }
+    }
 }
