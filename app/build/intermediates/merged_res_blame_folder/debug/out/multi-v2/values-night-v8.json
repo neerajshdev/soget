@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-79:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-78:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
                     "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\8fa194411f081db4f16ce03e502cb93a\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-night-v8\\values-night-v8.xml",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\2cdedfeead601678871bd734e042e17e\\transformed\\appcompat-1.4.2\\res\\values-night-v8\\values-night-v8.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\151d59e1d79069d468c87d374a3a378c\\transformed\\appcompat-1.2.0\\res\\values-night-v8\\values-night-v8.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
