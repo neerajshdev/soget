@@ -20,7 +20,7 @@ dependencyResolutionManagement {
         }
     }
 }
-rootProject.name = "ReelSaver"
+rootProject.name = "SoGet"
 include ':app'
 include ':nativetemplates'
 
