@@ -1,42 +1,33 @@
 [versions]
 
-compose = "1.0.0-beta01"
+coilCompose = "2.2.2"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.0.3"
-exoplayerCore = "2.19.1"
-exoplayerDash = "2.19.1"
-exoplayerUi = "2.19.1"
 facebookAndroidSdk = "latest.release"
-glide = "4.14.2"
+firebaseAnalyticsKtx = "21.5.0"
+firebaseConfigKtx = "21.6.0"
+firebaseCrashlyticsKtx = "18.6.0"
 gson = "2.10.1"
-jsoup = "1.15.3"
-kotlinCompilerExtensionVersion = "1.5.3"
+kotlinCompilerExtensionVersion = "1.5.6"
 
-#plugins version
-androidGraldePlugin = "8.1.2"
-kotlinGradlePlugin = "1.9.10"
-
-# libs version
 androidxLifeCycle = "2.6.2"
-activityCompose = "1.7.2"
-composeBom = "2023.03.00"
+activityCompose = "1.8.1"
+composeBom = "2023.10.01"
 androidx_material3 = "1.2.0-alpha10"
 #junit = "4.13.2"
 #testExtJunit = "1.1.5"
 #espressoCore = "3.5.1"
-kotlinxSerializationJson = "1.5.1"
+#kotlinxSerializationJson = "1.5.1"
 ktx = "1.12.0"
 ktor_version = "2.3.5"
 constraintlayout_compose = "1.1.0-alpha13"
 materialIconsExtended = "1.5.4"
-navigationCompose = "2.7.4"
 playServicesAds = "22.5.0"
-junit = "4.13.2"
-androidx-test-ext-junit = "1.1.5"
-espresso-core = "3.5.1"
-appcompat = "1.6.1"
-material = "1.9.0"
 decompose = "2.2.1"
+
+#plugins version
+androidGraldePlugin = "8.1.4"
+kotlinGradlePlugin = "1.9.21"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGraldePlugin" }
@@ -62,27 +53,24 @@ androidx-composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-uiGraphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout_compose" }
 
-
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 
 facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebaseAnalyticsKtx" }
+firebase-config-ktx = { module = "com.google.firebase:firebase-config-ktx", version.ref = "firebaseConfigKtx" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit-test = "junit:junit:4.13.2"
 androidx-junit-test = "androidx.test.ext:junit:1.1.5"
 
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+#kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor_version" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor_version" }
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor_version" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor_version" }
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_jetpack = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }

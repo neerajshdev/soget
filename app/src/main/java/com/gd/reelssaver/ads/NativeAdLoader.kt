@@ -20,10 +20,10 @@ import kotlin.coroutines.suspendCoroutine
 object NativeAdLoader {
     val TAG = NativeAdLoader::class.simpleName
     private val adUnitId: String by lazy {
-//        "ca-app-pub-3940256099942544/2247696110"
         Firebase.remoteConfig.getString(FirebaseKeys.NATIVE_AD_UNIT_ID).also {
             Log.d(TAG, "ad Unit Id: $it")
         }.trim()
+        "ca-app-pub-3940256099942544/2247696110"
     }
 
     private val loadedAds = mutableListOf<NativeAd>()
@@ -65,6 +65,7 @@ object NativeAdLoader {
     }
 
     suspend fun takeAndLoad(): NativeAd? = coroutineScope {
+
         val nativeAd = take()
         CoroutineScope(coroutineContext).launch {
             load()?.let { loadedAds.add(it) }

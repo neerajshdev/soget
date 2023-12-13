@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-78:/values-v29/values-v29.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-72:/values-v29/values-v29.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\8fa194411f081db4f16ce03e502cb93a\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-v29\\values-v29.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\47bc0bcf27421b6075ff1675361bae4f\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-v29\\values-v29.xml",
                     "from": {
                         "startLines": "2,7",
                         "startColumns": "4,4",

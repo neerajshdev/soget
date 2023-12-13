@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-78:/values-watch-v21/values-watch-v21.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-72:/values-watch-v21/values-watch-v21.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\151d59e1d79069d468c87d374a3a378c\\transformed\\appcompat-1.2.0\\res\\values-watch-v21\\values-watch-v21.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\9c8379bdcb38167b46ae0765850156aa\\transformed\\appcompat-1.2.0\\res\\values-watch-v21\\values-watch-v21.xml",
                     "from": {
                         "startLines": "2,6,10",
                         "startColumns": "4,4,4",

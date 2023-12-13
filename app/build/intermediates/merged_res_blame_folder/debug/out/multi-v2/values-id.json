@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-78:/values-id/values-id.xml",
+            "outputFile": "com.gd.reelssaver.app-mergeDebugResources-72:/values-id/values-id.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\9dd5132e7c8dac066f805a246f466d3e\\transformed\\jetified-facebook-common-16.3.0\\res\\values-id\\values-id.xml",
+                    "source": "C:\\Users\\nsxyl\\.gradle\\caches\\transforms-3\\2ba58d6d8bc4d573ca50e6f7c6bb7e57\\transformed\\jetified-facebook-common-16.3.0\\res\\values-id\\values-id.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

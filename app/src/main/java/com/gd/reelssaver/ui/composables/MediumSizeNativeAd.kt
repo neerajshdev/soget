@@ -15,8 +15,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.State
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -61,28 +61,27 @@ fun MediumSizeNativeAd(
     refreshTimeSec: Int = 60,
     adPlaceHolder: @Composable () -> Unit
 ) {
-    var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+    val nativeAdMutableState = remember { mutableStateOf<NativeAd?>(null) }
 
-    DisposableEffect(nativeAd) {
+    DisposableEffect(nativeAdMutableState) {
         onDispose {
-            nativeAd?.destroy()
+            nativeAdMutableState.value?.destroy()
         }
     }
 
     LaunchedEffect(refreshTimeSec) {
         val time = refreshTimeSec * 1000L
         while (isActive) {
-            nativeAd = NativeAdLoader.takeAndLoad()
+            nativeAdMutableState.value = NativeAdLoader.takeAndLoad()
             delay(time)
         }
+
     }
 
     MediumNativeAdContent(
         modifier = modifier,
-        nativeAdProvider = { nativeAd },
-        placeholderContent = {
-            adPlaceHolder()
-        }
+        nativeAdState = nativeAdMutableState,
+        placeholderContent = { adPlaceHolder() }
     )
 }
 
@@ -90,37 +89,31 @@ fun MediumSizeNativeAd(
 @Composable
 private fun MediumNativeAdContent(
     modifier: Modifier = Modifier,
-    nativeAdProvider: () -> NativeAd?,
-    placeholderContent: @Composable () -> Unit,
+    nativeAdState: State<NativeAd?>,
+    placeholderContent: @Composable () -> Unit
 ) {
+    val nativeAd by nativeAdState
     SubcomposeLayout(modifier = modifier) { constraints ->
-        val nativeAdPlaceable = subcompose("native_ad") {
-            AndroidNativeAdView(nativeAdProvider = nativeAdProvider)
+        val placeables = subcompose("native_ad") {
+            AndroidNativeAdView(nativeAd = nativeAd)
         }.map {
             it.measure(constraints)
-        }
+        }.toMutableList()
 
         val maxSize =
-            nativeAdPlaceable.maxByOrNull { it.width * it.height }?.run { IntSize(width, height) }
+            placeables.maxByOrNull { it.width * it.height }?.run { IntSize(width, height) }
                 ?: IntSize.Zero
 
-        val placeholder = subcompose("place_holder") {
-            val nativeAd = nativeAdProvider()
-            if (nativeAd == null) {
-                placeholderContent()
+        if (nativeAd == null) {
+            placeables += subcompose("place_holder", placeholderContent).map {
+                it.measure(
+                    Constraints.fixed(maxSize.width, maxSize.height)
+                )
             }
-        }.map {
-            it.measure(
-                Constraints.fixed(maxSize.width, maxSize.height)
-            )
         }
 
         layout(maxSize.width, maxSize.height) {
-            placeholder.forEach {
-                it.place(0, 0)
-            }
-            
-            nativeAdPlaceable.forEach {
+            placeables.forEach {
                 it.place(0, 0)
             }
         }
@@ -129,12 +122,9 @@ private fun MediumNativeAdContent(
 
 
 @Composable
-private fun AndroidNativeAdView(modifier: Modifier = Modifier, nativeAdProvider: () -> NativeAd?) {
+fun AndroidNativeAdView(modifier: Modifier = Modifier, nativeAd: NativeAd?) {
     val backgroundColor = MaterialTheme.colorScheme.background
-    val nativeAd = nativeAdProvider()
-
     ComposeDebug(dbgStr = "nativeAd: $nativeAd")
-
     AndroidView(
         modifier = modifier,
         factory = {
