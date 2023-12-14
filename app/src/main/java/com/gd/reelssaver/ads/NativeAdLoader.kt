@@ -23,7 +23,6 @@ object NativeAdLoader {
         Firebase.remoteConfig.getString(FirebaseKeys.NATIVE_AD_UNIT_ID).also {
             Log.d(TAG, "ad Unit Id: $it")
         }.trim()
-        "ca-app-pub-3940256099942544/2247696110"
     }
 
     private val loadedAds = mutableListOf<NativeAd>()
