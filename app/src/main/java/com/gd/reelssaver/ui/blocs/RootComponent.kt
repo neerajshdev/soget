@@ -7,21 +7,36 @@ import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
-import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.active
-import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.MutableValue
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.gd.reelssaver.model.Tab
+import com.gd.reelssaver.ui.router.GraphNavState
+import com.gd.reelssaver.ui.router.GraphNavigation
+import com.gd.reelssaver.ui.router.childGraph
 import com.gd.reelssaver.util.findFirstUrl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import kotlin.coroutines.CoroutineContext
 
-class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Unit) : ComponentContext by componentContext {
+fun ComponentContext.componentScope(context: CoroutineContext = Dispatchers.Main + SupervisorJob()): CoroutineScope {
+    val scope = CoroutineScope(context)
+    doOnDestroy { scope.cancel() }
+    return scope
+}
+
+class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Unit) :
+    ComponentContext by componentContext {
+    private val scope = componentScope()
     private val tabs = MutableValue(emptyList<Tab>())
     private val activeTab = MutableStateFlow<Tab?>(null)
     private val views: HashMap<String, WebView> = HashMap()
@@ -31,12 +46,26 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
     private val _useDarkTheme = MutableStateFlow(false)
     val useDarkTheme: StateFlow<Boolean> = _useDarkTheme
 
-    private val navigation = StackNavigation<Config>()
+  /*  private val navigation = StackNavigation<Config>()
     val child = childStack<Config, Child>(
         source = navigation,
         initialConfiguration = Config.SplashScreen,
         handleBackButton = false,
         childFactory = ::childFactory,
+    )*/
+
+
+    private val navigation = GraphNavigation<Config>(scope)
+    private val child = childGraph(
+        source = navigation,
+        configClass = Config::class,
+        initialState = {
+            GraphNavState(
+                mapOf(Config.SplashScreen to emptyList()),
+                Config.SplashScreen
+            )
+        },
+        childFactory = ::childFactory
     )
 
     private val sheetNav = SlotNavigation<SheetConfig>()
@@ -48,7 +77,6 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
     }
 
 
-    @OptIn(ExperimentalDecomposeApi::class)
     private fun childFactory(config: Config, ctx: ComponentContext): Child {
         return when (config) {
             is Config.SplashScreen -> Child.SplashScreen(
