@@ -6,11 +6,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-class GraphNavigation<C : Parcelable>(
+class TabNavigation<C : Parcelable>(
     private val scope: CoroutineScope
-) : GraphNavigationSource<C>, GraphNavigator<C> {
-    private val relay = Channel<GraphNavigationSource.Event<C>>()
-    private val observers = mutableListOf<(GraphNavigationSource.Event<C>) -> Unit>()
+) : TabNavigationSource<C>, TabsNavigator<C> {
+    private val relay = Channel<TabNavigationSource.Event<C>>()
+    private val observers = mutableListOf<(TabNavigationSource.Event<C>) -> Unit>()
 
     init {
         scope.launch {
@@ -22,20 +22,20 @@ class GraphNavigation<C : Parcelable>(
         }
     }
 
-    override fun subscribe(observer: (GraphNavigationSource.Event<C>) -> Unit) {
+    override fun subscribe(observer: (TabNavigationSource.Event<C>) -> Unit) {
         observers.add(observer)
     }
 
-    override fun unsubscribe(observer: (GraphNavigationSource.Event<C>) -> Unit) {
+    override fun unsubscribe(observer: (TabNavigationSource.Event<C>) -> Unit) {
         observers.remove(observer)
     }
 
     override fun navigate(
-        transform: (state: GraphNavState<C>) -> GraphNavState<C>,
+        transform: (state: TabNavState<C>) -> TabNavState<C>,
         onComplete: () -> Unit
     ) {
         scope.launch {
-            relay.send(GraphNavigationSource.Event(transform, onComplete))
+            relay.send(TabNavigationSource.Event(transform, onComplete))
         }
     }
 }

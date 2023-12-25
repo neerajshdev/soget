@@ -3,9 +3,9 @@ package com.gd.reelssaver.ui.router
 import android.os.Parcelable
 import com.arkivanov.decompose.router.children.NavigationSource
 
-interface GraphNavigationSource<C : Parcelable> : NavigationSource<GraphNavigationSource.Event<C>> {
+interface TabNavigationSource<C : Parcelable> : NavigationSource<TabNavigationSource.Event<C>> {
     data class Event<C : Parcelable>(
-        val transform: (state: GraphNavState<C>) -> GraphNavState<C>,
+        val transform: (state: TabNavState<C>) -> TabNavState<C>,
         val onComplete: () -> Unit
     )
 }
