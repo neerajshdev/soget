@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.gd.reelssaver"
-    android:versionCode="5"
-    android:versionName="2.5" >
+    android:versionCode="7"
+    android:versionName="2.6" >
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -56,7 +56,6 @@
         android:icon="@mipmap/logo_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:testOnly="true"
         android:theme="@style/Theme.Myapp" >
         <activity
             android:name="com.gd.reelssaver.MainActivity"

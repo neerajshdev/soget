@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Surface
@@ -73,7 +72,7 @@ fun BrowserTopBarPrev() {
             BrowserTopBar(
                 currentUrl = "https://example.com",
                 onOpenTabChooser = {},
-                tabCount = 2
+                pageCount = 2
             )
         }
     }
@@ -87,8 +86,8 @@ enum class BrowserTopBarContent {
 fun BrowserTopBar(
     modifier: Modifier = Modifier,
     currentUrl: String,
-    tabCount: Int,
-    useDarkTheme: Boolean = false,
+    pageCount: Int,
+    isDarkTheme: Boolean = false,
     onToggleTheme: () -> Unit = {},
     onOpenTabChooser: () -> Unit= {},
     onLoadNewPage: (String) -> Unit = {},
@@ -118,9 +117,9 @@ fun BrowserTopBar(
                     BrowserTopBarContent.CurrentPage -> {
                         CurrentPageUrlText(
                             currentUrl = currentUrl,
-                            tabCount = tabCount,
+                            tabCount = pageCount,
                             onOpenTabChooser = onOpenTabChooser,
-                            useDarkTheme = useDarkTheme,
+                            useDarkTheme = isDarkTheme,
                             onToggleTheme = onToggleTheme,
                             modifier = Modifier
                                 .clickable(

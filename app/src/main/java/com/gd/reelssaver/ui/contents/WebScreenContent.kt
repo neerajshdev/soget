@@ -24,52 +24,49 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.model.VideoData
+import com.gd.reelssaver.ui.blocs.WebScreenComponent
+import com.gd.reelssaver.ui.blocs.WebScreenComponent.Event
 import com.gd.reelssaver.ui.composables.BrowserTopBar
 import com.gd.reelssaver.ui.composables.ComposeWebView
 import com.gd.reelssaver.ui.composables.SearchVideoCard
-import com.gd.reelssaver.ui.blocs.WebScreenComponent
-import com.gd.reelssaver.ui.blocs.WebScreenComponent.Event
-import com.gd.reelssaver.ui.util.ComposeDebug
 import com.gd.reelssaver.ui.util.storagePermission
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WebScreenContent(component: WebScreenComponent) {
-    val activeTab by component.activeTab.collectAsState()
-    val view by rememberUpdatedState(newValue = component.views[activeTab?.id])
-    val tabs by component.tabs.subscribeAsState()
-    val videoOnPage by component.videosOnPage.subscribeAsState()
     var showFoundVideos by remember { mutableStateOf(false) }
 
     var shouldAskPermission by remember { mutableStateOf(false) }
     val storagePermission = storagePermission(shouldAskPermission)
 
+    val view by component.webView.collectAsState()
+    val currentUrl by component.currentUrl.collectAsState()
+    val videoOnPage by component.videosOnPage.collectAsState()
+    val pageCount by component.pageCount.collectAsState()
+    val isDarkTheme by component.isDarkTheme.collectAsState()
+
     Scaffold(
         topBar = {
-            activeTab?.let {
-                BrowserTopBar(
-                    useDarkTheme = component.useDarkTheme.collectAsState().value,
-                    currentUrl = it.url,
-                    tabCount = tabs.size,
-                    onLoadNewPage = { str -> component.onEvent(Event.LoadUrl(str)) },
-                    onToggleTheme = { component.onEvent(Event.ToggleTheme) },
-                    onOpenTabChooser = { component.onEvent(Event.OpenTabChooser) },
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(vertical = 8.dp)
-                )
-            }
+            BrowserTopBar(
+                isDarkTheme = isDarkTheme,
+                currentUrl = currentUrl,
+                pageCount = pageCount,
+                onLoadNewPage = { str -> component.onEvent(Event.LoadUrl(str)) },
+                onToggleTheme = { component.onEvent(Event.ToggleTheme) },
+                onOpenTabChooser = { component.onEvent(Event.OpenTabChooser) },
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(vertical = 8.dp)
+            )
         },
         floatingActionButton = {
             FilledIconButton(onClick = {
@@ -84,26 +81,21 @@ fun WebScreenContent(component: WebScreenComponent) {
             }
         }
     ) { padding ->
-        activeTab?.let {
-            key(it.id) {
-                ComposeDebug(dbgStr = "Show WebView for $it view: ${component.views[it.id]}")
-                ComposeWebView(
-                    modifier = Modifier.padding(padding),
-                    initialUrl = it.url,
-                    webView = view,
-                    onCreate = { webView ->
-                        component.onEvent(
-                            Event.WebViewCreated(
-                                webView
-                            )
-                        )
-                    },
-                    onPageLoad = { newUrl ->
-                        component.onEvent(Event.UpdateUrl(newUrl))
-                    }
+        ComposeWebView(
+            modifier = Modifier.padding(padding),
+            initialUrl = currentUrl,
+            webView = view,
+            onCreate = { webView ->
+                component.onEvent(
+                    Event.OnWebViewCreated(
+                        webView
+                    )
                 )
+            },
+            onPageLoad = { newUrl ->
+                component.onEvent(Event.OnPageLoaded(newUrl))
             }
-        }
+        )
 
         val appname = stringResource(id = R.string.app_name)
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -112,7 +104,7 @@ fun WebScreenContent(component: WebScreenComponent) {
                 onDismissRequest = { showFoundVideos = false },
                 sheetState = sheetState
             ) {
-                ShowSearchedVideos(
+                SearchedVideos(
                     videoDataList = videoOnPage,
                     onDownloadVideo = { videoData ->
                         if (storagePermission) {
@@ -137,12 +129,12 @@ fun WebScreenContent(component: WebScreenComponent) {
     }
 
     BackHandler {
-        component.onEvent(Event.GoBackToHome)
+        component.onEvent(Event.OnGoBack)
     }
 }
 
 @Composable
-private fun ShowSearchedVideos(
+private fun SearchedVideos(
     videoDataList: List<VideoData>,
     onDownloadVideo: (VideoData) -> Unit
 ) {

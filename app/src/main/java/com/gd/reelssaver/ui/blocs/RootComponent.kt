@@ -2,22 +2,19 @@ package com.gd.reelssaver.ui.blocs
 
 import android.webkit.WebView
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.router.slot.SlotNavigation
 import com.arkivanov.decompose.router.slot.activate
 import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
-import com.arkivanov.decompose.router.stack.active
-import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.pushNew
-import com.arkivanov.decompose.router.stack.replaceCurrent
-import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import com.arkivanov.essenty.parcelable.Parcelable
-import com.gd.reelssaver.model.Tab
-import com.gd.reelssaver.ui.router.GraphNavState
-import com.gd.reelssaver.ui.router.GraphNavigation
-import com.gd.reelssaver.ui.router.childGraph
+import com.gd.reelssaver.ui.router.TabNavState
+import com.gd.reelssaver.ui.router.TabNavigation
+import com.gd.reelssaver.ui.router.childTabs
+import com.gd.reelssaver.ui.router.goBackward
+import com.gd.reelssaver.ui.router.goForward
+import com.gd.reelssaver.ui.router.goto
+import com.gd.reelssaver.ui.router.replaceCurrent
 import com.gd.reelssaver.util.findFirstUrl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,8 +22,15 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.net.URL
+import java.util.UUID
 import kotlin.coroutines.CoroutineContext
+
+
+typealias WebPageModels = Map<String, RootComponent.WebPageModel>
 
 fun ComponentContext.componentScope(context: CoroutineContext = Dispatchers.Main + SupervisorJob()): CoroutineScope {
     val scope = CoroutineScope(context)
@@ -36,46 +40,48 @@ fun ComponentContext.componentScope(context: CoroutineContext = Dispatchers.Main
 
 class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Unit) :
     ComponentContext by componentContext {
+    data class WebPageModel(
+        val id: String,
+        val currentUrl: MutableStateFlow<String>,
+        val view: MutableStateFlow<WebView?>,
+    )
+
+    private val webPages = MutableStateFlow<WebPageModels>(mapOf())
+    private val pageCount by lazy {
+        val mutableStateFlow = MutableStateFlow(0)
+        scope.launch {
+            webPages.collect {
+                mutableStateFlow.value = it.size
+            }
+        }
+        mutableStateFlow
+    }
+
     private val scope = componentScope()
-    private val tabs = MutableValue(emptyList<Tab>())
-    private val activeTab = MutableStateFlow<Tab?>(null)
-    private val views: HashMap<String, WebView> = HashMap()
 
     val extraUrl: MutableStateFlow<String?> = MutableStateFlow(null)
 
     private val _useDarkTheme = MutableStateFlow(false)
     val useDarkTheme: StateFlow<Boolean> = _useDarkTheme
 
-  /*  private val navigation = StackNavigation<Config>()
-    val child = childStack<Config, Child>(
-        source = navigation,
-        initialConfiguration = Config.SplashScreen,
-        handleBackButton = false,
-        childFactory = ::childFactory,
-    )*/
-
-
-    private val navigation = GraphNavigation<Config>(scope)
-    private val child = childGraph(
+    private val sheetNav = SlotNavigation<SheetConfig>()
+    private val navigation = TabNavigation<Config>(scope)
+    val child = childTabs(
         source = navigation,
         configClass = Config::class,
         initialState = {
-            GraphNavState(
-                mapOf(Config.SplashScreen to emptyList()),
+            TabNavState(
+                mapOf(Config.SplashScreen to emptySet()),
                 Config.SplashScreen
             )
         },
         childFactory = ::childFactory
     )
 
-    private val sheetNav = SlotNavigation<SheetConfig>()
 
-    private fun clearAllTab() {
-        tabs.value = emptyList()
-        views.clear()
-        activeTab.value = null
+    private fun clearAllWebPages() {
+
     }
-
 
     private fun childFactory(config: Config, ctx: ComponentContext): Child {
         return when (config) {
@@ -85,7 +91,12 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
                         if (extraUrl.value != null) {
                             val url = findFirstUrl(extraUrl.value!!)
                             if (url != null) {
-                                navigation.pushNew(Config.WebScreen)
+                                navigation.goForward(
+                                    Config.WebScreen(
+                                        initialUrl = url,
+                                        pageModelId = UUID.randomUUID().toString()
+                                    )
+                                )
                             }
                         }
                     }
@@ -94,11 +105,10 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
 
             is Config.HomeScreen -> Child.HomeScreenChild(
                 DefaultHomeScreenComponent(ctx,
-                    tabs = tabs,
-                    useDarkTheme = useDarkTheme,
-                    onOpenWebUrl = { webUrl ->
-                        tabs.value += Tab(webUrl.toString()).also { activeTab.value = it }
-                        navigation.pushNew(Config.WebScreen)
+                    pageCount = pageCount,
+                    isDarkTheme = useDarkTheme,
+                    onOpenWebUrl = { webUrl: URL ->
+                        openNewWebPage(webUrl.toString())
                     },
                     onOpenTabChooser = {
                         sheetNav.activate(SheetConfig.TabChooser)
@@ -109,53 +119,93 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
                 )
             )
 
-            is Config.WebScreen -> Child.WebScreenChild(
-                DefaultWebScreenComponent(
-                    componentContext = ctx,
-                    tabs = tabs,
-                    activeTab = activeTab,
-                    views = views,
-                    useDarkTheme = useDarkTheme,
-                    onTabUpdate = { old, new ->
-                        tabs.value = tabs.value.map { if (it == old) new else it }
-                        activeTab.value = new
-                    },
-                    onWebViewCreated = { key, view ->
-                        views[key] = view
-                    },
-                    onOpenTabChooser = {
-                        sheetNav.activate(SheetConfig.TabChooser)
-                    },
-                    onGoBackToHome = {
-                        navigation.pop {
-                            activeTab.value?.let {
-                                tabs.value -= it
+            is Config.WebScreen -> {
+                val model = WebPageModel(
+                    currentUrl = MutableStateFlow(config.initialUrl),
+                    view = MutableStateFlow(null),
+                    id = config.pageModelId
+                )
+
+                webPages.value = webPages.value.toMutableMap().apply {
+                    put(config.pageModelId, model)
+                }
+
+                Child.WebScreenChild(
+                    DefaultWebScreenComponent(
+                        componentContext = ctx,
+                        webView = model.view,
+                        currentUrl = model.currentUrl,
+                        isDarkTheme = useDarkTheme,
+                        pageCount = pageCount,
+                        onOpenTabChooser = {
+                            sheetNav.activate(SheetConfig.TabChooser)
+                        },
+                        onGoBackToHome = {
+                            navigation.goBackward()
+                        },
+                        onToggleTheme = {
+                            _useDarkTheme.value = useDarkTheme.value.not()
+                        },
+                        onViewCreated = { model.view.value = it },
+                        onPageLoaded = { pageUrl -> model.currentUrl.value = pageUrl },
+                        onComponentDestroyed = {
+                            val newState = webPages.value.toMutableMap().apply {
+                                remove(config.pageModelId)
                             }
-                            activeTab.value = null
+                            webPages.value = newState
                         }
-                    },
-                    onToggleTheme = {
-                        _useDarkTheme.value = useDarkTheme.value.not()
-                    },
-                    onLoadUrl = { url ->
-                        activeTab.value?.let {
-                            views[it.id]?.loadUrl(url.toString())
-                        }
-                    }
+                    )
+                )
+            }
+        }
+    }
+
+
+    private fun openNewWebPage(url: String) {
+        // goto home screen and then go forward to new web screen
+        navigation.goto(Config.HomeScreen) {
+            navigation.goForward(
+                Config.WebScreen(
+                    initialUrl = url,
+                    pageModelId = UUID.randomUUID().toString()
                 )
             )
         }
     }
 
 
-    @OptIn(ExperimentalDecomposeApi::class)
+    private fun removeWebPage(pageId: String) {
+        val config = child.value.graph.keys.find {config ->
+            config is Config.WebScreen && config.pageModelId == pageId
+        }
+
+        val selectedConfig = child.value.active.configuration
+
+        if (config != null && selectedConfig != config) {
+            with(navigation) {
+                goto(config) {}
+                goBackward()
+                goForward(selectedConfig)
+            }
+        } else {
+            navigation.goBackward()
+        }
+    }
+
+    private fun selectPage(pageId: String) {
+        val config = child.value.graph.keys.find {config ->
+            config is Config.WebScreen && config.pageModelId == pageId
+        }
+
+        if (config != null) {
+            navigation.goto(config)
+        }
+    }
+
     fun onEvent(event: Event) {
         when (event) {
             is Event.OpenNewTabWithExtraText -> {
-                tabs.value += Tab(event.extraText).also { activeTab.value = it }
-                if (child.value.active.configuration is Config.HomeScreen) {
-                    navigation.pushNew(Config.WebScreen)
-                }
+                openNewWebPage(event.extraText)
             }
 
             Event.DismissBottomSheet -> sheetNav.dismiss()
@@ -166,11 +216,21 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
     sealed class Event {
         data class OpenNewTabWithExtraText(val extraText: String) : Event()
         data object DismissBottomSheet : Event()
-        object ShowExitPrompt : Event()
+        data object ShowExitPrompt : Event()
     }
 
 
-    @OptIn(ExperimentalDecomposeApi::class)
+    private val activePage by lazy {
+        val state = MutableStateFlow<WebPageModel?>(null)
+        child.subscribe { newValue ->
+            val currentConfig = newValue.active.configuration
+            if (currentConfig is Config.WebScreen) {
+                state.value = webPages.value[currentConfig.pageModelId]
+            }
+        }
+        state
+    }
+
     val bottomSheet = childSlot(
         source = sheetNav,
         handleBackButton = true
@@ -178,56 +238,18 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
         when (configuration) {
             SheetConfig.TabChooser -> DefaultTabChooserComponent(
                 componentContext = componentContext,
-                activeTab = activeTab,
-                tabs = tabs,
-                views = views,
+                selectedPage = activePage,
+                pages = webPages.map { it.values.toList() },
                 onAddNewTab = {
-                    val newTab = Tab(url = "www.google.com")
-                    tabs.value += newTab
-                    activeTab.value = newTab
-
-                    if (child.value.active.configuration == Config.HomeScreen) {
-                        navigation.pushNew(Config.WebScreen)
-                    }
+                    val googleSearch = "www.google.com"
+                    openNewWebPage(googleSearch)
                 },
-                onClearAllTab = {
-                    if (child.value.active.configuration is Config.WebScreen) {
-                        navigation.pop { clearAllTab() }
-                    } else {
-                        clearAllTab()
-                    }
-                },
-                onRemoveTab = {
-                    tabs.value -= it
-                    views.remove(it.id)
-                    if (it == activeTab.value) {
-                        activeTab.value = null
-                        if (child.value.active.configuration is Config.WebScreen) {
-                            navigation.pop()
-                        }
-                    }
-                },
-                onSelectTab = {
-                    activeTab.value = it
-                    if (child.active.configuration is Config.HomeScreen) {
-                        navigation.pushNew(Config.WebScreen)
-                    }
-                },
-                onBackClick = {
-                    views[activeTab.value?.id]?.run {
-                        if (canGoBack()) {
-                            goBack()
-                        }
-                    }
-                },
-                onForwardClick = {
-                    views[activeTab.value?.id]?.run {
-                        if (canGoForward()) {
-                            goForward()
-                        }
-                    }
-                }
-            )
+                onClearAllPages = { clearAllWebPages() },
+                onRemoveTab = { removeWebPage(it) },
+                onSelectTab = { selectPage(it) },
+                onBackClick = { navigation.goBackward() }
+            ) {
+            }
 
             SheetConfig.ExitPrompt -> DefaultExitPromptComponent(
                 componentContext,
@@ -250,7 +272,7 @@ class RootComponent(componentContext: ComponentContext, val onAppClose: () -> Un
         data object HomeScreen : Config()
 
         @Parcelize
-        data object WebScreen : Config()
+        data class WebScreen(val pageModelId: String, val initialUrl: String) : Config()
     }
 
     sealed class Child {

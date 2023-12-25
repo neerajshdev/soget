@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -16,11 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.fade
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.plus
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.scale
-import com.arkivanov.decompose.extensions.compose.jetpack.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
 import com.arkivanov.essenty.lifecycle.doOnResume
@@ -89,10 +85,19 @@ fun RootContent(root: RootComponent) {
     }
 
     AppTheme(useDarkTheme = root.useDarkTheme.collectAsState().value) {
-        Children(
-            stack = root.child,
-            animation = stackAnimation(fade() + scale())
-        ) {
+        /* Children(
+             stack = root.child,
+             animation = stackAnimation(fade() + scale())
+         ) {
+             when (val child = it.instance) {
+                 is RootComponent.Child.HomeScreenChild -> HomeScreenContent(component = child.component)
+                 is RootComponent.Child.WebScreenChild -> WebScreenContent(component = child.component)
+                 is RootComponent.Child.SplashScreen -> SplashScreenContent(component = child.component)
+             }
+         }
+ */
+        val childGraph by root.child.subscribeAsState()
+        Crossfade(targetState = childGraph.active, label = "") {
             when (val child = it.instance) {
                 is RootComponent.Child.HomeScreenChild -> HomeScreenContent(component = child.component)
                 is RootComponent.Child.WebScreenChild -> WebScreenContent(component = child.component)

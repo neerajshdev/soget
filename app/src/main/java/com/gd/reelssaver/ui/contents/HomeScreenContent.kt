@@ -68,13 +68,13 @@ fun HomeScreenContent(
     component: HomeScreenComponent,
     modifier: Modifier = Modifier
 ) {
-    val useDarkTheme by component.useDarkTheme.collectAsState()
+    val useDarkTheme by component.isDarkTheme.collectAsState()
     val context = LocalContext.current
     val isKeyboardOpen = WindowInsets.isImeVisible
     val focusManager = LocalFocusManager.current
 
     val inputText by component.inputText.subscribeAsState()
-    val tabCount by component.tabCount.subscribeAsState()
+    val pageCount by component.pageCount.collectAsState()
 
     val progress by animateFloatAsState(
         targetValue = if (isKeyboardOpen) 1f else 0f, label = "progress"
@@ -109,7 +109,7 @@ fun HomeScreenContent(
     Scaffold(
         topBar = {
             HomeTopBar(
-                tabsCount = tabCount,
+                tabsCount = pageCount,
                 useDarkTheme = useDarkTheme,
                 onOpenTabs = { component.onEvent(Event.OpenTabChooser) },
                 onToggleTheme = { component.onEvent(Event.ToggleTheme) }
@@ -249,6 +249,14 @@ private fun Google(onClick: () -> Unit, iconSize: Dp = 56.dp) {
             }
         },
     )
+}
+
+
+@Composable
+fun Reels(onClick: () -> Unit, iconSize: Dp = 56.dp) {
+    SocialSite(name = "Reels") {
+
+    }
 }
 
 @Composable
