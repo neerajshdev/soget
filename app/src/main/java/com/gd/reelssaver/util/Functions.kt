@@ -25,6 +25,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.reflect.KClass
 
 private const val TAG = "Functions.Kt"
 
@@ -224,4 +225,9 @@ fun findFirstUrl(input: String): String? {
     val regex = Regex("""\b(?:https?):\/\/\S+\b""")
     val matchResult = regex.find(input)
     return matchResult?.value
+}
+
+
+inline fun <reified T : Any> toKClass(): KClass<T> {
+    return T::class
 }
