@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SoGet</string>
+    <string name="app_name">Soget</string>
     <string name="facebook_app_id">817647129579309</string>
     <string name="facebook_client_token">18d7803d942c2ea97469b34d1a3763cd</string>
 </resources>

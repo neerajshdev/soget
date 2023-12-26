@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.screens.browser.tab.pages.webpage
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,13 +38,9 @@ import com.gd.reelssaver.ui.util.storagePermission
 import com.gd.reelssaver.util.asSome
 import com.gd.reelssaver.util.isSome
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WebpageContent(component: Webpage) {
-    var showFoundVideos by remember { mutableStateOf(false) }
-    var shouldAskPermission by remember { mutableStateOf(false) }
-    val storagePermission = storagePermission(shouldAskPermission)
-
+fun WebpageContent(component: WebpageComponent) {
+    val showFoundVideos by component.showSearchedVideos.subscribeAsState()
     val model by component.model.subscribeAsState()
     val isDarkTheme by component.isDarkTheme.subscribeAsState()
     val tabsCount by component.tabsCount.subscribeAsState()
@@ -68,7 +63,6 @@ fun WebpageContent(component: Webpage) {
         floatingActionButton = {
             FilledIconButton(onClick = {
                 component.onEvent(Event.OpenSearchedVideo)
-                showFoundVideos = true
                 InterstitialAdManager.tryAd()
             }) {
                 Icon(
@@ -91,46 +85,59 @@ fun WebpageContent(component: Webpage) {
             onCreate = { webView ->
                 component.onEvent(Event.OnWebViewCreated(webView))
             },
-            onPageLoad = { newUrl ->
-                component.onEvent(Event.OnPageLoaded(newUrl))
+            onPageLoad = { view, newUrl ->
+                component.onEvent(Event.OnPageLoaded(newUrl, view.title ?: "unknown"))
             }
         )
 
         val appname = stringResource(id = R.string.app_name)
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         if (showFoundVideos) {
-            ModalBottomSheet(
-                onDismissRequest = { showFoundVideos = false },
-                sheetState = sheetState
-            ) {
-                SearchedVideos(
-                    videoDataList = searchedVideos,
-                    onDownloadVideo = { videoData ->
-                        if (storagePermission) {
-                            component.onEvent(
-                                Event.DownloadVideo(
-                                    videoData,
-                                    appname
-                                )
-                            )
-                        } else {
-                            shouldAskPermission = true
-                        }
-                        InterstitialAdManager.tryAd()
-                    }
-                )
-            }
-
-            LaunchedEffect(key1 = Unit) {
-                sheetState.show()
-            }
+            SearchedVideoBottomSheet(
+                searchedVideos = searchedVideos,
+                onDismissed = { component.onEvent(Event.OnSearchVideoDismiss) },
+                onVideoDownloadRequest = {
+                    component.onEvent(Event.DownloadVideo(it, appname))
+                }
+            )
         }
     }
+}
 
-    BackHandler {
-        component.onEvent(Event.OnGoBack)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchedVideoBottomSheet(
+    searchedVideos: List<VideoData>,
+    onDismissed: () -> Unit,
+    onVideoDownloadRequest: (VideoData) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var shouldAskPermission by remember { mutableStateOf(false) }
+    val storagePermission = storagePermission(shouldAskPermission)
+
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissed,
+        sheetState = sheetState
+    ) {
+        SearchedVideos(
+            videoDataList = searchedVideos,
+            onDownloadVideo = { videoData ->
+                if (storagePermission) {
+                    onVideoDownloadRequest(videoData)
+                } else {
+                    shouldAskPermission = true
+                }
+                InterstitialAdManager.tryAd()
+            }
+        )
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        sheetState.show()
     }
 }
+
 
 @Composable
 private fun SearchedVideos(

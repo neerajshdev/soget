@@ -39,12 +39,9 @@ fun <C : Parcelable, T : Any> ComponentContext.childTabs(
     },
     navTransformer = { state, event -> event.transform(state) },
     stateMapper = { state, children ->
-        @Suppress("UNCHECKED_CAST") val createdChildren = children as List<Child.Created<C, T>>
-        val selectedChild = with(state) { tabs[selectIndex] }
-        val active = createdChildren.first { child -> selectedChild == child }
         ChildTabs(
-            active,
-            createdChildren.filter { it.configuration != selectedChild }
+            active = children[state.selectIndex] as Child.Created<C, T>,
+            children = children
         )
     },
     onEventComplete = { event, _, _ -> event.onComplete() },
@@ -61,7 +58,7 @@ class SavedTabNavState<C : Parcelable>(
 
 data class ChildTabs<C : Parcelable, T : Any>(
     val active: Child.Created<C, T>,
-    val inActive: List<Child<C, T>>,
+    val children: List<Child<C, T>>,
 )
 
 

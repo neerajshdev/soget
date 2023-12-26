@@ -1,7 +1,6 @@
 package com.gd.reelssaver.ui.screens.browser.tab.pages.homepage
 
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,10 +35,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.MotionLayout
-import androidx.constraintlayout.compose.MotionScene
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.InterstitialAdManager
@@ -50,44 +48,33 @@ import com.gd.reelssaver.ui.theme.AppTheme
 import java.net.URL
 
 
-@Preview
+@Preview(wallpaper = Wallpapers.NONE)
 @Composable
-private fun HomeScreenPreview() {
+private fun HomepageContentPreview() {
     val component = remember { FakeHomePage() }
     AppTheme {
-        HomeScreenContent(component = component)
+        HomepageContent(component = component)
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun HomeScreenContent(
-    component: HomePage,
+fun HomepageContent(
+    component: HomePageComponent,
     modifier: Modifier = Modifier
 ) {
     val useDarkTheme by component.isDarkTheme.subscribeAsState()
-    val context = LocalContext.current
+    LocalContext.current
     val isKeyboardOpen = WindowInsets.isImeVisible
     val focusManager = LocalFocusManager.current
 
     val inputText by component.inputText.subscribeAsState()
     val pageCount by component.tabsCount.subscribeAsState()
 
-    val progress by animateFloatAsState(
-        targetValue = if (isKeyboardOpen) 1f else 0f, label = "progress"
-    )
-
-    val motionSceneContent = remember {
-        context.resources
-            .openRawResource(R.raw.motion_scene)
-            .readBytes()
-            .decodeToString()
-    }
-
     val openInputText: () -> Unit = {
         try {
             val url = URL(inputText)
-            component.onEvent(Event.OpenWeb(url))
+            component.onEvent(Event.OnOpenWebSite(url))
         } catch (ex: Exception) {
             component.onEvent(Event.SearchWeb(inputText))
         }
@@ -113,18 +100,29 @@ fun HomeScreenContent(
             )
         }
     ) {
-        MotionLayout(
-            motionScene = MotionScene(motionSceneContent),
-            progress = progress,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = modifier
                 .padding(it)
+                .padding(top = 12.dp, start = 16.dp, end = 16.dp)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
+            InputUrlFieldCard(
+                url = inputText,
+                onValueChange = updateInputText,
+                onKeyBoardAction = openInputText,
+                onGoActionClick = openInputText,
+                onContentPaste = updateInputText,
+                modifier = Modifier
+                    .layoutId("url_edit_text")
+                    .fillMaxWidth()
+            )
+
             MediumSizeNativeAd(
                 refreshTimeSec = 80,
                 modifier = Modifier
                     .layoutId("ad_place_holder")
-                    .padding(horizontal = 16.dp)
             ) { // ad_place_holder
                 Image(
                     painter = painterResource(id = R.drawable.ad_placeholder),
@@ -136,27 +134,14 @@ fun HomeScreenContent(
                 )
             }
 
-            InputUrlFieldCard(
-                url = inputText,
-                onValueChange = updateInputText,
-                onKeyBoardAction = openInputText,
-                onGoActionClick = openInputText,
-                onContentPaste = updateInputText,
-                modifier = Modifier
-                    .layoutId("url_edit_text")
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-
             SocialMediaSiteCard(
                 onSiteOpen = { siteUrl ->
-                    component.onEvent(Event.OpenWeb(siteUrl))
+                    component.onEvent(Event.OnOpenWebSite(siteUrl))
                     InterstitialAdManager.tryAd()
                 },
                 modifier = Modifier
-                    .layoutId("social_media_card")
+                    .layoutId("social_sites")
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
             )
         }
     }
@@ -181,7 +166,6 @@ private fun SocialMediaSiteCard(
         }
     }
 }
-
 
 
 @Composable

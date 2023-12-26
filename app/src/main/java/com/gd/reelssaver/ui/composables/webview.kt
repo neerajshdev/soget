@@ -42,7 +42,7 @@ fun ComposeWebView(
     initialUrl: String,
     webView: WebView? = null,
     onCreate: (WebView) -> Unit,
-    onPageLoad: (url: String) -> Unit,
+    onPageLoad: (view: WebView, url: String) -> Unit,
 ) {
     var backEnabled by remember { mutableStateOf(false) }
 
@@ -76,7 +76,7 @@ fun ComposeWebView(
                         // Load and inject JavaScript from the assets
                         val script = loadJavaScriptFromAsset(view.context, "script.js")
                         view.evaluateJavascript(script, null)
-                        onPageLoad(url)
+                        onPageLoad(view, url)
 
                         Log.d(TAG, "onPageFinished: $url")
 

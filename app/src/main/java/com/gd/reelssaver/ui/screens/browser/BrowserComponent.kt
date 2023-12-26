@@ -2,53 +2,126 @@ package com.gd.reelssaver.ui.screens.browser
 
 import android.os.Parcelable
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.operator.map
-import com.gd.reelssaver.ui.blocs.componentScope
 import com.gd.reelssaver.ui.router.ChildTabs
 import com.gd.reelssaver.ui.router.TabNavigation
+import com.gd.reelssaver.ui.router.addTab
 import com.gd.reelssaver.ui.router.childTabs
+import com.gd.reelssaver.ui.router.remove
+import com.gd.reelssaver.ui.router.replaceAll
+import com.gd.reelssaver.ui.router.select
 import com.gd.reelssaver.ui.screens.browser.tab.DefaultTabComponent
 import com.gd.reelssaver.ui.screens.browser.tab.TabComponent
+import com.gd.reelssaver.ui.screens.browser.tab.TabComponentCallback
+import com.gd.reelssaver.ui.util.componentScope
 import com.gd.reelssaver.util.Events
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 
 
 interface BrowserComponent : Events<Event> {
-    val tabs: Value<ChildTabs<Config, TabComponent>>
-    val tabsCount: Value<Int>
+    val childTabs: Value<ChildTabs<Config, TabComponent>>
+    val tabCount: Value<Int>
+    val isTabChooserOpen: Value<Boolean>
+    val tabComponents: Value<List<TabComponent>>
+    val isDarkTheme: Value<Boolean>
 }
 
 
 class DefaultBrowserComponent(
     context: ComponentContext,
-    val isDarkTheme: Value<Boolean>
+    isDarkTheme: Boolean,
 ) : ComponentContext by context, BrowserComponent {
+    private val _tabCount = MutableValue(0)
+    override val tabCount = _tabCount
 
+    private val _isDarkTheme = MutableValue(isDarkTheme)
+    override val isDarkTheme: Value<Boolean> = _isDarkTheme
+
+
+    private val _isTabChooserOpen = MutableValue(false)
+    override val isTabChooserOpen: Value<Boolean> = _isTabChooserOpen
 
     private val scope = componentScope()
 
     private val navigation = TabNavigation<Config>(scope)
 
-    override val tabs: Value<ChildTabs<Config, TabComponent>> =
+    override val childTabs: Value<ChildTabs<Config, TabComponent>> =
         childTabs(
             source = navigation,
             initialTabs = listOf(Config(initialPage = TabPage.Homepage)),
             selectedTab = 0
         ) { config, componentContext ->
-            DefaultTabComponent(componentContext, config.initialPage, tabsCount, isDarkTheme)
+            DefaultTabComponent(
+                componentContext,
+                config.initialPage,
+                tabCount,
+                this.isDarkTheme,
+                callback = object : TabComponentCallback {
+                    override fun openTabChooser() {
+                        _isTabChooserOpen.value = true
+                    }
+
+                    override fun toggleTheme() {
+                        with(_isDarkTheme) { value = value.not() }
+                    }
+                })
         }
 
-    override val tabsCount = tabs.map { it.inActive.size + 1 }
-    override fun onEvent(e: Event) {
+
+    init {
+        childTabs.observe {
+            _tabCount.value = it.children.size
+        }
     }
+
+    override val tabComponents =
+        childTabs.map { it.children.mapNotNull { child -> child.instance } }
+
+
+    override fun onEvent(e: Event) {
+        when (e) {
+            is Event.AddNewTab -> navigation.addTab(Config(initialPage = e.initialPage))
+            is Event.OpenTabChooser -> {}
+            is Event.OnTabChooserDissmised -> {
+                _isTabChooserOpen.value = false
+            }
+
+            is Event.RemoveTab -> {
+                navigation.remove(e.index)
+            }
+
+            is Event.SelectTab -> {
+                navigation.select(e.index)
+            }
+
+            is Event.ClearAllTab -> {
+                navigation.replaceAll(homepageConfig())
+            }
+            else -> {}
+        }
+    }
+
+    private fun homepageConfig() = Config(initialPage = TabPage.Homepage)
 }
 
 sealed interface Event {
     data class AddNewTab(val initialPage: TabPage) : Event
+    data class RemoveTab(val index: Int) : Event
+    data class SelectTab(val index: Int) : Event
+    data object ClearAllTab : Event
+    data object OpenTabChooser : Event
+    data object OnTabChooserDissmised : Event
 }
 
+
+@Parcelize
+data class Config(
+    val id: String = UUID.randomUUID().toString(),
+    val initialPage: TabPage
+) : Parcelable
 
 sealed interface TabPage : Parcelable {
 
@@ -59,9 +132,5 @@ sealed interface TabPage : Parcelable {
     data class Webpage(val initialUrl: String) : TabPage
 }
 
-@Parcelize
-data class Config(
-    val id: String = UUID.randomUUID().toString(),
-    val initialPage: TabPage
-) : Parcelable
+
 

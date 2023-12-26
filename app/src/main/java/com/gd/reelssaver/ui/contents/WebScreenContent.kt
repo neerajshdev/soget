@@ -92,7 +92,7 @@ fun WebScreenContent(component: WebScreenComponent) {
                     )
                 )
             },
-            onPageLoad = { newUrl ->
+            onPageLoad = {view, newUrl ->
                 component.onEvent(Event.OnPageLoaded(newUrl))
             }
         )

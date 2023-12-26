@@ -24,7 +24,20 @@ import androidx.core.graphics.red
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.lifecycle.doOnDestroy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlin.coroutines.CoroutineContext
 
+
+fun ComponentContext.componentScope(context: CoroutineContext = Dispatchers.Main + SupervisorJob()): CoroutineScope {
+    val scope = CoroutineScope(context)
+    doOnDestroy { scope.cancel() }
+    return scope
+}
 
 fun hideStatusBar(window: Window) {
     val insetsController = WindowCompat.getInsetsController(window, window.decorView)

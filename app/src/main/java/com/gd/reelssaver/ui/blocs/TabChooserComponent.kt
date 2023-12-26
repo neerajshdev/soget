@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 
-interface TabChooserComponent {
+/*interface TabChooserComponent {
     val pages: Flow<List<RootComponent.WebPageModel>>
     val selectedPage: StateFlow<RootComponent.WebPageModel?>
     fun onEvent(event: Event)
@@ -18,8 +18,9 @@ interface TabChooserComponent {
         data object BackClick : Event()
         data object ForwardClick : Event()
     }
-}
+}*/
 
+/*
 class DefaultTabChooserComponent(
     componentContext: ComponentContext,
     override val selectedPage: StateFlow<RootComponent.WebPageModel?>,
@@ -41,4 +42,4 @@ class DefaultTabChooserComponent(
             is TabChooserComponent.Event.SelectPage -> onSelectTab(event.id)
         }
     }
-}
+}*/

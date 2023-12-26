@@ -10,7 +10,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.ContentPaste
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material3.Card
@@ -126,7 +126,7 @@ fun GoActionIconButton(onClick: () -> Unit) {
         )
     ) {
         Icon(
-            imageVector = Icons.Rounded.ArrowForward,
+            imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
             contentDescription = "Link input field",
         )
     }
@@ -134,10 +134,10 @@ fun GoActionIconButton(onClick: () -> Unit) {
 
 @Composable
 fun EditableUrlText(
+    modifier: Modifier = Modifier,
     url: String,
     textColor: Color = LocalContentColor.current,
     style: TextStyle = LocalTextStyle.current,
-    modifier: Modifier = Modifier,
     placeholderText: @Composable () -> Unit = {},
     onValueChange: (String) -> Unit,
     onKeyBoardAction: () -> Unit = {}

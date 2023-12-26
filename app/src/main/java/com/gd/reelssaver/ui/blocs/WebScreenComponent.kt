@@ -9,6 +9,8 @@ import com.gd.reelssaver.model.VideoData
 import com.gd.reelssaver.ui.composables.searchVideoElement
 import com.gd.reelssaver.util.createFileName
 import com.gd.reelssaver.util.download
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -49,7 +51,7 @@ class DefaultWebScreenComponent(
     private val onGoBackToHome: () -> Unit,
     private val onToggleTheme: () -> Unit,
 ) : WebScreenComponent, ComponentContext by componentContext {
-    private val scope = componentScope()
+    private val scope = CoroutineScope(Dispatchers.Main)
 
     private val _videosOnPage = MutableStateFlow(emptyList<VideoData>())
     override val videosOnPage: StateFlow<List<VideoData>> = _videosOnPage
