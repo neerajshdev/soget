@@ -103,7 +103,6 @@ class DefaultBrowserComponent(
             else -> {}
         }
     }
-
     private fun homepageConfig() = Config(initialPage = TabPage.Homepage)
 }
 
