@@ -28,10 +28,17 @@ decompose = "2.2.1"
 #plugins version
 androidGraldePlugin = "8.1.4"
 kotlinGradlePlugin = "1.9.21"
+junit = "4.13.2"
+androidx-test-ext-junit = "1.1.5"
+espresso-core = "3.5.1"
+appcompat = "1.6.1"
+material = "1.11.0"
+objectBoxVersion = "3.7.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGraldePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGraldePlugin" }
+io-objectbox = {id = "io.objectbox", version.ref = "objectBoxVersion"}
 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinGradlePlugin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinGradlePlugin"}
@@ -70,9 +77,15 @@ ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor_ve
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor_version" }
 ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor_version" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor_version" }
+
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_jetpack = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 

@@ -2,9 +2,6 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="BrowserTopBarPrev">
-        <State />
-      </entry>
       <entry key="SplashScreenPreviewLight">
         <State />
       </entry>
@@ -15,6 +12,12 @@
         <State />
       </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="downloadTest()">
+        <State />
+      </entry>
+      <entry key="downloader">
         <State />
       </entry>
       <entry key="main">
