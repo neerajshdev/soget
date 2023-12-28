@@ -2,25 +2,7 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="SplashScreenPreviewLight">
-        <State />
-      </entry>
-      <entry key="TestAds">
-        <State />
-      </entry>
-      <entry key="TestAdsActivity">
-        <State />
-      </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="downloadTest()">
-        <State />
-      </entry>
-      <entry key="downloader">
-        <State />
-      </entry>
-      <entry key="main">
         <State />
       </entry>
     </value>

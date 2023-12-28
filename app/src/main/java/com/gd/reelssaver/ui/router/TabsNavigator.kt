@@ -1,7 +1,6 @@
 package com.gd.reelssaver.ui.router
 
 import android.os.Parcelable
-import com.gd.reelssaver.ui.screens.browser.Config
 
 interface TabsNavigator<C : Parcelable> {
     fun navigate(

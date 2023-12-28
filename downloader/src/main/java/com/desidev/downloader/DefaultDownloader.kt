@@ -76,6 +76,8 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
                 status = Download.Status.InProgress
             )
 
+            send(DownloadEvent.OnAddNew(state))
+
             while (!channel.isClosedForRead) {
                 channel.read(1024) { buffer -> stream.write(buffer.moveToByteArray()) }
 
@@ -100,7 +102,7 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
         return false
     }
 
-    private fun createNewFile(parentDir: File, fileName: String) : File {
+    private fun createNewFile(parentDir: File, fileName: String): File {
         // Create a file object with the given file name
         var file = File(parentDir, fileName)
         // Initialize a counter for the file name suffix
@@ -110,7 +112,8 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
             // Increment the counter
             counter++
             // Append the counter to the file name before the extension
-            val newName = fileName.substringBeforeLast(".") + " ($counter)." + fileName.substringAfterLast(".")
+            val newName =
+                fileName.substringBeforeLast(".") + " ($counter)." + fileName.substringAfterLast(".")
             // Create a new file object with the new name
             file = File(parentDir, newName)
         }

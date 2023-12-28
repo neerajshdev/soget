@@ -2,7 +2,7 @@
 <resources>
     <style name="Theme.Myapp" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">#FF0F0D0E</item>
-        <item name="android:windowIsTranslucent"> true</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 
 </resources>

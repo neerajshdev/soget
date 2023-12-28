@@ -28,7 +28,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalDecomposeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         Thread.UncaughtExceptionHandler { t, e ->

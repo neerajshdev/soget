@@ -30,16 +30,45 @@ interface BrowserComponent : Events<Event> {
 }
 
 
+sealed interface Event {
+    data class AddNewTab(val initialPage: TabPage) : Event
+    data class RemoveTab(val index: Int) : Event
+    data class SelectTab(val index: Int) : Event
+    data object ClearAllTab : Event
+    data object OpenTabChooser : Event
+    data object OnTabChooserDissmised : Event
+}
+
+
+@Parcelize
+data class Config(
+    val id: String = UUID.randomUUID().toString(),
+    val initialPage: TabPage
+) : Parcelable
+
+sealed interface TabPage : Parcelable {
+
+    @Parcelize
+    data object Homepage : TabPage
+
+    @Parcelize
+    data class Webpage(val initialUrl: String) : TabPage
+}
+
+interface BrowserComponentCallback {
+    fun toggleTheme()
+    fun addDownload(url: String)
+}
+
+
 class DefaultBrowserComponent(
     context: ComponentContext,
-    isDarkTheme: Boolean,
+    initialPage: TabPage,
+    private val callback: BrowserComponentCallback,
+    override val isDarkTheme: Value<Boolean>,
 ) : ComponentContext by context, BrowserComponent {
     private val _tabCount = MutableValue(0)
     override val tabCount = _tabCount
-
-    private val _isDarkTheme = MutableValue(isDarkTheme)
-    override val isDarkTheme: Value<Boolean> = _isDarkTheme
-
 
     private val _isTabChooserOpen = MutableValue(false)
     override val isTabChooserOpen: Value<Boolean> = _isTabChooserOpen
@@ -51,7 +80,7 @@ class DefaultBrowserComponent(
     override val childTabs: Value<ChildTabs<Config, TabComponent>> =
         childTabs(
             source = navigation,
-            initialTabs = listOf(Config(initialPage = TabPage.Homepage)),
+            initialTabs = listOf(Config(initialPage = initialPage)),
             selectedTab = 0
         ) { config, componentContext ->
             DefaultTabComponent(
@@ -65,7 +94,8 @@ class DefaultBrowserComponent(
                     }
 
                     override fun toggleTheme() {
-                        with(_isDarkTheme) { value = value.not() }
+                        // event goes up
+                        callback.toggleTheme()
                     }
                 })
         }
@@ -100,36 +130,12 @@ class DefaultBrowserComponent(
             is Event.ClearAllTab -> {
                 navigation.replaceAll(homepageConfig())
             }
-            else -> {}
         }
     }
+
     private fun homepageConfig() = Config(initialPage = TabPage.Homepage)
 }
 
-sealed interface Event {
-    data class AddNewTab(val initialPage: TabPage) : Event
-    data class RemoveTab(val index: Int) : Event
-    data class SelectTab(val index: Int) : Event
-    data object ClearAllTab : Event
-    data object OpenTabChooser : Event
-    data object OnTabChooserDissmised : Event
-}
-
-
-@Parcelize
-data class Config(
-    val id: String = UUID.randomUUID().toString(),
-    val initialPage: TabPage
-) : Parcelable
-
-sealed interface TabPage : Parcelable {
-
-    @Parcelize
-    data object Homepage : TabPage
-
-    @Parcelize
-    data class Webpage(val initialUrl: String) : TabPage
-}
 
 
 

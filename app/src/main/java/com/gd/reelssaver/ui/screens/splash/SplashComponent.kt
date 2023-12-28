@@ -1,8 +1,6 @@
 package com.gd.reelssaver.ui.screens.splash
 
 import com.arkivanov.decompose.ComponentContext
-import com.gd.reelssaver.ui.util.ComponentScopeOwner
-import com.gd.reelssaver.ui.util.DefaultComponentScopeOwner
 import com.gd.reelssaver.util.Events
 
 interface SplashComponent : Events<Event> {
