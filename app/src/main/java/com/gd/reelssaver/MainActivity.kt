@@ -2,6 +2,7 @@ package com.gd.reelssaver
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
@@ -9,8 +10,9 @@ import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
-import com.gd.reelssaver.ui.screens.browser.BrowserContent
-import com.gd.reelssaver.ui.screens.browser.DefaultBrowserComponent
+import com.desidev.downloader.Downloader
+import com.gd.reelssaver.ui.screens.DefaultRootComponent
+import com.gd.reelssaver.ui.screens.RootContent
 import com.gd.reelssaver.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,8 +36,12 @@ class MainActivity : ComponentActivity() {
             e.printStackTrace()
         }
 
+        val dbDir = filesDir
+        val videoDir =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+
         val root = retainedComponent {
-            DefaultBrowserComponent(it, false)
+            DefaultRootComponent(it, Downloader(dbDir), videoDir)
         }
 
 //        root.lifecycle.doOnResume {
@@ -46,7 +52,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isDarktheme by root.isDarkTheme.subscribeAsState()
             AppTheme(useDarkTheme = isDarktheme) {
-                BrowserContent(comp = root)
+                RootContent(component = root)
             }
         }
     }

@@ -51,6 +51,8 @@ class ExampleUnitTest {
 
                     is DownloadEvent.OnCancelled -> {
                     }
+
+                    is DownloadEvent.OnAddNew -> {}
                 }
             }
         }

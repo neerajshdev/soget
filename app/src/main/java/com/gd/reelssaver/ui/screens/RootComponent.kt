@@ -5,6 +5,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -20,11 +22,18 @@ import com.gd.reelssaver.ui.screens.downloads.DownloadsComponent
 import com.gd.reelssaver.ui.screens.splash.DefaultSplashComponent
 import com.gd.reelssaver.ui.screens.splash.SplashComponent
 import com.gd.reelssaver.ui.screens.splash.SplashComponentCallback
+import com.gd.reelssaver.util.Events
 import kotlinx.parcelize.Parcelize
 import java.io.File
 
-interface RootComponent {
-    val child: Value<ChildStack<Config, Child>>
+interface RootComponent : Events<Event> {
+    val childStack: Value<ChildStack<Config, Child>>
+    val isDarkTheme: Value<Boolean>
+}
+
+sealed interface Event {
+    object OnTabMenuSelect : Event
+    object OnDownloadMenuSelect : Event
 }
 
 sealed interface Config : Parcelable {
@@ -47,21 +56,24 @@ sealed interface Child {
 class DefaultRootComponent(
     componentContext: ComponentContext,
     downloader: Downloader,
-    parentDir: File,
+    parentVideoDir: File,
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
 
-    override val child: Value<ChildStack<Config, Child>> =
+    override val childStack: Value<ChildStack<Config, Child>> =
         childStack(
             source = navigation,
+            handleBackButton = true,
             initialConfiguration = Config.Splash,
             childFactory = ::childFactory
         )
 
     private val _isDarkTheme = MutableValue(false)
+    override val isDarkTheme: Value<Boolean> = _isDarkTheme
 
-    private val downloadModel = DefaultDownloadModel(this, downloader, parentDir)
+
+    private val downloadModel = DefaultDownloadModel(this, downloader, parentVideoDir)
 
     init {
         downloadModel
@@ -101,7 +113,7 @@ class DefaultRootComponent(
             is Config.Downloads -> Child.Downloads(
                 DefaultDownloadsComponent(
                     context = context,
-                    downloadModel = downloadModel,
+                    downloads = downloadModel.downloads,
                     callback = object : DownloadsComponent.Callback {
                         override fun addDownload(url: String) {
                             // delegate event to download model
@@ -110,6 +122,20 @@ class DefaultRootComponent(
                     }
                 )
             )
+        }
+    }
+
+    override fun onEvent(e: Event) {
+        when (e) {
+            Event.OnDownloadMenuSelect -> {
+                if (childStack.value.active.configuration !is Config.Downloads)
+                    navigation.push(Config.Downloads)
+            }
+
+            Event.OnTabMenuSelect -> {
+                if (childStack.value.active.configuration is Config.Downloads)
+                    navigation.pop()
+            }
         }
     }
 }
