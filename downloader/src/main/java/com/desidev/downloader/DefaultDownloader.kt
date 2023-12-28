@@ -1,6 +1,9 @@
 package com.desidev.downloader
 
+import com.desidev.downloader.database.getDownloads
+import com.desidev.downloader.database.putDownload
 import com.desidev.downloader.model.Download
+import com.desidev.downloader.database.ObjectBox
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.BrowserUserAgent
@@ -18,9 +21,21 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 
-class DefaultDownloader : Downloader {
 
-    val client by lazy {
+internal var downloaderInstance: Downloader? = null
+
+fun Downloader(dbDir: File) =
+    downloaderInstance ?: DefaultDownloader(dbDir).also { downloaderInstance = it }
+
+class DefaultDownloader internal constructor(private val dbDir: File) : Downloader {
+    init {
+        require(dbDir.isDirectory) { "parameter dbDir is required to be directory" }
+        require(dbDir.exists()) { "dbDir does not exists" }
+        require(dbDir.canRead() && dbDir.canWrite()) { "dbDir does not have read/write permissions" }
+        ObjectBox.init(dbDir)
+    }
+
+    private val client by lazy {
         HttpClient(CIO) {
             BrowserUserAgent()
             engine {
@@ -31,16 +46,17 @@ class DefaultDownloader : Downloader {
 
     override suspend fun addDownload(
         url: String,
-        dir: String,
+        parentDir: File,
         name: String?
     ): Result<Flow<DownloadEvent>, Error> {
         val filename = name ?: URL(url).path.substringAfterLast("/")
+        val localFile = createNewFile(parentDir, filename)
+
         val response = client.get(url)
-//        val subtype = response.contentType()?.contentSubtype ?: "bin"
         if (response.status != HttpStatusCode.OK) return Result.Err(Error.ServerDisAllowed(response.status.value))
 
         val stream = try {
-            File(dir, filename).outputStream()
+            localFile.outputStream()
         } catch (ex: IOException) {
             return Result.Err(Error.FailedWithIoException(ex))
         }
@@ -49,31 +65,57 @@ class DefaultDownloader : Downloader {
         val contentType = response.contentType() ?: ContentType.Any
         val flow = channelFlow {
             val channel = response.bodyAsChannel()
+            var state = Download(
+                id = 0,
+                name = filename,
+                localPath = localFile.path,
+                url = url,
+                contentSize = contentSize,
+                downloaded = 0L,
+                type = contentType,
+                status = Download.Status.InProgress
+            )
+
             while (!channel.isClosedForRead) {
-                channel.read(1024) { buffer ->
-                    stream.write(buffer.moveToByteArray())
-                    launch {
-                        send(
-                            DownloadEvent.DownloadUpdate(
-                                Download(
-                                    0,
-                                    name = filename,
-                                    url = url,
-                                    contentSize = contentSize,
-                                    downloaded = channel.totalBytesRead,
-                                    type = contentType
-                                )
-                            )
-                        )
-                    }
-                }
+                channel.read(1024) { buffer -> stream.write(buffer.moveToByteArray()) }
+
+                state = state.copy(
+                    downloaded = channel.totalBytesRead,
+                    status = if (contentSize == channel.totalBytesRead) Download.Status.Complete else Download.Status.InProgress
+                )
+
+                launch { send(DownloadEvent.OnProgress(state)) }
             }
+
+            // Download complete
+            putDownload(state)
         }
 
         return Result.Ok(flow)
     }
 
+    override suspend fun getAll(): List<Download> = getDownloads() ?: emptyList()
+
     override fun cancelDownload(id: Long): Boolean {
         return false
+    }
+
+    private fun createNewFile(parentDir: File, fileName: String) : File {
+        // Create a file object with the given file name
+        var file = File(parentDir, fileName)
+        // Initialize a counter for the file name suffix
+        var counter = 0
+        // Loop until the file does not exist
+        while (file.exists()) {
+            // Increment the counter
+            counter++
+            // Append the counter to the file name before the extension
+            val newName = fileName.substringBeforeLast(".") + " ($counter)." + fileName.substringAfterLast(".")
+            // Create a new file object with the new name
+            file = File(parentDir, newName)
+        }
+        // Create the new file
+        file.createNewFile()
+        return file
     }
 }

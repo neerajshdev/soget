@@ -4,6 +4,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 import org.junit.Assert.*
+import java.io.File
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -22,11 +23,11 @@ class ExampleUnitTest {
 
     @Test
     fun downloadTest() {
-        val downloader: Downloader = DefaultDownloader()
+        val dir = ExampleUnitTest::class.java.getResource("").path.let { File(it) }
+        val downloader: Downloader = Downloader(dir)
+
         runBlocking {
-            val path = ExampleUnitTest::class.java.getResource("").path
-            val result = downloader.addDownload(testUrl, path)
-            val flow = when (result) {
+            val flow = when (val result = downloader.addDownload(testUrl, dir)) {
                 is Result.Ok -> result.value
                 is Result.Err -> {
                     when (val err = result.err) {
@@ -44,11 +45,11 @@ class ExampleUnitTest {
 
             flow.collect { event: DownloadEvent ->
                 when (event) {
-                    is DownloadEvent.DownloadUpdate -> {
+                    is DownloadEvent.OnProgress -> {
                         println("On download update: ${event.download}")
                     }
 
-                    is DownloadEvent.DownloadCancelled -> {
+                    is DownloadEvent.OnCancelled -> {
                     }
                 }
             }

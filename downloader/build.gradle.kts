@@ -1,6 +1,6 @@
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.io.objectbox)
 }
@@ -10,12 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.desidev.downloader"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,6 +26,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -49,4 +45,7 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.contentNegotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
 }

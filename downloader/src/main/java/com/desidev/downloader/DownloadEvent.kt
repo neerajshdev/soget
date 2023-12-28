@@ -3,6 +3,6 @@ package com.desidev.downloader
 import com.desidev.downloader.model.Download
 
 sealed interface DownloadEvent {
-    class DownloadUpdate(val download: Download): DownloadEvent
-    class DownloadCancelled(val download: Download): DownloadEvent
+    data class OnProgress(val download: Download): DownloadEvent
+    class OnCancelled(val download: Download): DownloadEvent
 }
