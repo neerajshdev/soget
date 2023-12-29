@@ -1,7 +1,9 @@
 package com.gd.reelssaver.ui.screens
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Download
@@ -17,7 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.gd.reelssaver.ui.screens.browser.BrowserContent
@@ -78,10 +82,12 @@ fun RootContent(component: RootComponent) {
         )
     )
 
-    val selectedMenuItem = when(childStack.active.instance) {
+    val selectedMenuItem = when (childStack.active.instance) {
         is Child.Browser -> navBarItems[0]
         else -> navBarItems[1]
     }
+
+    val columnModifier = Modifier.fillMaxSize()
 
     Children(stack = childStack) {
         when (val active = it.instance) {
@@ -89,28 +95,29 @@ fun RootContent(component: RootComponent) {
                 SplashContent(active.component, modifier = Modifier.fillMaxSize())
             }
 
-            is Child.Browser -> Column {
-                BrowserContent(
-                    active.component,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                )
-                BottomNavigation(
-                    items = navBarItems,
-                    selectedItem = selectedMenuItem,
-                )
-            }
+            is Child.Browser -> BrowserContent(
+                active.component,
+                bottomNavBar = {
+                    BottomNavigation(
+                        items = navBarItems,
+                        selectedItem = selectedMenuItem,
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
 
-            is Child.Downloads -> Column {
+            is Child.Downloads -> Column(modifier = columnModifier) {
                 DownloadContent(
                     component = active.component, modifier = Modifier
                         .weight(1f)
-                        .statusBarsPadding()
-                )
-                BottomNavigation(
-                    items = navBarItems,
-                    selectedItem = selectedMenuItem,
+                        .statusBarsPadding(),
+                    bottomNavBar = {
+                        BottomNavigation(
+                            items = navBarItems,
+                            selectedItem = selectedMenuItem,
+                        )
+                    }
                 )
             }
         }

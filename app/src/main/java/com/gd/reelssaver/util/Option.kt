@@ -14,3 +14,5 @@ fun <T: Any> Option<T>.or(other: Option<T>): Option<T> {
 }
 
 fun <T: Any> Option<T>.asSome() = this as Option.Some<T>
+
+fun <T: Any> Option<T>.unwrap() = this.asSome().value

@@ -5,12 +5,16 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.gd.reelssaver.model.VideoData
+import com.gd.reelssaver.ui.callbacks.OnDownloadVideo
+import com.gd.reelssaver.ui.callbacks.OnTabChooserOpen
+import com.gd.reelssaver.ui.callbacks.OnThemeToggle
 import com.gd.reelssaver.ui.composables.searchVideoElement
 import com.gd.reelssaver.ui.util.componentScope
 import com.gd.reelssaver.util.Events
 import com.gd.reelssaver.util.Option
 import com.gd.reelssaver.util.asSome
 import com.gd.reelssaver.util.isSome
+import com.gd.reelssaver.util.unwrap
 import kotlinx.coroutines.launch
 
 
@@ -62,12 +66,20 @@ class DefaultWebpageComponent(
                 value = value.copy(pageUrl = e.pageUrl, pageTitle = e.pageTitle)
             }
 
-            is Event.DownloadVideo -> {}
-            is Event.LoadUrl -> {}
-            is Event.OnGoBack -> {}
-            is Event.OnWebViewCreated -> {}
-            is Event.OpenTabChooser -> callback.openTabChooser()
-            is Event.ToggleTheme -> callback.toggleTheme()
+            is Event.DownloadVideo -> callback.onDownloadVideo(e.videoData.videoUrl, e.onDownloadAdd, e.onFailed )
+            is Event.LoadUrl -> with(model) {
+                val view = value.view
+                if (view.isSome()) {
+                    view.unwrap().loadUrl(e.url)
+                }
+            }
+
+            is Event.OnWebViewCreated -> with(_model) {
+                value = value.copy(view = Option.Some(e.webView))
+            }
+
+            is Event.OpenTabChooser -> callback.onTabChooserOpen()
+            is Event.ToggleTheme -> callback.onThemeToggle()
             is Event.OnSearchVideoDismiss -> _showSearchedVideos.value = false
             is Event.OpenSearchedVideo -> {
                 with(model.value.view) {
@@ -84,18 +96,18 @@ class DefaultWebpageComponent(
 }
 
 
-interface WebpageComponentCallback {
-    fun openTabChooser()
-    fun toggleTheme()
-}
+interface WebpageComponentCallback :
+    OnThemeToggle,
+    OnDownloadVideo,
+    OnTabChooserOpen
+
 
 sealed interface Event {
     data class OnPageLoaded(val pageUrl: String, val pageTitle: String) : Event
     class OnWebViewCreated(val webView: WebView) : Event
-    class DownloadVideo(val videoData: VideoData, val appname: String) : Event
+    class DownloadVideo(val videoData: VideoData, val onDownloadAdd: () -> Unit, val onFailed: () -> Unit) : Event
     data object OpenTabChooser : Event
     data object OpenSearchedVideo : Event
-    data object OnGoBack : Event
     data object ToggleTheme : Event
     object OnSearchVideoDismiss : Event
 

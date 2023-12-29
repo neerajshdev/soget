@@ -34,29 +34,29 @@ suspend fun getDownloads() = ObjectBox.store.awaitCallInTx {
 
 private fun Download.toEntity() = run {
     DownloadEntity(
-        id,
-        name,
-        localPath,
-        url,
-        type.toString(),
-        contentSize,
-        downloaded,
-        status.name,
-        time.toString()
+        id = id,
+        name = name,
+        localPath = localPath,
+        url = url,
+        type = type.toString(),
+        contentSize = contentSize,
+        downloadedSize = downloaded,
+        status = status.name,
+        time = time.toString()
     )
 }
 
 
 private fun DownloadEntity.toModel() = run {
     Download(
-        id,
-        name,
-        localPath,
-        url,
-        contentSize,
-        downloadedSize,
-        ContentType.parse(type),
-        Download.Status.valueOf(status),
-        LocalDate.parse(time)
+        id = id,
+        name = name,
+        localPath = localPath,
+        url = url,
+        contentSize = contentSize,
+        downloaded = downloadedSize,
+        type = ContentType.parse(type),
+        status = Download.Status.valueOf(status),
+        time = LocalDate.parse(time)
     )
 }

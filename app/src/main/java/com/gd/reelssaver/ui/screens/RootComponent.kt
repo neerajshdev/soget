@@ -18,6 +18,7 @@ import com.gd.reelssaver.ui.screens.browser.BrowserComponentCallback
 import com.gd.reelssaver.ui.screens.browser.DefaultBrowserComponent
 import com.gd.reelssaver.ui.screens.browser.TabPage
 import com.gd.reelssaver.ui.screens.downloads.DefaultDownloadsComponent
+import com.gd.reelssaver.ui.screens.downloads.DownloadComponentCallback
 import com.gd.reelssaver.ui.screens.downloads.DownloadsComponent
 import com.gd.reelssaver.ui.screens.splash.DefaultSplashComponent
 import com.gd.reelssaver.ui.screens.splash.SplashComponent
@@ -99,12 +100,22 @@ class DefaultRootComponent(
                     initialPage = config.initialPage,
                     isDarkTheme = _isDarkTheme,
                     callback = object : BrowserComponentCallback {
-                        override fun toggleTheme() {
+                        override fun onThemeToggle() {
                             with(_isDarkTheme) { value = value.not() }
                         }
 
-                        override fun addDownload(url: String) {
-                            // todo: start downloading from url
+                        override fun onDownloadVideo(
+                            videoUrl: String,
+                            onDownloadAdd: () -> Unit,
+                            onFailed: () -> Unit
+                        ) {
+                            downloadModel.onEvent(
+                                DownloadModel.Event.AddDownload(
+                                    videoUrl,
+                                    onDownloadAdd,
+                                    onFailed
+                                )
+                            )
                         }
                     }
                 )
@@ -114,12 +125,7 @@ class DefaultRootComponent(
                 DefaultDownloadsComponent(
                     context = context,
                     downloads = downloadModel.downloads,
-                    callback = object : DownloadsComponent.Callback {
-                        override fun addDownload(url: String) {
-                            // delegate event to download model
-                            downloadModel.onEvent(DownloadModel.Event.AddDownload(url))
-                        }
-                    }
+                    callback = object : DownloadComponentCallback {}
                 )
             )
         }

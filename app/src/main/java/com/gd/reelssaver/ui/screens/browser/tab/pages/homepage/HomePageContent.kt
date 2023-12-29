@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,20 +50,24 @@ import com.gd.reelssaver.ui.theme.AppTheme
 import java.net.URL
 
 
-@Preview(wallpaper = Wallpapers.NONE)
+@Preview(
+    wallpaper = Wallpapers.NONE, device = "spec:width=411dp,height=891dp", showSystemUi = true,
+    showBackground = true
+)
 @Composable
 private fun HomepageContentPreview() {
     val component = remember { FakeHomePage() }
     AppTheme {
-        HomepageContent(component = component)
+        HomepageContent(component = component) {}
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomepageContent(
+    modifier: Modifier = Modifier,
     component: HomePageComponent,
-    modifier: Modifier = Modifier
+    bottomNavBar: @Composable () -> Unit
 ) {
     val useDarkTheme by component.isDarkTheme.subscribeAsState()
     LocalContext.current
@@ -91,6 +97,8 @@ fun HomepageContent(
     })
 
     Scaffold(
+        modifier = modifier,
+        bottomBar = bottomNavBar,
         topBar = {
             HomeTopBar(
                 tabsCount = pageCount,
@@ -98,11 +106,11 @@ fun HomepageContent(
                 onOpenTabs = { component.onEvent(Event.OpenTabChooser) },
                 onToggleTheme = { component.onEvent(Event.ToggleTheme) }
             )
-        }
+        },
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = modifier
+            modifier = Modifier
                 .padding(it)
                 .padding(top = 12.dp, start = 16.dp, end = 16.dp)
                 .fillMaxSize()
@@ -143,6 +151,8 @@ fun HomepageContent(
                     .layoutId("social_sites")
                     .fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

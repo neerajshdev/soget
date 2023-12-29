@@ -2,6 +2,7 @@ package com.gd.reelssaver.ui.screens.browser.tab.pages.webpage
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -22,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,16 +41,27 @@ import com.gd.reelssaver.ui.composables.SearchVideoCard
 import com.gd.reelssaver.ui.util.storagePermission
 import com.gd.reelssaver.util.asSome
 import com.gd.reelssaver.util.isSome
+import kotlinx.coroutines.launch
 
 @Composable
-fun WebpageContent(component: WebpageComponent) {
+fun WebpageContent(
+    modifier: Modifier = Modifier,
+    component: WebpageComponent,
+    bottomNavBar: @Composable () -> Unit
+) {
     val showFoundVideos by component.showSearchedVideos.subscribeAsState()
     val model by component.model.subscribeAsState()
     val isDarkTheme by component.isDarkTheme.subscribeAsState()
     val tabsCount by component.tabsCount.subscribeAsState()
     val searchedVideos by component.searchedVideos.subscribeAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier,
+        bottomBar = bottomNavBar,
         topBar = {
             BrowserTopBar(
                 isDarkTheme = isDarkTheme,
@@ -79,7 +94,9 @@ fun WebpageContent(component: WebpageComponent) {
         }
 
         ComposeWebView(
-            modifier = Modifier.padding(padding),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
             initialUrl = model.pageUrl,
             webView = view,
             onCreate = { webView ->
@@ -90,13 +107,23 @@ fun WebpageContent(component: WebpageComponent) {
             }
         )
 
-        val appname = stringResource(id = R.string.app_name)
         if (showFoundVideos) {
             SearchedVideoBottomSheet(
                 searchedVideos = searchedVideos,
                 onDismissed = { component.onEvent(Event.OnSearchVideoDismiss) },
                 onVideoDownloadRequest = {
-                    component.onEvent(Event.DownloadVideo(it, appname))
+                    // close the bottom sheet
+                    component.onEvent(Event.OnSearchVideoDismiss)
+
+                    component.onEvent(Event.DownloadVideo(it, onDownloadAdd = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Video Added to Download!")
+                        }
+                    }, onFailed = {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Something went wrong!")
+                        }
+                    }))
                 }
             )
         }
@@ -172,7 +199,6 @@ private fun SearchedVideos(
                         modifier = Modifier.padding(16.dp),
                         onDownloadClick = {
                             onDownloadVideo(it)
-//                          fetchDownloader.downloadFile(it.videoUrl, createFileName("$appName.mp4"))
                         })
                 }
             }

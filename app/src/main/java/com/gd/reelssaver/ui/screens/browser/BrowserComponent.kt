@@ -18,6 +18,7 @@ import com.gd.reelssaver.ui.screens.browser.tab.TabComponentCallback
 import com.gd.reelssaver.ui.util.componentScope
 import com.gd.reelssaver.util.Events
 import kotlinx.parcelize.Parcelize
+import java.net.URL
 import java.util.UUID
 
 
@@ -55,10 +56,6 @@ sealed interface TabPage : Parcelable {
     data class Webpage(val initialUrl: String) : TabPage
 }
 
-interface BrowserComponentCallback {
-    fun toggleTheme()
-    fun addDownload(url: String)
-}
 
 
 class DefaultBrowserComponent(
@@ -88,14 +85,9 @@ class DefaultBrowserComponent(
                 config.initialPage,
                 tabCount,
                 this.isDarkTheme,
-                callback = object : TabComponentCallback {
-                    override fun openTabChooser() {
+                callback = object : TabComponentCallback by callback {
+                    override fun onTabChooserOpen() {
                         _isTabChooserOpen.value = true
-                    }
-
-                    override fun toggleTheme() {
-                        // event goes up
-                        callback.toggleTheme()
                     }
                 })
         }
@@ -136,6 +128,11 @@ class DefaultBrowserComponent(
     private fun homepageConfig() = Config(initialPage = TabPage.Homepage)
 }
 
+interface BrowserComponentCallback: TabComponentCallback  {
+    override fun onTabChooserOpen() {
+        // ignore
+    }
+}
 
 
 

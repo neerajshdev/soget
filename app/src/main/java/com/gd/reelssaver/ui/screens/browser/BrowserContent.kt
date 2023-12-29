@@ -44,7 +44,11 @@ import com.gd.reelssaver.ui.screens.browser.tab.TabContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrowserContent(comp: BrowserComponent, modifier: Modifier = Modifier) {
+fun BrowserContent(
+    comp: BrowserComponent,
+    modifier: Modifier = Modifier,
+    bottomNavBar: @Composable () -> Unit
+) {
     val tabs by comp.childTabs.subscribeAsState()
     val isTabChooserOpen by comp.isTabChooserOpen.subscribeAsState()
 
@@ -53,7 +57,7 @@ fun BrowserContent(comp: BrowserComponent, modifier: Modifier = Modifier) {
         label = "TabsCrossFade",
         modifier = modifier
     ) { tab ->
-        TabContent(tab.instance)
+        TabContent(tab.instance, modifier.fillMaxSize(), bottomNavBar = bottomNavBar)
     }
 
 

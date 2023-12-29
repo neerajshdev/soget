@@ -1,24 +1,25 @@
 package com.desidev.downloader
 
+import com.desidev.downloader.database.ObjectBox
 import com.desidev.downloader.database.getDownloads
 import com.desidev.downloader.database.putDownload
 import com.desidev.downloader.model.Download
-import com.desidev.downloader.database.ObjectBox
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.BrowserUserAgent
-import io.ktor.client.request.get
+import io.ktor.client.plugins.CurlUserAgent
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.request.prepareGet
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentLength
 import io.ktor.http.contentType
-import io.ktor.util.moveToByteArray
+import io.ktor.utils.io.core.isEmpty
+import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.printStack
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.launch
 import java.io.File
-import java.io.IOException
 import java.net.URL
 
 
@@ -37,9 +38,11 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
 
     private val client by lazy {
         HttpClient(CIO) {
-            BrowserUserAgent()
-            engine {
-                requestTimeout = 15000
+            CurlUserAgent()
+            install(HttpTimeout) {
+                requestTimeoutMillis = 15000
+                connectTimeoutMillis = 15000
+                socketTimeoutMillis = 15000
             }
         }
     }
@@ -48,52 +51,46 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
         url: String,
         parentDir: File,
         name: String?
-    ): Result<Flow<DownloadEvent>, Error> {
+    ): Flow<DownloadEvent> {
         val filename = name ?: URL(url).path.substringAfterLast("/")
-        val localFile = createNewFile(parentDir, filename)
+        val file = createNewFile(parentDir, filename)
 
-        val response = client.get(url)
-        if (response.status != HttpStatusCode.OK) return Result.Err(Error.ServerDisAllowed(response.status.value))
-
-        val stream = try {
-            localFile.outputStream()
-        } catch (ex: IOException) {
-            return Result.Err(Error.FailedWithIoException(ex))
-        }
-
-        val contentSize = response.contentLength() ?: 1
-        val contentType = response.contentType() ?: ContentType.Any
-        val flow = channelFlow {
-            val channel = response.bodyAsChannel()
-            var state = Download(
-                id = 0,
-                name = filename,
-                localPath = localFile.path,
-                url = url,
-                contentSize = contentSize,
-                downloaded = 0L,
-                type = contentType,
-                status = Download.Status.InProgress
-            )
-
-            send(DownloadEvent.OnAddNew(state))
-
-            while (!channel.isClosedForRead) {
-                channel.read(1024) { buffer -> stream.write(buffer.moveToByteArray()) }
-
-                state = state.copy(
-                    downloaded = channel.totalBytesRead,
-                    status = if (contentSize == channel.totalBytesRead) Download.Status.Complete else Download.Status.InProgress
+        return channelFlow {
+            client.prepareGet(url).execute { response: HttpResponse ->
+                var download = Download(
+                    id = 0,
+                    name = filename,
+                    localPath = file.path,
+                    url = url,
+                    contentSize = response.contentLength() ?: -1,
+                    downloaded = 0L,
+                    type = response.contentType() ?: ContentType.Any,
+                    status = Download.Status.InProgress
                 )
 
-                launch { send(DownloadEvent.OnProgress(state)) }
+                send(DownloadEvent.OnAddNew(download))
+
+                try {
+                    val channel = response.bodyAsChannel()
+                    while (!channel.isClosedForRead) {
+                        val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+                        while (!packet.isEmpty) {
+                            val bytes = packet.readBytes()
+                            file.appendBytes(bytes)
+                            download =
+                                download.copy(downloaded = download.downloaded + bytes.size)
+                            send(DownloadEvent.OnProgress(download))
+                        }
+                    }
+                } catch (ex: Exception) {
+                    ex.printStack()
+                }
+
+                download = download.copy(status = Download.Status.Complete)
+                putDownload(download)
+                send(DownloadEvent.OnComplete(download))
             }
-
-            // Download complete
-            putDownload(state)
         }
-
-        return Result.Ok(flow)
     }
 
     override suspend fun getAll(): List<Download> = getDownloads() ?: emptyList()

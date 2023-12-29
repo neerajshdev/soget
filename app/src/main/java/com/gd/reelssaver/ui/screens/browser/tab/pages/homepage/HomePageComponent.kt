@@ -3,6 +3,9 @@ package com.gd.reelssaver.ui.screens.browser.tab.pages.homepage
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
+import com.gd.reelssaver.ui.callbacks.OnOpenWebSite
+import com.gd.reelssaver.ui.callbacks.OnTabChooserOpen
+import com.gd.reelssaver.ui.callbacks.OnThemeToggle
 import com.gd.reelssaver.util.Events
 import java.net.URL
 
@@ -34,19 +37,15 @@ class DefaultHomePageComponent(
     override fun onEvent(e: Event) {
         when (e) {
             is Event.UpdateInputText -> _inputText.value = e.newValue
-            is Event.OpenTabChooser -> callback.openTabChooser()
-            is Event.OnOpenWebSite -> callback.onOpenWebSite(e.url)
-            is Event.SearchWeb -> callback.onOpenWebSite(URL("https://www.google.com/search?q=${e.query}"))
-            is Event.ToggleTheme -> callback.toggleTheme()
+            is Event.OpenTabChooser -> callback.onTabChooserOpen()
+            is Event.OnOpenWebSite -> callback.onOpenWebsite(e.url)
+            is Event.SearchWeb -> callback.onOpenWebsite(URL("https://www.google.com/search?q=${e.query}"))
+            is Event.ToggleTheme -> callback.onThemeToggle()
         }
     }
 }
 
-interface HomepageComponentCallback {
-    fun onOpenWebSite(url: URL)
-    fun openTabChooser()
-    fun toggleTheme()
-}
+interface HomepageComponentCallback : OnThemeToggle, OnTabChooserOpen, OnOpenWebSite
 
 class FakeHomePage : HomePageComponent {
     override val isDarkTheme: Value<Boolean> = MutableValue(false)

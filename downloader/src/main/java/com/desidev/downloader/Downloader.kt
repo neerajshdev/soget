@@ -9,7 +9,7 @@ interface Downloader {
         url: String,
         parentDir: File,
         name: String? = null,
-    ) : Result<Flow<DownloadEvent>, Error>
+    ) : Flow<DownloadEvent>
 
     suspend fun getAll(): List<Download>
     fun cancelDownload(id: Long): Boolean

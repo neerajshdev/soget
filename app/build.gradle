@@ -100,5 +100,6 @@ dependencies {
 
     implementation(libs.decompose)
     implementation(libs.decompose.jetpack)
+//    implementation(libs.landscapist.coil)
 }
 

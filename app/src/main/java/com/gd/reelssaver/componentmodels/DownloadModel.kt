@@ -6,20 +6,24 @@ import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.desidev.downloader.DownloadEvent
 import com.desidev.downloader.Downloader
-import com.desidev.downloader.Error
-import com.desidev.downloader.Result
 import com.desidev.downloader.model.Download
 import com.gd.reelssaver.ui.util.ComponentScopeOwner
 import com.gd.reelssaver.ui.util.DefaultComponentScopeOwner
 import com.gd.reelssaver.util.Events
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 interface DownloadModel : Events<DownloadModel.Event> {
     val downloads: Value<List<Download>>
 
     sealed interface Event {
-        data class AddDownload(val url: String) : Event
+        data class AddDownload(
+            val url: String,
+            val onAddDownload: () -> Unit,
+            val onFailed: () -> Unit
+        ) : Event
     }
 }
 
@@ -47,41 +51,44 @@ class DefaultDownloadModel(
 
     override fun onEvent(e: DownloadModel.Event) {
         when (e) {
-            is DownloadModel.Event.AddDownload -> download(e.url)
+            is DownloadModel.Event.AddDownload -> download(e)
         }
     }
 
 
-    private fun download(url: String) {
-        scope.launch {
-            val flow = when (val result = downloader.addDownload(url, parentDir)) {
-                is Result.Ok -> result.value
-                is Result.Err -> {
-                    when (val err = result.err) {
-                        is Error.ServerDisAllowed -> {
-                            Log.d(TAG, "Failed with status code! : ${err.statusCode}")
-                        }
-
-                        is Error.FailedWithIoException -> {
-                            Log.d(TAG, "Failed with io exception : ${err.ex}")
-                        }
-                    }
-                    return@launch
-                }
-            }
+    private fun download(input: DownloadModel.Event.AddDownload) {
+        scope.launch(Dispatchers.IO) {
+            val flow = downloader.addDownload(input.url, parentDir)
 
             flow.collect { event: DownloadEvent ->
                 when (event) {
                     is DownloadEvent.OnAddNew -> with(_downloads) {
                         Log.d(TAG, "Added new download ${event.download}")
                         value = value + event.download
+
+                        withContext(Dispatchers.Main) {
+                            input.onAddDownload()
+                        }
                     }
-                    is DownloadEvent.OnProgress -> with(_downloads){
+
+                    is DownloadEvent.OnProgress -> with(_downloads) {
                         Log.d(TAG, "On download update: ${event.download}")
-                        value = value.map { if (it.id == event.download.id) event.download else it  }
+                        value = value.map { if (it.id == event.download.id) event.download else it }
                     }
-                    is DownloadEvent.OnCancelled -> Log.d(TAG, "Download was cancelled. ${event.download}")
-                        // todo: Handle this case
+
+                    is DownloadEvent.OnCancelled -> Log.d(
+                        TAG,
+                        "Download was cancelled. ${event.download}"
+                    )
+                    // todo: Handle this case
+                    is DownloadEvent.OnComplete -> with(_downloads) {
+                        value = value.map { if (it.id == event.download.id) event.download else it }
+
+                        Log.d(
+                            TAG,
+                            "Download is complete: ${event.download}"
+                        )
+                    }
                 }
             }
         }

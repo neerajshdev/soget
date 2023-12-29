@@ -1,6 +1,6 @@
 [versions]
 
-coilCompose = "2.2.2"
+coilCompose = "2.5.0"
 coreSplashscreen = "1.0.1"
 desugar_jdk_libs = "2.0.3"
 facebookAndroidSdk = "latest.release"
@@ -24,6 +24,7 @@ constraintlayout_compose = "1.1.0-alpha13"
 materialIconsExtended = "1.5.4"
 playServicesAds = "22.5.0"
 decompose = "2.2.1"
+landscapist = "2.2.13"
 
 #plugins version
 androidGraldePlugin = "8.1.4"
@@ -60,8 +61,11 @@ androidx-composeUiTooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-uiGraphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout_compose" }
 
+#landscapist_coil = { module = "com.github.skydoves:landscapist-coil", version.ref = "landscapist" }
+
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-video = { module = "io.coil-kt:coil-video", version.ref = "coilCompose" }
+
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 
 facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }

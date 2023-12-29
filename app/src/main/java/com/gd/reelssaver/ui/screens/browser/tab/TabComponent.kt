@@ -7,6 +7,9 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.gd.reelssaver.ui.callbacks.OnDownloadVideo
+import com.gd.reelssaver.ui.callbacks.OnTabChooserOpen
+import com.gd.reelssaver.ui.callbacks.OnThemeToggle
 import com.gd.reelssaver.ui.screens.browser.TabPage
 import com.gd.reelssaver.ui.screens.browser.tab.pages.homepage.DefaultHomePageComponent
 import com.gd.reelssaver.ui.screens.browser.tab.pages.homepage.HomePageComponent
@@ -43,17 +46,12 @@ class DefaultTabComponent(
         when (config) {
             is Config.HomePage -> ChildComp.Homepage(
                 DefaultHomePageComponent(
-                    context, tabCount, isDarkTheme, callback = object : HomepageComponentCallback {
-                        override fun onOpenWebSite(url: URL) {
+                    context,
+                    tabCount,
+                    isDarkTheme,
+                    callback = object : HomepageComponentCallback by callback {
+                        override fun onOpenWebsite(url: URL) {
                             navigation.push(Config.WebPage(initialUrl = url.toString()))
-                        }
-
-                        override fun openTabChooser() {
-                            callback.openTabChooser()
-                        }
-
-                        override fun toggleTheme() {
-                            callback.toggleTheme()
                         }
                     }
                 )
@@ -65,24 +63,16 @@ class DefaultTabComponent(
                     config.initialUrl,
                     isDarkTheme,
                     tabCount,
-                    callback = object : WebpageComponentCallback {
-                        override fun openTabChooser() {
-                            callback.openTabChooser()
-                        }
-
-                        override fun toggleTheme() {
-                            callback.toggleTheme()
-                        }
-                    }
+                    callback = object : WebpageComponentCallback by callback {}
                 )
             )
         }
     }
 }
 
-interface TabComponentCallback {
-    fun openTabChooser()
-    fun toggleTheme()
+interface TabComponentCallback : WebpageComponentCallback, HomepageComponentCallback {
+    override fun onOpenWebsite(url: URL) {
+    }
 }
 
 sealed interface Config : Parcelable {

@@ -5,13 +5,13 @@ import java.time.LocalDate
 
 data class Download(
     val id: Long,
+    val status: Status,
+    val type: ContentType,
     val name: String,
-    val url: String,
-    val localPath: String,
     val contentSize: Long,
     val downloaded: Long,
-    val type: ContentType,
-    val status: Status,
+    val localPath: String,
+    val url: String,
     val time: LocalDate = LocalDate.now()
 ) {
     enum class Status {
