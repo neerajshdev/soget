@@ -1,7 +1,7 @@
 package com.desidev.downloader.model
 
 import io.ktor.http.ContentType
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class Download(
     val id: Long,
@@ -12,7 +12,7 @@ data class Download(
     val downloaded: Long,
     val localPath: String,
     val url: String,
-    val time: LocalDate = LocalDate.now()
+    val time: LocalDateTime = LocalDateTime.now()
 ) {
     enum class Status {
         InProgress, Complete

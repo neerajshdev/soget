@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.screens.downloads
 
-import android.util.Log
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
@@ -9,7 +8,7 @@ import com.gd.reelssaver.ui.callbacks.OnOpenVideoInPlayer
 import com.gd.reelssaver.ui.callbacks.OnRemoveDownload
 import com.gd.reelssaver.util.Events
 import io.ktor.http.ContentType
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface DownloadsComponent : Events<Event> {
     val downloads: Value<List<Download>>
@@ -57,7 +56,7 @@ val fakeDownloads = listOf(
         downloaded = 1024 * 1024 * 10, // 10 MB
         localPath = "/downloads/BigBuckBunny.mp4",
         url = "https://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4",
-        time = LocalDate.of(2023, 1, 1)
+        time = LocalDateTime.of(2023, 1, 1, 1, 2)
     ),
     Download(
         id = 2,
@@ -68,7 +67,7 @@ val fakeDownloads = listOf(
         downloaded = 1024 * 1024 * 50, // 50 MB
         localPath = "/downloads/ElephantDream.mp4",
         url = "https://www.sample-videos.com/video123/mp4/720/elephants_dream_720p_1mb.mp4",
-        time = LocalDate.of(2023, 1, 2)
+        time = LocalDateTime.of(2023, 1, 2, 2, 2)
     ),
     // Add more fake Download items as needed
 )

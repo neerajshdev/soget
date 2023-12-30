@@ -1,8 +1,8 @@
 package com.desidev.downloader
 
 import com.desidev.downloader.database.ObjectBox
-import com.desidev.downloader.database.getDownloads
-import com.desidev.downloader.database.putDownload
+import com.desidev.downloader.database.ObjectBox.getDownloads
+import com.desidev.downloader.database.ObjectBox.putDownload
 import com.desidev.downloader.model.Download
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -57,7 +57,7 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
 
         return channelFlow {
             client.prepareGet(url).execute { response: HttpResponse ->
-                var download = Download(
+                var download = putDownload(Download(
                     id = 0,
                     name = filename,
                     localPath = file.path,
@@ -66,7 +66,7 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
                     downloaded = 0L,
                     type = response.contentType() ?: ContentType.Any,
                     status = Download.Status.InProgress
-                )
+                ))
 
                 send(DownloadEvent.OnAddNew(download))
 
@@ -84,6 +84,7 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
                     }
                 } catch (ex: Exception) {
                     ex.printStack()
+                    ObjectBox.removeDownload(download)
                 }
 
                 download = download.copy(status = Download.Status.Complete)
@@ -97,6 +98,11 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
 
     override fun cancelDownload(id: Long): Boolean {
         return false
+    }
+
+
+    override suspend fun removeDownload(downloads: List<Download>){
+        ObjectBox.removeDownloads(downloads)
     }
 
     private fun createNewFile(parentDir: File, fileName: String): File {

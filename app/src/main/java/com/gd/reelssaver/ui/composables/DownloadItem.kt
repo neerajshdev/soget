@@ -1,6 +1,7 @@
 package com.gd.reelssaver.ui.composables
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,11 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DownloadDone
-import androidx.compose.material.icons.rounded.Downloading
+import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -36,7 +34,7 @@ import coil.request.videoFrameMillis
 import com.desidev.downloader.model.Download
 import com.gd.reelssaver.ui.theme.AppTheme
 import io.ktor.http.ContentType
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 @Preview
@@ -52,7 +50,7 @@ fun DownloadItemPreview() {
                 downloaded = 3000L,
                 status = Download.Status.InProgress,
                 type = ContentType.Video.MP4,
-                time = LocalDate.now(),
+                time = LocalDateTime.now(),
                 localPath = ""
             )
         }
@@ -96,11 +94,26 @@ fun DownloadedItem(item: Download, modifier: Modifier) {
             maxLines = 2,
             modifier = Modifier.padding(10.dp)
         )
-        VideoThumbnail(
-            url = item.url, modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-        )
+
+        Box {
+            VideoThumbnail(
+                url = item.url, modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            if (item.status == Download.Status.Complete) {
+                Icon(
+                    imageVector = Icons.Rounded.PlayCircle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondaryContainer,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(8.dp)
+                        .size(40.dp)
+                )
+            }
+        }
     }
 }
 
@@ -119,7 +132,6 @@ fun DownloadingItem(item: Download, modifier: Modifier) {
 //            Spacer(modifier = Modifier.width(8.dp))
 
         Spacer(modifier = Modifier.height(12.dp))
-
         VideoThumbnail(
             url = item.url, modifier = Modifier
                 .padding(10.dp)
@@ -161,13 +173,11 @@ fun VideoThumbnail(url: String, modifier: Modifier) {
             )
         }
         .build()
-
     AsyncImage(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(4.dp),
         model = model,
         contentDescription = "video thumbnail",
-        contentScale = ContentScale.Crop
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .fillMaxSize()
     )
 }

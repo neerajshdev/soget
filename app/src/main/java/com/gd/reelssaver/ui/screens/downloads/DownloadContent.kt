@@ -75,8 +75,8 @@ fun DownloadContent(
 
     var selection by remember { mutableStateOf<List<Download>>(emptyList()) }
 
-    // todo : when there is something in progress show it first
-    var tabIndex by remember { mutableIntStateOf(1) }
+
+    var tabIndex by remember { mutableIntStateOf(if (inProgress.isNotEmpty()) 0 else 1) }
     val pagerState = rememberPagerState(initialPage = tabIndex) { 2 }
     val scope = rememberCoroutineScope()
 
@@ -146,6 +146,7 @@ fun DownloadContent(
                                 onDeleteClick = {
                                     if (selection.isNotEmpty()) {
                                         component.onEvent(Event.OnRemovedDownloadItem(selection))
+                                        selection = emptyList()
                                     }
                                 },
                                 onSelectAll = {
@@ -346,7 +347,6 @@ fun SelectItemWidget(
             }
         }
     }
-
 
     Row(
         modifier = modifier,

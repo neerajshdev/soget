@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 interface DownloadModel : Events<DownloadModel.Event> {
     val downloads: Value<List<Download>>
@@ -44,21 +46,45 @@ class DefaultDownloadModel(
     private val _downloads = MutableValue(emptyList<Download>())
     override val downloads: Value<List<Download>> = _downloads
 
-    private val _isLoading = MutableValue(true)
 
     init {
-        scope.launch {
-            _downloads.value = downloader.getAll()
-            _isLoading.value = false
-        }
+        reloadDownloads()
     }
 
     override fun onEvent(e: DownloadModel.Event) {
         when (e) {
             is DownloadModel.Event.AddDownload -> download(e)
             is DownloadModel.Event.RemoveDownload -> {
-                // todo: handle remove download event
+                scope.launch {
+                    try {
+                        e.downloads.forEach { File(it.localPath).delete() }
+                        downloader.removeDownload(e.downloads)
+                    } catch (_: Exception) {
+                    }
+
+                    reloadDownloads()
+                }
             }
+        }
+    }
+
+
+    private fun reloadDownloads() {
+        scope.launch {
+            val downloads = downloader.getAll()
+            val downloadsToRemove = downloads.filter {
+                try {
+                    it.status == Download.Status.Complete && File(it.localPath).exists().not()
+                } catch (ex: Exception) {
+                    false
+                }
+            }
+            launch {
+                downloader.removeDownload(downloadsToRemove)
+            }
+
+            val comp = compareByDescending<Download> { it.time.toEpochSecond(ZoneOffset.UTC) }
+            _downloads.value = downloads.minus(downloadsToRemove.toSet()).sortedWith(comp)
         }
     }
 

@@ -11,6 +11,8 @@ interface Downloader {
         name: String? = null,
     ) : Flow<DownloadEvent>
 
+    suspend fun removeDownload(downloads: List<Download>)
+
     suspend fun getAll(): List<Download>
     fun cancelDownload(id: Long): Boolean
 }

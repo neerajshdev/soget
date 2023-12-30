@@ -21,42 +21,6 @@ internal data class DownloadEntity(
 )
 
 
-suspend fun putDownload(download: Download) {
-    ObjectBox.store.awaitCallInTx {
-        ObjectBox.store.boxFor(DownloadEntity::class.java).put(download.toEntity())
-    }
-}
-
-suspend fun getDownloads() = ObjectBox.store.awaitCallInTx {
-    ObjectBox.store.boxFor(DownloadEntity::class.java).all.map { it.toModel() }
-}
 
 
-private fun Download.toEntity() = run {
-    DownloadEntity(
-        id = id,
-        name = name,
-        localPath = localPath,
-        url = url,
-        type = type.toString(),
-        contentSize = contentSize,
-        downloadedSize = downloaded,
-        status = status.name,
-        time = time.toString()
-    )
-}
 
-
-private fun DownloadEntity.toModel() = run {
-    Download(
-        id = id,
-        name = name,
-        localPath = localPath,
-        url = url,
-        contentSize = contentSize,
-        downloaded = downloadedSize,
-        type = ContentType.parse(type),
-        status = Download.Status.valueOf(status),
-        time = LocalDate.parse(time)
-    )
-}
