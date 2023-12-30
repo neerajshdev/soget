@@ -11,6 +11,7 @@ import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
 import com.desidev.downloader.Downloader
+import com.desidev.downloader.model.Download
 import com.gd.reelssaver.componentmodels.DefaultDownloadModel
 import com.gd.reelssaver.componentmodels.DownloadModel
 import com.gd.reelssaver.ui.screens.browser.BrowserComponent
@@ -37,6 +38,11 @@ sealed interface Event {
     object OnDownloadMenuSelect : Event
 }
 
+interface RootComponentCallback: DownloadComponentCallback {
+    override fun onRemoveDownload(download: List<Download>) {
+    }
+}
+
 sealed interface Config : Parcelable {
     @Parcelize
     data object Splash : Config
@@ -58,6 +64,8 @@ class DefaultRootComponent(
     componentContext: ComponentContext,
     downloader: Downloader,
     parentVideoDir: File,
+    val initialPage: TabPage = TabPage.Homepage,
+    val callback: RootComponentCallback
 ) : RootComponent, ComponentContext by componentContext {
 
     private val navigation = StackNavigation<Config>()
@@ -89,7 +97,7 @@ class DefaultRootComponent(
                 DefaultSplashComponent(context, object : SplashComponentCallback {
                     override fun onSplashFinish() {
                         // Open the Browser with default homepage
-                        navigation.replaceCurrent(Config.Browser(TabPage.Homepage))
+                        navigation.replaceCurrent(Config.Browser(initialPage))
                     }
                 })
             )
@@ -125,7 +133,11 @@ class DefaultRootComponent(
                 DefaultDownloadsComponent(
                     context = context,
                     downloads = downloadModel.downloads,
-                    callback = object : DownloadComponentCallback {}
+                    callback = object : DownloadComponentCallback by callback {
+                        override fun onRemoveDownload(download: List<Download>) {
+                            downloadModel.onEvent(DownloadModel.Event.RemoveDownload(download))
+                        }
+                    }
                 )
             )
         }

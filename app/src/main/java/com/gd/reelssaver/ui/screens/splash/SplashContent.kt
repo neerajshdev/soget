@@ -57,8 +57,8 @@ fun SplashContent(component: SplashComponent, modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(Unit) {
-        val syncResult = com.gd.reelssaver.ui.contents.syncFirebase()
-        if (syncResult == com.gd.reelssaver.ui.contents.FirebaseSyncResult.SuccessAndUpdate || syncResult == com.gd.reelssaver.ui.contents.FirebaseSyncResult.Success) {
+        val syncResult = syncFirebase()
+        if (syncResult == FirebaseSyncResult.SuccessAndUpdate || syncResult == FirebaseSyncResult.Success) {
             InterstitialAdManager.init(localContext as Activity)
             AppOpenAdManager(localContext)
 

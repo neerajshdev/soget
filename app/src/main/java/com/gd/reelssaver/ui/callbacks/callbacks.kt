@@ -1,5 +1,6 @@
 package com.gd.reelssaver.ui.callbacks
 
+import com.desidev.downloader.model.Download
 import java.net.URL
 
 interface OnDownloadVideo {
@@ -16,4 +17,12 @@ interface OnTabChooserOpen {
 
 interface OnOpenWebSite {
     fun onOpenWebsite(url: URL)
+}
+
+interface OnRemoveDownload {
+    fun onRemoveDownload(download: List<Download>)
+}
+
+interface OnOpenVideoInPlayer {
+    fun onOpenVideoInPlayer(filepath: String)
 }

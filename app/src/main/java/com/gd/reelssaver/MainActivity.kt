@@ -1,6 +1,7 @@
 package com.gd.reelssaver
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import androidx.activity.ComponentActivity
@@ -12,8 +13,12 @@ import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.arkivanov.decompose.retainedComponent
 import com.desidev.downloader.Downloader
 import com.gd.reelssaver.ui.screens.DefaultRootComponent
+import com.gd.reelssaver.ui.screens.RootComponentCallback
 import com.gd.reelssaver.ui.screens.RootContent
+import com.gd.reelssaver.ui.screens.browser.TabPage
 import com.gd.reelssaver.ui.theme.AppTheme
+import java.net.URL
+
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -32,7 +37,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        Thread.UncaughtExceptionHandler { t, e ->
+        Thread.UncaughtExceptionHandler { _, e ->
             e.printStackTrace()
         }
 
@@ -40,14 +45,25 @@ class MainActivity : ComponentActivity() {
         val videoDir =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
 
-        val root = retainedComponent {
-            DefaultRootComponent(it, Downloader(dbDir), videoDir)
-        }
 
-//        root.lifecycle.doOnResume {
-//            root.extraUrl.value = intent?.extras?.getString(Intent.EXTRA_TEXT)
-//            Log.d(TAG, "onNewIntent: extra text: ${root.extraUrl.value}")
-//        }
+        val initialPage = intent.extras?.getString(Intent.EXTRA_TEXT)?.let {
+            URL(it).let {
+                TabPage.Webpage(initialUrl = it.toString())
+            }
+        } ?: TabPage.Homepage
+
+        val root = retainedComponent {
+            DefaultRootComponent(
+                componentContext =  it,
+                downloader = Downloader(dbDir),
+                parentVideoDir = videoDir,
+                initialPage = initialPage,
+                callback = object : RootComponentCallback {
+                    override fun onOpenVideoInPlayer(filepath: String) {
+                        openVideoInPlayer(filepath)
+                    }
+                })
+        }
 
         setContent {
             val isDarktheme by root.isDarkTheme.subscribeAsState()
@@ -55,6 +71,13 @@ class MainActivity : ComponentActivity() {
                 RootContent(component = root)
             }
         }
+    }
+
+    fun openVideoInPlayer(path: String) {
+        val uri = Uri.parse(path)
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(uri, "video/*")
+        startActivity(intent)
     }
 }
 

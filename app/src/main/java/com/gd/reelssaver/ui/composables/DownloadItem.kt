@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -89,17 +90,12 @@ fun DownloadItem(item: Download, modifier: Modifier = Modifier) {
 @Composable
 fun DownloadedItem(item: Download, modifier: Modifier) {
     Card(modifier) {
-        // name of the file
-        Row(modifier = Modifier.padding(8.dp)) {
-            Icon(
-                imageVector = Icons.Rounded.DownloadDone, contentDescription = null, Modifier
-                    .size(40.dp)
-                    .wrapContentSize()
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = item.name, overflow = TextOverflow.Ellipsis, maxLines = 2)
-        }
-
+        Text(
+            text = item.name,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 2,
+            modifier = Modifier.padding(10.dp)
+        )
         VideoThumbnail(
             url = item.url, modifier = Modifier
                 .fillMaxWidth()
@@ -113,33 +109,20 @@ fun DownloadedItem(item: Download, modifier: Modifier) {
 fun DownloadingItem(item: Download, modifier: Modifier) {
     Card(modifier) {
         // name of the file
-        Row(modifier = Modifier.padding(8.dp)) {
-            val progressValue = item.downloaded / item.contentSize.toFloat()
+        val progressValue = item.downloaded / item.contentSize.toFloat()
 
-            Icon(
-                imageVector = Icons.Rounded.Downloading,
-                contentDescription = null,
-                Modifier
-                    .size(40.dp)
-                    .wrapContentSize()
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, overflow = TextOverflow.Ellipsis, maxLines = 2)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Progress(progress = progressValue, modifier = Modifier)
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
+        Column(modifier = Modifier.padding(10.dp)) {
+            Text(text = item.name, overflow = TextOverflow.Ellipsis, maxLines = 2)
+            Spacer(modifier = Modifier.height(10.dp))
+            Progress(progress = progressValue, modifier = Modifier)
         }
+//            Spacer(modifier = Modifier.width(8.dp))
 
         Spacer(modifier = Modifier.height(12.dp))
 
         VideoThumbnail(
             url = item.url, modifier = Modifier
+                .padding(10.dp)
                 .fillMaxWidth()
                 .height(200.dp)
         )
@@ -153,7 +136,11 @@ fun Progress(progress: Float, modifier: Modifier) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = (progress * 100).toInt().toString() + "%")
+        Text(
+            text = (progress * 100).toInt().toString() + "%",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
         LinearProgressIndicator(
             modifier = Modifier.fillMaxWidth(),
             progress = { progress }
@@ -176,9 +163,11 @@ fun VideoThumbnail(url: String, modifier: Modifier) {
         .build()
 
     AsyncImage(
-        modifier = modifier.fillMaxSize().padding(4.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(4.dp),
         model = model,
         contentDescription = "video thumbnail",
-        contentScale = ContentScale.Fit
+        contentScale = ContentScale.Crop
     )
 }

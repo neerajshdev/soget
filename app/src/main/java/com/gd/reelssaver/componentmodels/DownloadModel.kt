@@ -24,6 +24,10 @@ interface DownloadModel : Events<DownloadModel.Event> {
             val onAddDownload: () -> Unit,
             val onFailed: () -> Unit
         ) : Event
+
+        data class RemoveDownload(
+            val downloads: List<Download>
+        ) : Event
     }
 }
 
@@ -52,6 +56,9 @@ class DefaultDownloadModel(
     override fun onEvent(e: DownloadModel.Event) {
         when (e) {
             is DownloadModel.Event.AddDownload -> download(e)
+            is DownloadModel.Event.RemoveDownload -> {
+                // todo: handle remove download event
+            }
         }
     }
 
@@ -80,7 +87,7 @@ class DefaultDownloadModel(
                         TAG,
                         "Download was cancelled. ${event.download}"
                     )
-                    // todo: Handle this case
+
                     is DownloadEvent.OnComplete -> with(_downloads) {
                         value = value.map { if (it.id == event.download.id) event.download else it }
 
