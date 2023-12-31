@@ -59,7 +59,7 @@ fun VideoThumbnail(
     contentDescription: String?,
     placeholder: (@Composable () -> Unit)?,
     alignment: Alignment = Alignment.Center,
-    contentScale: ContentScale = ContentScale.Fit,
+    contentScale: ContentScale = ContentScale.Crop,
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality

@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "2:5617671240039277073",
-      "lastPropertyId": "9:5295861833490419549",
+      "lastPropertyId": "10:2614138331339344871",
       "name": "DownloadEntity",
       "properties": [
         {
@@ -47,6 +47,11 @@
         {
           "id": "9:5295861833490419549",
           "name": "time",
+          "type": 9
+        },
+        {
+          "id": "10:2614138331339344871",
+          "name": "localPath",
           "type": 9
         }
       ],

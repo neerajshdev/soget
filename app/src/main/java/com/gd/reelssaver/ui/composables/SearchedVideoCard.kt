@@ -67,10 +67,11 @@ fun SearchVideoCard(
         } else {
             VideoThumbnail(
                 uri = videoData.videoUrl,
-                contentDescription = null ,
+                contentDescription = null,
                 placeholder = {
                     Shimmer()
-                }
+                },
+                modifier = Modifier.height(200.dp)
             )
         }
 
