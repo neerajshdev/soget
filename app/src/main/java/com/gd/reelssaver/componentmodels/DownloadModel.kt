@@ -10,6 +10,7 @@ import com.desidev.downloader.model.Download
 import com.gd.reelssaver.ui.util.ComponentScopeOwner
 import com.gd.reelssaver.ui.util.DefaultComponentScopeOwner
 import com.gd.reelssaver.util.Events
+import com.gd.reelssaver.util.createFileName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,7 +36,8 @@ interface DownloadModel : Events<DownloadModel.Event> {
 class DefaultDownloadModel(
     componentContext: ComponentContext,
     private val downloader: Downloader,
-    private val parentDir: File
+    private val parentDir: File,
+    private val appname: String
 ) : DownloadModel,
     ComponentScopeOwner by DefaultComponentScopeOwner(componentContext) {
     companion object {
@@ -94,7 +96,8 @@ class DefaultDownloadModel(
 
     private fun download(input: DownloadModel.Event.AddDownload) {
         scope.launch(Dispatchers.IO) {
-            val flow = downloader.addDownload(input.url, parentDir)
+            val name = createFileName()
+            val flow = downloader.addDownload(input.url, parentDir, name = "$appname $name")
 
             flow.collect { event: DownloadEvent ->
                 when (event) {

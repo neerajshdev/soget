@@ -71,6 +71,7 @@ class DefaultRootComponent(
     componentContext: ComponentContext,
     downloader: Downloader,
     parentVideoDir: File,
+    appname: String,
     val initialPage: TabPage = TabPage.Homepage,
     val callback: RootComponentCallback
 ) : RootComponent, ComponentContext by componentContext {
@@ -110,7 +111,7 @@ class DefaultRootComponent(
     override val isDarkTheme: Value<Boolean> = _isDarkTheme
 
 
-    private val downloadModel = DefaultDownloadModel(this, downloader, parentVideoDir)
+    private val downloadModel = DefaultDownloadModel(this, downloader, parentVideoDir, appname)
 
     init {
         downloadModel

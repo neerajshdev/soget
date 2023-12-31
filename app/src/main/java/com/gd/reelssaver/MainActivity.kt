@@ -7,6 +7,7 @@ import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
                 downloader = Downloader(dbDir),
                 parentVideoDir = videoDir,
                 initialPage = initialPage,
+                appname = getString(R.string.app_name) + " app",
                 callback = object : RootComponentCallback {
                     override fun onOpenVideoInPlayer(filepath: String) {
                         openVideoInPlayer(filepath)

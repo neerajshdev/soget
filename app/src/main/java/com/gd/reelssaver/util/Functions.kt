@@ -5,8 +5,6 @@ import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -193,9 +191,9 @@ fun share(url: String, context: Context) {
     context.startActivity(Intent.createChooser(myIntent, "Share Using"))
 }
 
-fun createFileName(postFix: String): String {
+fun createFileName(): String {
     val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    return "${timestamp}_$postFix"
+    return timestamp
 }
 
 

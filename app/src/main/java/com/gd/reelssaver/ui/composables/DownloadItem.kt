@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.composables
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.desidev.downloader.model.Download
 import com.gd.reelssaver.networkimage.VideoThumbnail
 import com.gd.reelssaver.ui.theme.AppTheme
-import com.gd.reelssaver.ui.util.debugLine
 import io.ktor.http.ContentType
 import java.time.LocalDateTime
 

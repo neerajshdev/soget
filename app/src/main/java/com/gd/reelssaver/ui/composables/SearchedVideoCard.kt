@@ -59,7 +59,7 @@ fun SearchVideoCard(
             AsyncImage(
                 model = videoData.imageUrl,
                 contentDescription = "video thumbnail",
-                contentScale = ContentScale.FillHeight,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .height(220.dp)
                     .align(Alignment.Center)

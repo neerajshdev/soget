@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
@@ -44,7 +44,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.desidev.downloader.model.Download
+import com.gd.reelssaver.ui.composables.BannerNativeAd
 import com.gd.reelssaver.ui.composables.DownloadItem
+import com.gd.reelssaver.ui.composables.Shimmer
 import com.gd.reelssaver.ui.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -119,55 +121,36 @@ fun DownloadContent(
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
-                        if (inProgress.isNotEmpty()) {
-                            ProgressPage(modifier = Modifier.fillMaxSize(), inProgress = inProgress)
-                        } else {
-                            DownloadMessage(
-                                text = "No download in progress!",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            )
-                        }
+                        ProgressPage(modifier = Modifier.fillMaxSize(), inProgress = inProgress)
                     }
 
                     else -> {
-                        if (downloaded.isNotEmpty()) {
-                            DownloadedItemsPage(
-                                modifier = Modifier.fillMaxSize(),
-                                downloaded = downloaded,
-                                itemSelection = selection,
-                                onSelectItem = {
-                                    selection += it
-                                },
-                                onDeselectItem = {
-                                    selection -= it
-                                },
-                                onDeleteClick = {
-                                    if (selection.isNotEmpty()) {
-                                        component.onEvent(Event.OnRemovedDownloadItem(selection))
-                                        selection = emptyList()
-                                    }
-                                },
-                                onSelectAll = {
-                                    selection = downloaded
-                                },
-                                onDeselectAllClick = {
+                        DownloadedItemsPage(
+                            modifier = Modifier.fillMaxSize(),
+                            downloaded = downloaded,
+                            itemSelection = selection,
+                            onSelectItem = {
+                                selection += it
+                            },
+                            onDeselectItem = {
+                                selection -= it
+                            },
+                            onDeleteClick = {
+                                if (selection.isNotEmpty()) {
+                                    component.onEvent(Event.OnRemovedDownloadItem(selection))
                                     selection = emptyList()
-                                },
-                                onItemClick = {
-                                    component.onEvent(Event.OnClickDownloadedItem(it))
                                 }
-                            )
-                        } else {
-                            DownloadMessage(
-                                text = "You have not downloaded anything!",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(100.dp)
-                            )
-                        }
-
+                            },
+                            onSelectAll = {
+                                selection = downloaded
+                            },
+                            onDeselectAllClick = {
+                                selection = emptyList()
+                            },
+                            onItemClick = {
+                                component.onEvent(Event.OnClickDownloadedItem(it))
+                            }
+                        )
                     }
                 }
             }
@@ -179,14 +162,27 @@ fun DownloadContent(
 
 @Composable
 fun ProgressPage(modifier: Modifier, inProgress: List<Download>) {
-    DownloadItemList(
-        items = inProgress,
-        modifier = modifier,
-        onEnableSelection = {},
-        onDeselectItem = {},
-        onSelectItem = {},
-        onItemClick = {}
-    )
+    Column(modifier) {
+        BannerNativeAd {
+            Shimmer()
+        }
+
+        if (inProgress.isEmpty()) {
+            DownloadMessage(
+                text = "No download in progress!",
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        }
+        DownloadItemList(
+            downloads = inProgress,
+            modifier = Modifier.fillMaxWidth(),
+            onEnableSelection = {},
+            onDeselectItem = {},
+            onSelectItem = {},
+            onItemClick = {}
+        )
+    }
 }
 
 @Composable
@@ -208,18 +204,30 @@ fun DownloadedItemsPage(
     }
 
     Column(modifier) {
-        SelectItemWidget(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            itemSelection = itemSelection,
-            onSelectAllClick = onSelectAll,
-            onDeselectAllClick = onDeselectAllClick,
-            onDeleteClick = onDeleteClick
-        )
+        BannerNativeAd {
+            Shimmer()
+        }
+
+        if (downloaded.isEmpty()) {
+            DownloadMessage(
+                text = "You have not downloaded anything!",
+                modifier = Modifier
+                    .fillMaxSize()
+            )
+        } else {
+            SelectItemWidget(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                itemSelection = itemSelection,
+                onSelectAllClick = onSelectAll,
+                onDeselectAllClick = onDeselectAllClick,
+                onDeleteClick = onDeleteClick
+            )
+        }
 
         DownloadItemList(
-            items = downloaded,
+            downloads = downloaded,
             isSelectionDisable = isSelectionDisable,
             modifier = Modifier.fillMaxSize(),
             selection = itemSelection,
@@ -235,7 +243,7 @@ fun DownloadedItemsPage(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DownloadItemList(
-    items: List<Download>,
+    downloads: List<Download>,
     modifier: Modifier = Modifier,
     isSelectionDisable: Boolean = true,
     onItemClick: (Download) -> Unit,
@@ -244,8 +252,8 @@ fun DownloadItemList(
     onDeselectItem: (Download) -> Unit,
     onEnableSelection: () -> Unit
 ) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        items.forEach { item ->
+    LazyColumn(modifier) {
+        items(downloads) { item ->
             val isSelected = isSelectionDisable.not() && selection.contains(item)
             Box(
                 modifier = Modifier

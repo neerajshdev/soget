@@ -122,7 +122,7 @@ private fun MediumNativeAdContent(
 
 
 @Composable
-fun AndroidNativeAdView(modifier: Modifier = Modifier, nativeAd: NativeAd?) {
+private fun AndroidNativeAdView(modifier: Modifier = Modifier, nativeAd: NativeAd?) {
     val backgroundColor = MaterialTheme.colorScheme.background
     ComposeDebug(dbgStr = "nativeAd: $nativeAd")
     AndroidView(

@@ -28,7 +28,7 @@ internal var downloaderInstance: Downloader? = null
 fun Downloader(dbDir: File) =
     downloaderInstance ?: DefaultDownloader(dbDir).also { downloaderInstance = it }
 
-class DefaultDownloader internal constructor(private val dbDir: File) : Downloader {
+class DefaultDownloader internal constructor(dbDir: File) : Downloader {
     init {
         require(dbDir.isDirectory) { "parameter dbDir is required to be directory" }
         require(dbDir.exists()) { "dbDir does not exists" }
@@ -52,21 +52,25 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
         parentDir: File,
         name: String?
     ): Flow<DownloadEvent> {
-        val filename = name ?: URL(url).path.substringAfterLast("/")
+        val extension = URL(url).path.substringAfterLast(".")
+        val filename =
+            if (name != null) "$name.$extension" else URL(url).path.substringAfterLast("/")
         val file = createNewFile(parentDir, filename)
 
         return channelFlow {
             client.prepareGet(url).execute { response: HttpResponse ->
-                var download = putDownload(Download(
-                    id = 0,
-                    name = filename,
-                    localPath = file.path,
-                    url = url,
-                    contentSize = response.contentLength() ?: -1,
-                    downloaded = 0L,
-                    type = response.contentType() ?: ContentType.Any,
-                    status = Download.Status.InProgress
-                ))
+                var download = putDownload(
+                    Download(
+                        id = 0,
+                        name = filename,
+                        localPath = file.path,
+                        url = url,
+                        contentSize = response.contentLength() ?: -1,
+                        downloaded = 0L,
+                        type = response.contentType() ?: ContentType.Any,
+                        status = Download.Status.InProgress
+                    )
+                )
 
                 send(DownloadEvent.OnAddNew(download))
 
@@ -101,7 +105,7 @@ class DefaultDownloader internal constructor(private val dbDir: File) : Download
     }
 
 
-    override suspend fun removeDownload(downloads: List<Download>){
+    override suspend fun removeDownload(downloads: List<Download>) {
         ObjectBox.removeDownloads(downloads)
     }
 
