@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 interface DownloadModel : Events<DownloadModel.Event> {
@@ -85,6 +84,10 @@ class DefaultDownloadModel(
 
             val comp = compareByDescending<Download> { it.time.toEpochSecond(ZoneOffset.UTC) }
             _downloads.value = downloads.minus(downloadsToRemove.toSet()).sortedWith(comp)
+
+            _downloads.value.forEach {
+                println(it)
+            }
         }
     }
 
@@ -97,7 +100,10 @@ class DefaultDownloadModel(
                 when (event) {
                     is DownloadEvent.OnAddNew -> with(_downloads) {
                         Log.d(TAG, "Added new download ${event.download}")
-                        value = value + event.download
+                        value = buildList {
+                            add(event.download)
+                            addAll(value)
+                        }
 
                         withContext(Dispatchers.Main) {
                             input.onAddDownload()

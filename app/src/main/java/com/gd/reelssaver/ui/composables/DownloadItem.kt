@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayCircle
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -87,32 +88,39 @@ fun DownloadItem(item: Download, modifier: Modifier = Modifier) {
 
 @Composable
 fun DownloadedItem(item: Download, modifier: Modifier) {
-    Card(modifier) {
-        Text(
-            text = item.name,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 2,
-            modifier = Modifier.padding(10.dp)
+    Card(
+        modifier, colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
         )
-
-        Box {
-            VideoThumbnail(
-                url = item.url, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
-
-            if (item.status == Download.Status.Complete) {
-                Icon(
-                    imageVector = Icons.Rounded.PlayCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(8.dp)
-                        .size(40.dp)
+    ) {
+        Row {
+            Box {
+                VideoThumbnail(
+                    url = item.localPath, modifier = Modifier
+                        .padding(10.dp)
+                        .size(100.dp)
                 )
+
+                if (item.status == Download.Status.Complete) {
+                    Icon(
+                        imageVector = Icons.Rounded.PlayCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(8.dp)
+                            .size(40.dp)
+                    )
+                }
             }
+
+            Text(
+                text = item.name,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 2,
+                modifier = Modifier.padding(10.dp)
+            )
         }
     }
 }
@@ -120,24 +128,31 @@ fun DownloadedItem(item: Download, modifier: Modifier) {
 
 @Composable
 fun DownloadingItem(item: Download, modifier: Modifier) {
-    Card(modifier) {
-        // name of the file
-        val progressValue = item.downloaded / item.contentSize.toFloat()
-
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(text = item.name, overflow = TextOverflow.Ellipsis, maxLines = 2)
-            Spacer(modifier = Modifier.height(10.dp))
-            Progress(progress = progressValue, modifier = Modifier)
-        }
-//            Spacer(modifier = Modifier.width(8.dp))
-
-        Spacer(modifier = Modifier.height(12.dp))
-        VideoThumbnail(
-            url = item.url, modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth()
-                .height(200.dp)
+    val progressValue = item.downloaded / item.contentSize.toFloat()
+    Card(
+        modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
         )
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            VideoThumbnail(
+                url = item.url, modifier = Modifier
+                    .padding(10.dp)
+                    .size(100.dp)
+            )
+
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text(
+                    text = item.name,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Progress(progress = progressValue, modifier = Modifier)
+            }
+        }
     }
 }
 

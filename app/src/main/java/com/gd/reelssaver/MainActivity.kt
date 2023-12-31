@@ -17,7 +17,7 @@ import com.gd.reelssaver.ui.screens.RootComponentCallback
 import com.gd.reelssaver.ui.screens.RootContent
 import com.gd.reelssaver.ui.screens.browser.TabPage
 import com.gd.reelssaver.ui.theme.AppTheme
-import java.net.URL
+import com.gd.reelssaver.util.findFirstUrl
 
 
 class MainActivity : ComponentActivity() {
@@ -47,8 +47,8 @@ class MainActivity : ComponentActivity() {
 
 
         val initialPage = intent.extras?.getString(Intent.EXTRA_TEXT)?.let {
-            URL(it).let {
-                TabPage.Webpage(initialUrl = it.toString())
+            findFirstUrl(it)?.let { str ->
+                TabPage.Webpage(initialUrl = str)
             }
         } ?: TabPage.Homepage
 

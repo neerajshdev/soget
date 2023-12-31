@@ -17,6 +17,7 @@ class ExampleUnitTest {
     @Test
     fun sortingTest() {
         val list = listOf(LocalDateTime.now(), LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1))
+
         val sortedList = list.sortedWith(compareByDescending<LocalDateTime> { it.toEpochSecond(
             ZoneOffset.UTC) })
 
