@@ -62,6 +62,10 @@ class MainActivity : ComponentActivity() {
                     override fun onOpenVideoInPlayer(filepath: String) {
                         openVideoInPlayer(filepath)
                     }
+
+                    override fun onExitConfirm() {
+                        finishAfterTransition()
+                    }
                 })
         }
 

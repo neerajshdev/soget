@@ -1,5 +1,6 @@
 package com.gd.reelssaver.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
+import com.gd.reelssaver.ui.composables.ExitDialog
+import com.gd.reelssaver.ui.composables.ExitDialogBottomSheet
 import com.gd.reelssaver.ui.screens.browser.BrowserContent
 import com.gd.reelssaver.ui.screens.downloads.DownloadContent
 import com.gd.reelssaver.ui.screens.splash.SplashContent
@@ -58,6 +61,8 @@ private fun NavigationBarPreview() {
 @Composable
 fun RootContent(component: RootComponent) {
     val childStack by component.childStack.subscribeAsState()
+    val openExitDialog by component.openExitDialog.subscribeAsState()
+
     val navBarItems = listOf(
         NavigationBarItem(
             label = "Tabs",
@@ -118,8 +123,19 @@ fun RootContent(component: RootComponent) {
                 )
             }
         }
-
     }
+
+    ExitDialogBottomSheet(openExitDialog,
+        onDismiss = {
+            component.onEvent(Event.OnExitDialogDismiss)
+        },
+        onExitConfirm = {
+            component.onEvent(Event.OnExitConfirm)
+        },
+        onExitCancel = {
+            component.onEvent(Event.OnExitDialogDismiss)
+        }
+    )
 }
 
 @Composable

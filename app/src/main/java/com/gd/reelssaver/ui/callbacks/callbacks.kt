@@ -26,3 +26,7 @@ interface OnRemoveDownload {
 interface OnOpenVideoInPlayer {
     fun onOpenVideoInPlayer(filepath: String)
 }
+
+fun interface OnExitConfirm {
+    fun onExitConfirm()
+}
