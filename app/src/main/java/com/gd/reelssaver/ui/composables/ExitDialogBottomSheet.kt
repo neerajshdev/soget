@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -78,7 +79,10 @@ fun ExitDialog(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            MediumSizeNativeAd {}
+            MediumSizeNativeAd {
+                Shimmer(modifier = Modifier.fillMaxSize())
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,

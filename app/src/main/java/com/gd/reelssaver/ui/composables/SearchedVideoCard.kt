@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.composables
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,23 +12,15 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.gd.reelssaver.networkimage.VideoThumbnail
 import com.gd.reelssaver.ui.theme.AppTheme
-import com.gd.reelssaver.util.getVideoThumbnail
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 
 @Preview
@@ -74,20 +65,13 @@ fun SearchVideoCard(
                     .align(Alignment.Center)
             )
         } else {
-            var bitmap by remember { mutableStateOf<ImageBitmap?>(null) }
-            LaunchedEffect(key1 = videoData) {
-                withContext(Dispatchers.IO) {
-                    bitmap = getVideoThumbnail(videoData.videoUrl)?.asImageBitmap()
+            VideoThumbnail(
+                uri = videoData.videoUrl,
+                contentDescription = null ,
+                placeholder = {
+                    Shimmer()
                 }
-            }
-            bitmap?.let {
-                Image(
-                    bitmap = it, contentDescription = null, contentScale = ContentScale.FillHeight,
-                    modifier = Modifier
-                        .height(220.dp)
-                        .align(Alignment.Center)
-                )
-            }
+            )
         }
 
         FilledIconButton(

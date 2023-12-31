@@ -1,11 +1,11 @@
 package com.gd.reelssaver.ui.composables
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,17 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.decode.VideoFrameDecoder
-import coil.request.ImageRequest
-import coil.request.videoFrameMillis
 import com.desidev.downloader.model.Download
+import com.gd.reelssaver.networkimage.VideoThumbnail
 import com.gd.reelssaver.ui.theme.AppTheme
+import com.gd.reelssaver.ui.util.debugLine
 import io.ktor.http.ContentType
 import java.time.LocalDateTime
 
@@ -97,9 +93,14 @@ fun DownloadedItem(item: Download, modifier: Modifier) {
         Row {
             Box {
                 VideoThumbnail(
-                    url = item.localPath, modifier = Modifier
-                        .padding(10.dp)
-                        .size(100.dp)
+                    uri = item.url,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(80.dp),
+                    placeholder = {
+                        Shimmer(modifier)
+                    }
                 )
 
                 if (item.status == Download.Status.Complete) {
@@ -118,7 +119,7 @@ fun DownloadedItem(item: Download, modifier: Modifier) {
             Text(
                 text = item.name,
                 overflow = TextOverflow.Ellipsis,
-                maxLines = 2,
+                maxLines = 3,
                 modifier = Modifier.padding(10.dp)
             )
         }
@@ -138,16 +139,21 @@ fun DownloadingItem(item: Download, modifier: Modifier) {
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             VideoThumbnail(
-                url = item.url, modifier = Modifier
-                    .padding(10.dp)
-                    .size(100.dp)
+                uri = item.url,
+                contentDescription = null,
+                modifier = Modifier
+                    .padding(6.dp)
+                    .size(80.dp),
+                placeholder = {
+                    Shimmer(modifier)
+                }
             )
 
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(
                     text = item.name,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 2,
+                    maxLines = 3,
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Progress(progress = progressValue, modifier = Modifier)
@@ -173,26 +179,4 @@ fun Progress(progress: Float, modifier: Modifier) {
             progress = { progress }
         )
     }
-}
-
-
-@Composable
-fun VideoThumbnail(url: String, modifier: Modifier) {
-    val model = ImageRequest.Builder(LocalContext.current)
-        .data(url)
-        .videoFrameMillis(10000)
-        .decoderFactory { result, options, _ ->
-            VideoFrameDecoder(
-                result.source,
-                options
-            )
-        }
-        .build()
-    AsyncImage(
-        model = model,
-        contentDescription = "video thumbnail",
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .fillMaxSize()
-    )
 }

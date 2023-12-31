@@ -199,23 +199,7 @@ fun createFileName(postFix: String): String {
 }
 
 
-fun getVideoThumbnail(videoUrl: String): Bitmap? {
-    val retriever =  MediaMetadataRetriever()
-    var thumbnail : Bitmap? = null
-    try {
-        // Set video URL
-        retriever.setDataSource(videoUrl, HashMap < String, String > ())
-        // Get frame at the 1st second as the thumbnail
-        thumbnail = retriever.getFrameAtTime (1000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
-        // Use this thumbnail Bitmap as needed
-    } catch (e: Exception) {
-        e.printStackTrace();
-        // Handle exceptions
-    } finally {
-        retriever.release()
-    }
-    return thumbnail
-}
+
 
 
 /**
