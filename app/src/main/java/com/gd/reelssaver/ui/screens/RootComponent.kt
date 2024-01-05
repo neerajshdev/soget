@@ -79,6 +79,9 @@ class DefaultRootComponent(
     private val _openExitDialog = MutableValue(false)
     override val openExitDialog: Value<Boolean> = _openExitDialog
 
+    private val _isDarkTheme = MutableValue(false)
+    override val isDarkTheme: Value<Boolean> = _isDarkTheme
+
     private val navigation = StackNavigation<Config>()
 
     override val childStack: Value<ChildStack<Config, Child>> =
@@ -107,8 +110,7 @@ class DefaultRootComponent(
         }
     }
 
-    private val _isDarkTheme = MutableValue(false)
-    override val isDarkTheme: Value<Boolean> = _isDarkTheme
+
 
 
     private val downloadModel = DefaultDownloadModel(this, downloader, parentVideoDir, appname)
