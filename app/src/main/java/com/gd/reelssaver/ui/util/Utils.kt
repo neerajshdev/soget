@@ -76,31 +76,3 @@ fun ComposeDebug(dbgStr: String) {
 
 
 fun Modifier.debugLine() = border(1.dp, color = Color.Green)
-
-@Composable
-fun storagePermission(shouldAsk: Boolean): Boolean {
-    val localContext = LocalContext.current
-    var storagePermission by remember {
-        mutableStateOf(
-            checkSelfPermission(
-                localContext,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) == PackageManager.PERMISSION_GRANTED ||
-                    Build.VERSION.SDK_INT > 28
-        )
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = {
-            storagePermission = it
-        }
-    )
-
-    LaunchedEffect(shouldAsk) {
-        if (!storagePermission && shouldAsk) {
-            permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-    }
-    return storagePermission
-}

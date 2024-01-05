@@ -1,5 +1,8 @@
 package com.gd.reelssaver.ui.screens.browser.tab.pages.webpage
 
+import android.Manifest
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,22 +26,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
-import com.gd.reelssaver.R
 import com.gd.reelssaver.ads.InterstitialAdManager
 import com.gd.reelssaver.model.VideoData
+import com.gd.reelssaver.ui.composables.AlertDialogState
+import com.gd.reelssaver.ui.composables.AppAlertDialog
 import com.gd.reelssaver.ui.composables.BrowserTopBar
 import com.gd.reelssaver.ui.composables.ComposeWebView
 import com.gd.reelssaver.ui.composables.SearchVideoCard
-import com.gd.reelssaver.ui.util.storagePermission
+import com.gd.reelssaver.ui.util.requiredPermission
 import com.gd.reelssaver.util.asSome
 import com.gd.reelssaver.util.isSome
 import kotlinx.coroutines.launch
@@ -57,6 +59,11 @@ fun WebpageContent(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val writePermission =
+        requiredPermission(permissionString = Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    val context = LocalContext.current
+
+    val dialogState = remember { AlertDialogState() }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -102,8 +109,8 @@ fun WebpageContent(
             onCreate = { webView ->
                 component.onEvent(Event.OnWebViewCreated(webView))
             },
-            onPageLoad = { view, newUrl ->
-                component.onEvent(Event.OnPageLoaded(newUrl, view.title ?: "unknown"))
+            onPageLoad = { webView, newUrl ->
+                component.onEvent(Event.OnPageLoaded(newUrl, webView.title ?: "unknown"))
             }
         )
 
@@ -111,22 +118,47 @@ fun WebpageContent(
             SearchedVideoBottomSheet(
                 searchedVideos = searchedVideos,
                 onDismissed = { component.onEvent(Event.OnSearchVideoDismiss) },
-                onVideoDownloadRequest = {
-                    // close the bottom sheet
+                onDownloadClick = { videoData ->
                     component.onEvent(Event.OnSearchVideoDismiss)
-
-                    component.onEvent(Event.DownloadVideo(it, onDownloadAdd = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Video Added to Download!")
-                        }
-                    }, onFailed = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Something went wrong!")
-                        }
-                    }))
+                    if (writePermission.check()) {
+                        component.onEvent(
+                            Event.DownloadVideo(
+                                videoData = videoData,
+                                onDownloadAdd = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Video Added to Download!")
+                                    }
+                                },
+                                onFailed = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Something went wrong!")
+                                    }
+                                }
+                            )
+                        )
+                    } else if (writePermission.shouldShowReason()) {
+                        dialogState.showDialog(
+                            title = "Storage Permission",
+                            text = "This app need storage permission to save videos to your device.",
+                            confirmAction = {
+                                writePermission.launch()
+                            }
+                        )
+                    } else if (writePermission.shouldOpenSetting()) {
+                        dialogState.showDialog(
+                            title = "Storage Permission",
+                            text = "This app need storage permission to save videos to your device. Allow permission from app settings.",
+                            confirmAction = {
+                                openAppSettings(context)
+                            }
+                        )
+                    } else {
+                        writePermission.launch()
+                    }
                 }
             )
         }
+        AppAlertDialog(dialogState = dialogState)
     }
 }
 
@@ -136,12 +168,9 @@ fun WebpageContent(
 fun SearchedVideoBottomSheet(
     searchedVideos: List<VideoData>,
     onDismissed: () -> Unit,
-    onVideoDownloadRequest: (VideoData) -> Unit
+    onDownloadClick: (VideoData) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var shouldAskPermission by remember { mutableStateOf(false) }
-    val storagePermission = storagePermission(shouldAskPermission)
-
 
     ModalBottomSheet(
         onDismissRequest = onDismissed,
@@ -149,13 +178,8 @@ fun SearchedVideoBottomSheet(
     ) {
         SearchedVideos(
             videoDataList = searchedVideos,
-            onDownloadVideo = { videoData ->
-                if (storagePermission) {
-                    onVideoDownloadRequest(videoData)
-                } else {
-                    shouldAskPermission = true
-                }
-                InterstitialAdManager.tryAd()
+            onDownloadClick = { videoData ->
+                onDownloadClick(videoData)
             }
         )
     }
@@ -169,7 +193,7 @@ fun SearchedVideoBottomSheet(
 @Composable
 private fun SearchedVideos(
     videoDataList: List<VideoData>,
-    onDownloadVideo: (VideoData) -> Unit
+    onDownloadClick: (VideoData) -> Unit
 ) {
     Text(
         text = "Videos on this page",
@@ -198,10 +222,16 @@ private fun SearchedVideos(
                     SearchVideoCard(videoData = it,
                         modifier = Modifier.padding(16.dp),
                         onDownloadClick = {
-                            onDownloadVideo(it)
+                            onDownloadClick(it)
                         })
                 }
             }
         }
     }
+}
+
+fun openAppSettings(context: android.content.Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+    intent.data = android.net.Uri.parse("package:" + context.packageName)
+    context.startActivity(intent)
 }
