@@ -16,10 +16,13 @@ import io.ktor.http.contentLength
 import io.ktor.http.contentType
 import io.ktor.utils.io.core.isEmpty
 import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.printStack
+import io.ktor.utils.io.errors.IOException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.flow
 import java.io.File
+import java.io.FileOutputStream
 import java.net.URL
 
 
@@ -52,15 +55,14 @@ class DefaultDownloader internal constructor(dbDir: File) : Downloader {
         parentDir: File,
         name: String?
     ): Flow<DownloadEvent> {
-        val extension = URL(url).path.substringAfterLast(".")
-        val filename =
-            if (name != null) "$name.$extension" else URL(url).path.substringAfterLast("/")
-        val file = createNewFile(parentDir, filename)
+        try {
+            val extension = URL(url).path.substringAfterLast(".")
+            val filename = if (name != null) "$name.$extension" else URL(url).path.substringAfterLast("/")
+            val file = createNewFile(parentDir, filename)
 
-        return channelFlow {
-            client.prepareGet(url).execute { response: HttpResponse ->
-                var download = putDownload(
-                    Download(
+            return channelFlow {
+                client.prepareGet(url).execute { response: HttpResponse ->
+                    var download = putDownload(Download(
                         id = 0,
                         name = filename,
                         localPath = file.path,
@@ -69,34 +71,45 @@ class DefaultDownloader internal constructor(dbDir: File) : Downloader {
                         downloaded = 0L,
                         type = response.contentType() ?: ContentType.Any,
                         status = Download.Status.InProgress
-                    )
-                )
+                    ))
 
-                send(DownloadEvent.OnAddNew(download))
+                    send(DownloadEvent.OnAddNew(download))
 
-                try {
-                    val channel = response.bodyAsChannel()
-                    while (!channel.isClosedForRead) {
-                        val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-                        while (!packet.isEmpty) {
-                            val bytes = packet.readBytes()
-                            file.appendBytes(bytes)
-                            download =
-                                download.copy(downloaded = download.downloaded + bytes.size)
-                            send(DownloadEvent.OnProgress(download))
+                    var fos: FileOutputStream? = null
+                    try {
+                        fos = file.outputStream()
+                        val channel = response.bodyAsChannel()
+                        while (!channel.isClosedForRead) {
+                            val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
+                            while (!packet.isEmpty) {
+                                val bytes = packet.readBytes()
+                                fos.write(bytes)
+                                download =
+                                    download.copy(downloaded = download.downloaded + bytes.size)
+                                send(DownloadEvent.OnProgress(download))
+                            }
                         }
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                        if (ex is CancellationException) throw ex
+                        ObjectBox.removeDownload(download)
+                    } finally {
+                        fos?.close()
                     }
-                } catch (ex: Exception) {
-                    ex.printStack()
-                    ObjectBox.removeDownload(download)
+                    download = download.copy(status = Download.Status.Complete)
+                    putDownload(download)
+                    send(DownloadEvent.OnComplete(download))
                 }
-
-                download = download.copy(status = Download.Status.Complete)
-                putDownload(download)
-                send(DownloadEvent.OnComplete(download))
+            }
+        } catch (ioException: IOException) {
+            // Handle file creation failure
+            ioException.printStackTrace()
+            return flow {
+                emit(DownloadEvent.OnError("File creation failed"))
             }
         }
     }
+
 
     override suspend fun getAll(): List<Download> = getDownloads() ?: emptyList()
 
@@ -105,7 +118,7 @@ class DefaultDownloader internal constructor(dbDir: File) : Downloader {
     }
 
 
-    override suspend fun removeDownload(downloads: List<Download>) {
+    override suspend fun removeDownload(downloads: List<Download>){
         ObjectBox.removeDownloads(downloads)
     }
 

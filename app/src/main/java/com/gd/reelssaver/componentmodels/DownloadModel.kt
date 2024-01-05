@@ -131,6 +131,8 @@ class DefaultDownloadModel(
                             "Download is complete: ${event.download}"
                         )
                     }
+
+                    is DownloadEvent.OnError -> input.onFailed()
                 }
             }
         }

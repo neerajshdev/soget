@@ -7,4 +7,5 @@ sealed interface DownloadEvent {
     data class OnProgress(val download: Download): DownloadEvent
     data class OnComplete(val download: Download): DownloadEvent
     class OnCancelled(val download: Download): DownloadEvent
+    class OnError(s: String) : DownloadEvent
 }
