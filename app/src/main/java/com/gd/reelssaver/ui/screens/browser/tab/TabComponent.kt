@@ -7,9 +7,6 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
-import com.gd.reelssaver.ui.callbacks.OnDownloadVideo
-import com.gd.reelssaver.ui.callbacks.OnTabChooserOpen
-import com.gd.reelssaver.ui.callbacks.OnThemeToggle
 import com.gd.reelssaver.ui.screens.browser.TabPage
 import com.gd.reelssaver.ui.screens.browser.tab.pages.homepage.DefaultHomePageComponent
 import com.gd.reelssaver.ui.screens.browser.tab.pages.homepage.HomePageComponent

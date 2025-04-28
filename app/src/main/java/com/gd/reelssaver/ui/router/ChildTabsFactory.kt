@@ -56,7 +56,7 @@ class SavedTabNavState<C : Parcelable>(
 ) : Parcelable
 
 
-data class ChildTabs<C : Parcelable, T : Any>(
+data class ChildTabs<out C : Parcelable, out T : Any>(
     val active: Child.Created<C, T>,
     val children: List<Child<C, T>>,
 )

@@ -4,25 +4,31 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Download
-import androidx.compose.material.icons.rounded.TableRows
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetpack.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
-import com.gd.reelssaver.ui.composables.ExitDialog
 import com.gd.reelssaver.ui.composables.ExitDialogBottomSheet
 import com.gd.reelssaver.ui.screens.browser.BrowserContent
 import com.gd.reelssaver.ui.screens.downloads.DownloadContent
@@ -35,9 +41,9 @@ private fun NavigationBarPreview() {
     val navigationBarItem = remember {
         listOf(
             NavigationBarItem(
-                label = "Tabs",
+                label = "Browser",
                 iconContent = {
-                    Icon(imageVector = Icons.Rounded.TableRows, contentDescription = null)
+                    Icon(imageVector = Icons.Filled.TableRows, contentDescription = "Browser Tabs")
                 }, onSelect = {
 
                 }),
@@ -45,7 +51,7 @@ private fun NavigationBarPreview() {
             NavigationBarItem(
                 label = "Downloads",
                 iconContent = {
-                    Icon(imageVector = Icons.Rounded.Download, contentDescription = null)
+                    Icon(imageVector = Icons.Filled.Download, contentDescription = "Downloads")
                 }, onSelect = {})
         )
     }
@@ -65,9 +71,12 @@ fun RootContent(component: RootComponent) {
 
     val navBarItems = listOf(
         NavigationBarItem(
-            label = "Tabs",
+            label = "Browser",
             iconContent = {
-                Icon(imageVector = Icons.Rounded.TableRows, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Filled.TableRows, 
+                    contentDescription = "Browser Tabs"
+                )
             },
             onSelect = {
                 component.onEvent(Event.OnTabMenuSelect)
@@ -76,7 +85,10 @@ fun RootContent(component: RootComponent) {
         NavigationBarItem(
             label = "Downloads",
             iconContent = {
-                Icon(imageVector = Icons.Rounded.Download, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Filled.Download, 
+                    contentDescription = "Downloads"
+                )
             },
             onSelect = {
                 component.onEvent(Event.OnDownloadMenuSelect)
@@ -89,43 +101,54 @@ fun RootContent(component: RootComponent) {
         else -> navBarItems[1]
     }
 
-    val columnModifier = Modifier.fillMaxSize()
-
     Children(stack = childStack) {
         when (val active = it.instance) {
             is Child.Splash -> {
                 SplashContent(active.component, modifier = Modifier.fillMaxSize())
             }
 
-            is Child.Browser -> BrowserContent(
-                active.component,
-                bottomNavBar = {
-                    BottomNavigation(
-                        items = navBarItems,
-                        selectedItem = selectedMenuItem,
+            is Child.Browser -> {
+                Surface(
+                    color = colorScheme.background,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    BrowserContent(
+                        active.component,
+                        bottomNavBar = {
+                            BottomNavigation(
+                                items = navBarItems,
+                                selectedItem = selectedMenuItem,
+                            )
+                        },
+                        modifier = Modifier.fillMaxSize()
                     )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
+                }
+            }
 
-            is Child.Downloads -> Column(modifier = columnModifier) {
-                DownloadContent(
-                    component = active.component, modifier = Modifier
-                        .weight(1f)
-                        .statusBarsPadding(),
-                    bottomNavBar = {
-                        BottomNavigation(
-                            items = navBarItems,
-                            selectedItem = selectedMenuItem,
-                        )
-                    }
-                )
+            is Child.Downloads -> {
+                Surface(
+                    color = colorScheme.background,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    DownloadContent(
+                        component = active.component, 
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .statusBarsPadding(),
+                        bottomNavBar = {
+                            BottomNavigation(
+                                items = navBarItems,
+                                selectedItem = selectedMenuItem,
+                            )
+                        }
+                    )
+                }
             }
         }
     }
 
-    ExitDialogBottomSheet(openExitDialog,
+    ExitDialogBottomSheet(
+        enable = openExitDialog,
         onDismiss = {
             component.onEvent(Event.OnExitDialogDismiss)
         },
@@ -144,20 +167,48 @@ fun BottomNavigation(
     items: List<NavigationBarItem>,
     selectedItem: NavigationBarItem,
 ) {
-    NavigationBar(modifier, contentColor = colorScheme.surfaceContainer) {
-        items.forEach { item ->
-            NavigationBarItem(
-                selected = item == selectedItem,
-                onClick = item.onSelect,
-                icon = item.iconContent,
-                label = {
-                    Text(
-                        text = item.label,
-                        style = typography.titleMedium,
-                        color = LocalContentColor.current
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(elevation = 6.dp),
+        color = colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp
+    ) {
+        NavigationBar(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+            containerColor = colorScheme.surfaceContainerHigh,
+            contentColor = colorScheme.onSurface,
+            tonalElevation = 0.dp
+        ) {
+            items.forEach { item ->
+                val selected = item == selectedItem
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = item.onSelect,
+                    icon = item.iconContent,
+                    label = {
+                        Text(
+                            text = item.label,
+                            style = typography.labelLarge.copy(
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (selected) 
+                                colorScheme.primary 
+                            else 
+                                colorScheme.onSurfaceVariant
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = colorScheme.primary,
+                        unselectedIconColor = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        selectedTextColor = colorScheme.primary,
+                        unselectedTextColor = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        indicatorColor = colorScheme.primaryContainer.copy(alpha = 0.7f)
                     )
-                }
-            )
+                )
+            }
         }
     }
 }

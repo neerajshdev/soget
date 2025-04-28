@@ -1,6 +1,5 @@
 package com.gd.reelssaver.ui.screens.browser.tab
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier

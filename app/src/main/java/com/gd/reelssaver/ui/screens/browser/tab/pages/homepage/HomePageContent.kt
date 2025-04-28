@@ -1,8 +1,13 @@
 package com.gd.reelssaver.ui.screens.browser.tab.pages.homepage
 
-
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -14,13 +19,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +46,8 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.Dp
@@ -48,7 +60,6 @@ import com.gd.reelssaver.ui.composables.InputUrlFieldCard
 import com.gd.reelssaver.ui.composables.MediumSizeNativeAd
 import com.gd.reelssaver.ui.theme.AppTheme
 import java.net.URL
-
 
 @Preview(
     wallpaper = Wallpapers.NONE, device = "spec:width=411dp,height=891dp", showSystemUi = true,
@@ -107,159 +118,262 @@ fun HomepageContent(
                 onToggleTheme = { component.onEvent(Event.ToggleTheme) }
             )
         },
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        containerColor = colorScheme.background
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .padding(it)
-                .padding(top = 12.dp, start = 16.dp, end = 16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .background(colorScheme.background)
         ) {
-            InputUrlFieldCard(
-                url = inputText,
-                onValueChange = updateInputText,
-                onKeyBoardAction = openInputText,
-                onGoActionClick = openInputText,
-                onContentPaste = updateInputText,
+            Column(
+                verticalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier
-                    .layoutId("url_edit_text")
-                    .fillMaxWidth()
-            )
-
-            MediumSizeNativeAd(
-                refreshTimeSec = 80,
-                modifier = Modifier
-                    .layoutId("ad_place_holder")
-            ) { // ad_place_holder
-                Image(
-                    painter = painterResource(id = R.drawable.ad_placeholder),
-                    contentDescription = "ad_placeholder",
-                    contentScale = ContentScale.Crop,
+                    .padding(horizontal = 20.dp)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 16.dp, bottom = 24.dp)
+            ) {
+                // Hero section with app logo and tagline
+                HeroSection(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 )
+
+                // Search Input with improved design
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(tween(500)) + slideInVertically(
+                        initialOffsetY = { it / 2 },
+                        animationSpec = tween(500)
+                    )
+                ) {
+                    InputUrlFieldCard(
+                        url = inputText,
+                        onValueChange = updateInputText,
+                        onKeyBoardAction = openInputText,
+                        onGoActionClick = openInputText,
+                        onContentPaste = updateInputText,
+                        modifier = Modifier
+                            .layoutId("url_edit_text")
+                            .fillMaxWidth()
+                    )
+                }
+
+                // Popular Platforms section
+                PopularPlatformsSection(
+                    onSiteOpen = { siteUrl ->
+                        component.onEvent(Event.OnOpenWebSite(siteUrl))
+                        InterstitialAdManager.tryAd()
+                    },
+                    modifier = Modifier
+                        .layoutId("social_sites")
+                        .fillMaxWidth()
+                )
+
+                // Ad placement with better framing
+                ElevatedCard(
+                    modifier = Modifier
+                        .layoutId("ad_place_holder")
+                        .fillMaxWidth()
+                        .height(160.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                    colors = CardDefaults.elevatedCardColors(
+                        containerColor = colorScheme.surface
+                    )
+                ) {
+                    MediumSizeNativeAd(
+                        refreshTimeSec = 80,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(2.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ad_placeholder),
+                                contentDescription = "Ad Placeholder",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .fillMaxSize()
+                            )
+                            
+                            // Overlay text "Advertisement"
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Advertisement",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+
             }
-
-            SocialMediaSiteCard(
-                onSiteOpen = { siteUrl ->
-                    component.onEvent(Event.OnOpenWebSite(siteUrl))
-                    InterstitialAdManager.tryAd()
-                },
-                modifier = Modifier
-                    .layoutId("social_sites")
-                    .fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun SocialMediaSiteCard(
+private fun HeroSection(modifier: Modifier = Modifier) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .size(88.dp)
+                .clip(CircleShape)
+                .background(colorScheme.primaryContainer.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.app_icon),
+                contentDescription = "App Logo",
+                modifier = Modifier
+                    .size(64.dp)
+                    .padding(4.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Text(
+            text = "Social Media Browser",
+            style = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = colorScheme.primary
+        )
+        
+        Text(
+            text = "Download content from your favorite platforms",
+            style = MaterialTheme.typography.bodyMedium,
+            color = colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun PopularPlatformsSection(
     modifier: Modifier = Modifier,
     onSiteOpen: (URL) -> Unit
 ) {
-    Card(modifier = modifier) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+    Column(modifier = modifier) {
+        SectionTitle(title = "Popular Platforms")
+        
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            ),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Facebook(onClick = { onSiteOpen(URL("https://www.facebook.com/")) })
-            Instagram(onClick = { onSiteOpen(URL("https://www.instagram.com/")) })
-            Google(onClick = { onSiteOpen(URL("https://www.google.com/")) })
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp)
+            ) {
+                PlatformButton(
+                    name = "Facebook",
+                    icon = R.drawable.facebook,
+                    onClick = { onSiteOpen(URL("https://www.facebook.com/")) }
+                )
+                
+                PlatformButton(
+                    name = "Instagram",
+                    icon = R.drawable.instagram,
+                    onClick = { onSiteOpen(URL("https://www.instagram.com/")) }
+                )
+                
+                PlatformButton(
+                    name = "YouTube",
+                    icon = R.drawable.youtube,
+                    onClick = { onSiteOpen(URL("https://www.youtube.com/")) }
+                )
+                
+                PlatformButton(
+                    name = "Google",
+                    icon = R.drawable.google,
+                    onClick = { onSiteOpen(URL("https://www.google.com/")) }
+                )
+            }
         }
     }
 }
 
-
 @Composable
-private fun Facebook(onClick: () -> Unit, iconSize: Dp = 56.dp) {
-    SocialSite(
-        name = "Facebook",
-        icon = {
-            IconButton(
-                onClick = onClick, modifier = Modifier.size(iconSize)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.facebook),
-                    contentDescription = "facebook",
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(4.dp)
-                )
-            }
-        },
-    )
-}
-
-
-@Composable
-private fun Instagram(onClick: () -> Unit, iconSize: Dp = 56.dp) {
-    SocialSite(
-        name = "Instagram",
-        icon = {
-            IconButton(
-                onClick = onClick, modifier = Modifier.size(iconSize)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.instagram),
-                    contentDescription = "instagram",
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(4.dp)
-                )
-            }
-        },
-    )
-}
-
-@Composable
-private fun Google(onClick: () -> Unit, iconSize: Dp = 56.dp) {
-    SocialSite(
-        name = "Google",
-        icon = {
-            IconButton(
-                onClick = onClick, modifier = Modifier.size(iconSize)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.google),
-                    contentDescription = "Google search",
-                    tint = Color.Unspecified,
-                    modifier = Modifier
-                        .size(iconSize)
-                        .padding(4.dp)
-                )
-            }
-        },
-    )
-}
-
-
-@Composable
-fun Reels(onClick: () -> Unit, iconSize: Dp = 56.dp) {
-    SocialSite(name = "Reels") {
-
-    }
-}
-
-@Composable
-private fun SocialSite(name: String, icon: @Composable () -> Unit) {
+private fun PlatformButton(
+    name: String,
+    icon: Int,
+    onClick: () -> Unit,
+    iconSize: Dp = 32.dp
+) {
     Column(
-        verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.width(72.dp)
     ) {
-        icon()
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(colorScheme.surface)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            IconButton(
+                onClick = onClick,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = icon),
+                    contentDescription = name,
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(iconSize)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
         Text(
             text = name,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            style = MaterialTheme.typography.labelMedium,
+            color = colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
+}
+
+
+@Composable
+private fun SectionTitle(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium.copy(
+            fontWeight = FontWeight.SemiBold
+        ),
+        color = colorScheme.onBackground,
+        modifier = Modifier
+            .padding(start = 4.dp, bottom = 12.dp)
+            .then(modifier)
+    )
 }

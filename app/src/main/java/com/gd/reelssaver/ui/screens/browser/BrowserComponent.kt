@@ -18,7 +18,6 @@ import com.gd.reelssaver.ui.screens.browser.tab.TabComponentCallback
 import com.gd.reelssaver.ui.util.componentScope
 import com.gd.reelssaver.util.Events
 import kotlinx.parcelize.Parcelize
-import java.net.URL
 import java.util.UUID
 
 

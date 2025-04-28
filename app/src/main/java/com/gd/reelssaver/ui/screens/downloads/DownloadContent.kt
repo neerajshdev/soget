@@ -1,33 +1,54 @@
 package com.gd.reelssaver.ui.screens.downloads
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material.icons.outlined.FileDownloadOff
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Deselect
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,9 +60,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.extensions.compose.jetpack.subscribeAsState
 import com.desidev.downloader.model.Download
 import com.gd.reelssaver.ui.composables.BannerNativeAd
@@ -53,7 +79,7 @@ import kotlinx.coroutines.launch
 
 data class TabItem(
     val title: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )
 
 @Preview
@@ -69,7 +95,7 @@ fun DownloadScreenPreview() {
 fun DownloadContent(
     component: DownloadsComponent,
     modifier: Modifier = Modifier,
-    bottomNavBar: @Composable () -> Unit
+    bottomNavBar: @Composable () -> Unit,
 ) {
     val downloads by component.downloads.subscribeAsState()
     val inProgress = downloads.filter { it.status == Download.Status.InProgress }
@@ -84,7 +110,7 @@ fun DownloadContent(
 
     val tabItems = remember {
         listOf(
-            TabItem("InProgress", Icons.Rounded.Downloading),
+            TabItem("In Progress", Icons.Rounded.Downloading),
             TabItem("Downloaded", Icons.Rounded.DownloadDone)
         )
     }
@@ -100,17 +126,48 @@ fun DownloadContent(
         onTabChange(pagerState.currentPage)
     }
 
-    Scaffold(bottomBar = bottomNavBar, modifier = modifier) {
-        Column(modifier = Modifier.padding(it)) {
-            TabRow(selectedTabIndex = tabIndex) {
+    Scaffold(
+        bottomBar = bottomNavBar,
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
+            // Enhanced Tab Row
+            TabRow(
+                selectedTabIndex = tabIndex,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(tabPositions[tabIndex]),
+                        color = MaterialTheme.colorScheme.primary,
+                        height = 3.dp
+                    )
+                }
+            ) {
                 tabItems.forEachIndexed { index, tabItem ->
                     Tab(
                         selected = index == tabIndex,
                         onClick = {
                             onTabChange(index)
                         },
-                        text = { Text(text = tabItem.title) },
-                        icon = { Icon(imageVector = tabItem.icon, contentDescription = null) }
+                        text = {
+                            Text(
+                                text = tabItem.title,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = if (index == tabIndex) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = tabItem.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        },
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = 0.7f
+                        )
                     )
                 }
             }
@@ -156,32 +213,38 @@ fun DownloadContent(
             }
         }
     }
-
 }
 
 
 @Composable
 fun ProgressPage(modifier: Modifier, inProgress: List<Download>) {
     Column(modifier) {
-        BannerNativeAd {
+        BannerNativeAd(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
             Shimmer()
         }
 
         if (inProgress.isEmpty()) {
-            DownloadMessage(
-                text = "No download in progress!",
-                modifier = Modifier
-                    .fillMaxSize()
+            EmptyStateMessage(
+                icon = Icons.Outlined.FileDownloadOff,
+                title = "No Active Downloads",
+                message = "Your downloads in progress will appear here",
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            DownloadItemList(
+                downloads = inProgress,
+                modifier = Modifier.fillMaxWidth(),
+                onEnableSelection = {},
+                onDeselectItem = {},
+                onSelectItem = {},
+                onItemClick = {}
             )
         }
-        DownloadItemList(
-            downloads = inProgress,
-            modifier = Modifier.fillMaxWidth(),
-            onEnableSelection = {},
-            onDeselectItem = {},
-            onSelectItem = {},
-            onItemClick = {}
-        )
     }
 }
 
@@ -195,7 +258,7 @@ fun DownloadedItemsPage(
     onSelectAll: () -> Unit,
     onDeselectAllClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    onItemClick: (Download) -> Unit
+    onItemClick: (Download) -> Unit,
 ) {
     var isSelectionDisable by remember { mutableStateOf(true) }
 
@@ -204,38 +267,94 @@ fun DownloadedItemsPage(
     }
 
     Column(modifier) {
-        BannerNativeAd {
+        BannerNativeAd(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clip(RoundedCornerShape(8.dp))
+        ) {
             Shimmer()
         }
 
         if (downloaded.isEmpty()) {
-            DownloadMessage(
-                text = "You have not downloaded anything!",
-                modifier = Modifier
-                    .fillMaxSize()
+            EmptyStateMessage(
+                icon = Icons.Filled.VideoLibrary,
+                title = "No Downloads Yet",
+                message = "Your downloaded videos will appear here",
+                modifier = Modifier.fillMaxSize()
             )
         } else {
-            SelectItemWidget(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                itemSelection = itemSelection,
-                onSelectAllClick = onSelectAll,
-                onDeselectAllClick = onDeselectAllClick,
-                onDeleteClick = onDeleteClick
+            AnimatedVisibility(
+                visible = !isSelectionDisable || downloaded.isNotEmpty(),
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                SelectItemWidget(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    itemSelection = itemSelection,
+                    totalItems = downloaded.size,
+                    onSelectAllClick = onSelectAll,
+                    onDeselectAllClick = onDeselectAllClick,
+                    onDeleteClick = onDeleteClick
+                )
+            }
+
+            DownloadItemList(
+                downloads = downloaded,
+                isSelectionDisable = isSelectionDisable,
+                modifier = Modifier.fillMaxSize(),
+                selection = itemSelection,
+                onSelectItem = onSelectItem,
+                onDeselectItem = onDeselectItem,
+                onEnableSelection = { isSelectionDisable = false },
+                onItemClick = onItemClick
             )
         }
+    }
+}
 
-        DownloadItemList(
-            downloads = downloaded,
-            isSelectionDisable = isSelectionDisable,
-            modifier = Modifier.fillMaxSize(),
-            selection = itemSelection,
-            onSelectItem = onSelectItem,
-            onDeselectItem = onDeselectItem,
-            onEnableSelection = { isSelectionDisable = false },
-            onItemClick = onItemClick
-        )
+@Composable
+fun EmptyStateMessage(
+    icon: ImageVector,
+    title: String,
+    message: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(32.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+                    .padding(bottom = 16.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            )
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
@@ -250,43 +369,73 @@ fun DownloadItemList(
     selection: List<Download> = emptyList(),
     onSelectItem: (Download) -> Unit,
     onDeselectItem: (Download) -> Unit,
-    onEnableSelection: () -> Unit
+    onEnableSelection: () -> Unit,
 ) {
-    LazyColumn(modifier) {
-        items(downloads) { item ->
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp)
+    ) {
+        items(
+            items = downloads,
+            key = { it.id }
+        ) { item ->
             val isSelected = isSelectionDisable.not() && selection.contains(item)
-            Box(
+
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                DownloadItem(
-                    item = item,
-                    Modifier
-                        .combinedClickable(
-                            onClick = {
-                                if (isSelectionDisable.not()) {
-                                    if (isSelected) onDeselectItem(item) else onSelectItem(item)
-                                } else {
-                                    onItemClick(item)
-                                }
-                            },
-                            onLongClick = {
-                                if (isSelectionDisable) {
-                                    onSelectItem(item)
-                                    onEnableSelection()
-                                }
-                            }
-                        )
+                    .clip(RoundedCornerShape(12.dp))
+                    .animateItemPlacement(tween(300)),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = if (isSelected) 4.dp else 2.dp
+                ),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = if (isSelected)
+                        MaterialTheme.colorScheme.primaryContainer
+                    else
+                        MaterialTheme.colorScheme.surfaceContainerLow
                 )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    DownloadItem(
+                        item = item,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(
+                                onClick = {
+                                    if (isSelectionDisable.not()) {
+                                        if (isSelected) onDeselectItem(item) else onSelectItem(item)
+                                    } else {
+                                        onItemClick(item)
+                                    }
+                                },
+                                onLongClick = {
+                                    if (isSelectionDisable) {
+                                        onSelectItem(item)
+                                        onEnableSelection()
+                                    }
+                                }
+                            )
+                            .padding(16.dp)
+                    )
 
-                if (isSelected) {
-                    IconButton(onClick = { }, modifier = Modifier.align(Alignment.BottomEnd)) {
-                        Icon(
-                            imageVector = Icons.Rounded.CheckCircle,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.surfaceTint
-                        )
+                    if (isSelected) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.CheckCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -295,77 +444,83 @@ fun DownloadItemList(
 }
 
 @Composable
-fun DownloadMessage(text: String, modifier: Modifier = Modifier) {
-    Box(modifier = modifier) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(16.dp)
-        )
-    }
-}
-
-
-@Composable
 fun SelectItemWidget(
     modifier: Modifier,
     itemSelection: List<Download>,
+    totalItems: Int,
     onSelectAllClick: () -> Unit,
     onDeselectAllClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
 ) {
-
-    val textStyle = MaterialTheme.typography.labelSmall
-
-    @Composable
-    fun SelectAllIconButton() {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            IconButton(onClick = onSelectAllClick) {
-                Icon(imageVector = Icons.Rounded.SelectAll, contentDescription = null)
-            }
-            Text(text = "SelectAll", style = textStyle)
-        }
-    }
-
-    @Composable
-    fun DeSelectAllIconButton() {
-        if (itemSelection.isNotEmpty()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                IconButton(onClick = onDeselectAllClick) {
-                    Icon(imageVector = Icons.Rounded.Deselect, contentDescription = null)
-                }
-                Text(text = "Deselect All", style = textStyle)
-            }
-        }
-    }
-
-    @Composable
-    fun DeleteIconButton() {
-        if (itemSelection.isNotEmpty()) {
-            IconButton(onClick = onDeleteClick) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = null)
-            }
-        }
-    }
-
-    Row(
+    Card(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        )
     ) {
-        SelectAllIconButton()
-        DeSelectAllIconButton()
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Selection info
+            Text(
+                text = "${itemSelection.size} of $totalItems selected",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 8.dp)
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
-        DeleteIconButton()
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Select All Button
+            IconButton(
+                onClick = onSelectAllClick,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.SelectAll,
+                    contentDescription = "Select All",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Deselect All Button (only shown when items are selected)
+            AnimatedVisibility(visible = itemSelection.isNotEmpty()) {
+                FilledTonalIconButton(
+                    onClick = onDeselectAllClick,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Deselect,
+                        contentDescription = "Deselect All"
+                    )
+                }
+            }
+
+            // Delete Button (only shown when items are selected)
+            AnimatedVisibility(visible = itemSelection.isNotEmpty()) {
+                FilledTonalIconButton(
+                    onClick = onDeleteClick,
+                    modifier = Modifier.size(40.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
     }
 }
 

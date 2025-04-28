@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
@@ -66,7 +65,6 @@ fun BrowserTopBarPrev() {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
             BrowserTopBar(
@@ -95,23 +93,28 @@ fun BrowserTopBar(
     var contentType by remember {
         mutableStateOf(BrowserTopBarContent.CurrentPage)
     }
+    
     AnimatedContent(
         modifier = modifier,
         targetState = contentType,
         label = "AnimatedContent",
         transitionSpec = {
-            fadeIn() togetherWith fadeOut()
-        }) { type ->
+            fadeIn(animationSpec = androidx.compose.animation.core.tween(200)) togetherWith 
+            fadeOut(animationSpec = androidx.compose.animation.core.tween(150))
+        }
+    ) { type ->
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(50.dp),
-            color = colorScheme.surfaceContainerLowest
+            shape = RoundedCornerShape(28.dp),
+            color = colorScheme.surfaceContainerLow,
+            tonalElevation = 2.dp,
+            shadowElevation = 1.dp
         ) {
             Box(
                 contentAlignment = Alignment.CenterStart,
                 modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp)
-                    .requiredHeight(48.dp)
+                    .padding(horizontal = 16.dp)
+                    .requiredHeight(52.dp)
             ) {
                 when (type) {
                     BrowserTopBarContent.CurrentPage -> {
@@ -162,31 +165,50 @@ private fun CurrentPageUrlText(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Rounded.Link,
-            contentDescription = "Link input field",
-            tint = colorScheme.outline,
+            contentDescription = "URL Address",
+            tint = colorScheme.primary,
+            modifier = Modifier.size(22.dp)
         )
+        
         Text(
             text = currentUrl,
-            style = rememberTextStyle(),
+            style = rememberTextStyle().copy(
+                color = colorScheme.onSurface
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
 
-        IconButton(onClick = onOpenTabChooser) {
-            PageCountIcon(count = tabCount)
+        IconButton(
+            onClick = onOpenTabChooser,
+            modifier = Modifier.size(40.dp)
+        ) {
+            TabsCountBadge(count = tabCount)
         }
 
-        IconButton(onClick = onToggleTheme) {
+        IconButton(
+            onClick = onToggleTheme,
+            modifier = Modifier.size(40.dp)
+        ) {
             Icon(
-                painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
-                contentDescription = "Change Theme",
-                tint = colorScheme.onSurface
+                painter = painterResource(
+                    id = if (useDarkTheme) 
+                        R.drawable.baseline_dark_mode_24 
+                    else 
+                        R.drawable.baseline_light_mode_24
+                ),
+                contentDescription = if (useDarkTheme) 
+                    "Switch to Light Theme" 
+                else 
+                    "Switch to Dark Theme",
+                tint = colorScheme.primary,
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -220,20 +242,22 @@ private fun EditableUrlText(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-
         Icon(
             imageVector = Icons.Rounded.Link,
-            contentDescription = "Link input field",
-            tint = colorScheme.outline
+            contentDescription = "URL Address",
+            tint = colorScheme.primary,
+            modifier = Modifier.size(22.dp)
         )
 
         BasicTextField(
             value = editableText,
             onValueChange = { editableText = it },
-            textStyle = rememberTextStyle(),
+            textStyle = rememberTextStyle().copy(
+                color = colorScheme.onSurface
+            ),
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Go),
             keyboardActions = KeyboardActions(onGo = {
@@ -246,8 +270,22 @@ private fun EditableUrlText(
                 .focusRequester(focusRequester)
         )
 
-        IconButton(onClick = { editableText = "" }) {
-            Icon(imageVector = Icons.Default.Clear, contentDescription = null)
+        androidx.compose.animation.AnimatedVisibility(
+            visible = editableText.isNotEmpty(),
+            enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+            exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
+        ) {
+            IconButton(
+                onClick = { editableText = "" },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Clear, 
+                    contentDescription = "Clear URL",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }
@@ -272,26 +310,75 @@ fun HomeTopBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = { Text(stringResource(id = R.string.app_name)) },
+        title = { 
+            Text(
+                text = stringResource(id = R.string.app_name),
+                style = typography.titleLarge.copy(
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                ),
+                color = colorScheme.primary
+            ) 
+        },
         actions = {
-            IconButton(onClick = onOpenTabs) {
-                PageCountIcon(count = tabsCount)
+            IconButton(
+                onClick = onOpenTabs,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(40.dp)
+            ) {
+                TabsCountBadge(count = tabsCount)
             }
 
-            IconButton(onClick = onToggleTheme) {
+            IconButton(
+                onClick = onToggleTheme,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(40.dp)
+            ) {
                 Icon(
-                    painter = painterResource(id = if (useDarkTheme) R.drawable.baseline_dark_mode_24 else R.drawable.baseline_light_mode_24),
-                    contentDescription = "Change Theme",
-                    tint = colorScheme.onSurface
+                    painter = painterResource(
+                        id = if (useDarkTheme) 
+                            R.drawable.baseline_dark_mode_24 
+                        else 
+                            R.drawable.baseline_light_mode_24
+                    ),
+                    contentDescription = if (useDarkTheme) 
+                        "Switch to Light Theme" 
+                    else 
+                        "Switch to Dark Theme",
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         },
-
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = colorScheme.surface,
             titleContentColor = colorScheme.onSurface
         )
     )
+}
+
+@Composable
+private fun TabsCountBadge(count: Int) {
+    Box(
+        modifier = Modifier
+            .size(28.dp)
+            .border(
+                width = 1.5.dp,
+                color = colorScheme.primary,
+                shape = RoundedCornerShape(6.dp)
+            )
+            .padding(1.dp), 
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = count.toString(), 
+            style = typography.labelMedium.copy(
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            ),
+            color = colorScheme.primary
+        )
+    }
 }
 
 @Composable
