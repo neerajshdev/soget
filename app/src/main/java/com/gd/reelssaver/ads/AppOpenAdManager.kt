@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-
 class AppOpenAdManager(activity: Activity) : Application.ActivityLifecycleCallbacks {
     private val TAG = AppOpenAdManager::class.simpleName
     private var isInBackground = false

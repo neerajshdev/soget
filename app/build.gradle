@@ -9,15 +9,15 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         namespace "com.gd.reelssaver"
         applicationId "com.gd.reelssaver"
-        targetSdk 34
+        targetSdk 35
         minSdk 24
-        versionCode 7
-        versionName "3.0"
+        versionCode 8
+        versionName "4.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

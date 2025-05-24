@@ -5,9 +5,11 @@ A modern Android application built with Jetpack Compose that allows users to dow
 
 ## Screenshots
 
-![Screenshot 1](screenshots/Screenshot_20250428_131333.png)
-![Screenshot 2](screenshots/Screenshot_20250428_131409.png)
-![Screenshot 3](screenshots/Screenshot_20250428_131425.png)
+<p align="left">
+  <img src="screenshots/Screenshot_20250428_131333.png" width="250" style="margin-right: 16px;"/>
+  <img src="screenshots/Screenshot_20250428_131409.png" width="250" style="margin-right: 16px;"/>
+  <img src="screenshots/Screenshot_20250428_131425.png" width="250" />
+</p>
 
 
 
